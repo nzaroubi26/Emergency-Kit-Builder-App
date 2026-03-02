@@ -1,0 +1,18 @@
+@media print {
+  header,
+  .step-progress-indicator,
+  .btn-get-my-kit,
+  .btn-edit,
+  .btn-print,
+  .btn-start-over { display: none !important; }
+
+  body { background: white; font-size: 12pt; color: #000; }
+
+  .summary-subkit-section { page-break-inside: avoid; }
+
+  .visualizer-slot-empty::after { content: none; }
+  .visualizer-slot-empty {
+    background-color: #f8f9fa !important;
+    border: 1px solid #e5e7eb !important;
+  }
+}
