@@ -98,7 +98,10 @@ tests/
 - Story 4.3 (Empty Container Option): Done
 - Story 4.4 (Custom Subkit All-Category Browser): Done
 - Story 4.5 (Navigation Between Config Screens): Done
-- Stories 5.1–5.4: Draft
+- Story 5.1 (Kit Summary Display): Done
+- Story 5.2 (Housing Unit Visualizer on Summary Page): Done
+- Story 5.3 (Call-to-Action and Purchase Intent): Done
+- Story 5.4 (Summary Presentation and Print Readiness): Done
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Placeholder purchase URL for "Get My Kit" CTA (MVP default: `#`)
