@@ -18,6 +18,10 @@ import cookStove from '@assets/Camping_Stove_1772504397790.png';
 import medFirstAid from '@assets/First_Aid_Kit_1772504397793.png';
 import comfortFan from '@assets/Cooling_Fan_1772504397791.png';
 import comfortEarplugs from '@assets/Earplugs_1772504397792.png';
+import powerSolar from '@assets/Solar_Panel_1772504792249.png';
+import lightString from '@assets/String_Lights_1772504792249.png';
+import hygieneTp from '@assets/Toilet_Paper_1772504792250.png';
+import commsWalkie from '@assets/Walkie_Talkie_1772504792250.png';
 
 export const ITEM_IMAGES: Record<string, string> = {
   'power-station': powerStation,
@@ -40,4 +44,8 @@ export const ITEM_IMAGES: Record<string, string> = {
   'med-first-aid': medFirstAid,
   'comfort-fan': comfortFan,
   'comfort-earplugs': comfortEarplugs,
+  'power-solar': powerSolar,
+  'light-string': lightString,
+  'hygiene-tp': hygieneTp,
+  'comms-walkie': commsWalkie,
 };
