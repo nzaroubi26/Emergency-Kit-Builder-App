@@ -22,8 +22,11 @@ export const ImageWithFallback: FC<ImageWithFallbackProps> = ({
 
   if (src) {
     return (
-      <div className={`relative overflow-hidden ${className}`}>
-        <img src={src} alt={alt} className="h-full w-full object-cover" />
+      <div
+        className={`relative overflow-hidden ${className}`}
+        style={{ backgroundColor: categoryTint }}
+      >
+        <img src={src} alt={alt} className="h-full w-full object-contain p-2" />
       </div>
     );
   }
