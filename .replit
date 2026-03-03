@@ -10,10 +10,10 @@ channel = "stable-25_05"
 
 [deployment]
 run = ["npm", "run", "start"]
-deploymentTarget = "static"
+deploymentTarget = "autoscale"
 ignorePorts = false
 build = ["npm", "run", "build"]
-publicDir = "dist"
+publicDir = "dist/public"
 
 [agent]
 expertMode = true
