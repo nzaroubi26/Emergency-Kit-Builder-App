@@ -31,22 +31,40 @@ export const VisualizerSlot: FC<VisualizerSlotProps> = ({
 
   const containerClasses = `flex items-center justify-center ${borderClasses} ${fillClasses}`;
 
-  const containerStyles = isFilled && slot.subkitColor
-    ? { backgroundColor: slot.subkitColor, height: slotHeight }
-    : { height: slotHeight };
+  const bgColor = isFilled && slot.subkitColor ? slot.subkitColor : undefined;
+
+  const isInteractive = !readOnly && !!onSlotClick;
+
+  const cursorStyle = isInteractive ? 'pointer' : undefined;
+
+  const containerStyles: React.CSSProperties = {
+    height: slotHeight,
+    backgroundColor: bgColor,
+    cursor: cursorStyle,
+    transition: 'background-color var(--duration-standard) var(--ease-standard)',
+  };
+
+  const nameOpacity = isFilled ? 1 : 0;
+
+  const nameStyles: React.CSSProperties = {
+    opacity: nameOpacity,
+    transition: 'opacity var(--duration-standard) var(--ease-standard) 80ms',
+  };
 
   const slotLabel = isFilled
     ? `Slot ${slotIndex + 1}: ${slot.subkitName}`
     : `Slot ${slotIndex + 1}: empty`;
 
-  const role = onSlotClick ? 'button' : 'group';
+  const role = isInteractive ? 'button' : 'group';
 
-  const handleClick = onSlotClick
-    ? () => onSlotClick(slotIndex)
+  const handleClick = isInteractive
+    ? () => onSlotClick!(slotIndex)
     : undefined;
 
-  const nameContent: ReactNode = isFilled && slot.subkitName
-    ? <span>{slot.subkitName}</span>
+  const showName = isFilled && slot.subkitName && !slot.isLargeEnd;
+
+  const nameContent: ReactNode = showName
+    ? <span style={nameStyles}>{slot.subkitName}</span>
     : null;
 
   const plusContent: ReactNode = showPlusIcon

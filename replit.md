@@ -43,7 +43,7 @@ src/
 ├── components/
 │   ├── layout/                 # AppShell, AppHeader, StepProgressIndicator, MobileInterstitial
 │   ├── ui/                     # PrimaryButton, SecondaryButton, ConfirmationModal, ImageWithFallback
-│   ├── visualizer/             # HousingUnitVisualizer, VisualizerSlot
+│   ├── visualizer/             # HousingUnitVisualizer, VisualizerSlot, SlotFullIndicator
 │   ├── subkit-selection/       # SubkitSelectionScreen, SubkitCard, SizeToggle
 │   ├── item-config/            # ItemConfigScreen, CustomSubkitScreen, ItemCard, QuantitySelector
 │   └── summary/                # SummaryScreen, SubkitSummarySection
@@ -86,7 +86,12 @@ tests/
 - Story 1.2 (Data Architecture & Types): Done
 - Story 1.3 (Application Shell & Navigation): Done
 - Story 2.1 (Housing Unit Visualizer): Done
-- Stories 2.2–5.4: Draft
+- Story 2.2 (Dynamic Slot State & Subkit Rendering): Done
+- Story 2.3 (Slot Constraint Enforcement): Done
+- Story 2.4 (Visualizer Extensibility for Phase 2): Done
+- Story 3.1 (Subkit Category Cards): Done
+- Story 3.2 (Regular/Large Size Selection): Done
+- Stories 3.3–5.4: Draft
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Placeholder purchase URL for "Get My Kit" CTA (MVP default: `#`)
