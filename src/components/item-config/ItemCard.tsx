@@ -1,5 +1,6 @@
 import { type FC, type KeyboardEvent } from 'react';
 import type { KitItem, KitCategory } from '../../types';
+import { ITEM_IMAGES } from '../../data';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
 import { QuantitySelector } from './QuantitySelector';
 
@@ -74,7 +75,7 @@ export const ItemCard: FC<ItemCardProps> = ({
         className="cursor-pointer"
       >
         <ImageWithFallback
-          src={item.imageSrc}
+          src={ITEM_IMAGES[item.id] ?? item.imageSrc}
           alt={item.name}
           categoryIcon={category.icon}
           categoryTint={category.colorTint}

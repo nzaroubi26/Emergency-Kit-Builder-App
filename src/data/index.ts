@@ -1,1 +1,2 @@
 export { CATEGORIES, ITEMS, ITEMS_BY_CATEGORY, STANDARD_CATEGORY_IDS, ITEM_ICON_OVERRIDES } from './kitItems';
+export { ITEM_IMAGES } from './itemImages';
