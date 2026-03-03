@@ -22,6 +22,10 @@ import powerSolar from '@assets/Solar_Panel_1772504792249.png';
 import lightString from '@assets/String_Lights_1772504792249.png';
 import hygieneTp from '@assets/Toilet_Paper_1772504792250.png';
 import commsWalkie from '@assets/Walkie_Talkie_1772504792250.png';
+import clothShoeCovers from '@assets/Shoe_Cover_1772505108555.jpg';
+import clothPonchos from '@assets/Rain_Poncho_1772505108555.webp';
+import medIcePacks from '@assets/Ice_Pack_1772505108556.webp';
+import hygieneFeminine from '@assets/Feminine-Hygiene-Kit_1772505108556.webp';
 
 export const ITEM_IMAGES: Record<string, string> = {
   'power-station': powerStation,
@@ -48,4 +52,8 @@ export const ITEM_IMAGES: Record<string, string> = {
   'light-string': lightString,
   'hygiene-tp': hygieneTp,
   'comms-walkie': commsWalkie,
+  'cloth-shoe-covers': clothShoeCovers,
+  'cloth-ponchos': clothPonchos,
+  'med-ice-packs': medIcePacks,
+  'hygiene-feminine': hygieneFeminine,
 };
