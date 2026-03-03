@@ -34,13 +34,14 @@ src/
 │   └── index.ts                # Barrel re-export
 ├── utils/
 │   ├── slotCalculations.ts     # calculateTotalSlots, canFitSize, calculateSlotState, isSlotsAtCapacity (100% branch coverage)
-│   └── categoryUtils.ts        # getCategoryById, getCategoryColor, getCategoryIcon
+│   ├── categoryUtils.ts        # getCategoryById, getCategoryColor, getCategoryIcon
+│   └── announce.ts             # ARIA live region announcer (initAnnouncer, announcePolite, announceAssertive)
 ├── store/                      # Zustand store (kitStore.ts)
 ├── router/
 │   ├── index.tsx               # createBrowserRouter routes
 │   └── guards.ts               # Loader-based navigation guards
 ├── components/
-│   ├── layout/                 # AppShell, AppHeader, StepProgressIndicator
+│   ├── layout/                 # AppShell, AppHeader, StepProgressIndicator, MobileInterstitial
 │   ├── ui/                     # PrimaryButton, SecondaryButton, ConfirmationModal, ImageWithFallback
 │   ├── visualizer/             # HousingUnitVisualizer, VisualizerSlot
 │   ├── subkit-selection/       # SubkitSelectionScreen, SubkitCard, SizeToggle
@@ -83,7 +84,8 @@ tests/
 ## Story Progress
 - Story 1.1 (Project Scaffolding): Done
 - Story 1.2 (Data Architecture & Types): Done
-- Stories 1.3–5.4: Draft
+- Story 1.3 (Application Shell & Navigation): Done
+- Stories 2.1–5.4: Draft
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Placeholder purchase URL for "Get My Kit" CTA (MVP default: `#`)
