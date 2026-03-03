@@ -15,14 +15,14 @@ export const router = createBrowserRouter([
         element: <SubkitSelectionScreen />,
       },
       {
-        path: '/configure/:subkitId',
-        element: <ItemConfigScreen />,
-        loader: subkitConfigGuard,
-      },
-      {
         path: '/configure/custom',
         element: <CustomSubkitScreen />,
         loader: customConfigGuard,
+      },
+      {
+        path: '/configure/:subkitId',
+        element: <ItemConfigScreen />,
+        loader: subkitConfigGuard,
       },
       {
         path: '/summary',

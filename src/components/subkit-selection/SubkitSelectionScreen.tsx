@@ -1,10 +1,14 @@
 import { type FC, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HousingUnitVisualizer } from '../visualizer/HousingUnitVisualizer';
 import { SlotFullIndicator } from '../visualizer/SlotFullIndicator';
 import { SubkitCard } from './SubkitCard';
+import { PrimaryButton } from '../ui/PrimaryButton';
 import { useSlotState, useTotalSlotsUsed, useIsAtCapacity, useCanProceedToConfig } from '../../hooks/useKitStore';
 import { useKitStore } from '../../store/kitStore';
 import { CATEGORIES } from '../../data';
+import { announcePolite } from '../../utils/announce';
+import { calculateTotalSlots } from '../../utils/slotCalculations';
 import type { KitCategory, SubkitSize } from '../../types';
 
 interface SubkitSelectionScreenProps {}
@@ -13,6 +17,7 @@ const ALL_CATEGORIES: KitCategory[] = Object.values(CATEGORIES);
 
 export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const navigate = useNavigate();
   const slots = useSlotState();
   const totalSlotsUsed = useTotalSlotsUsed();
   const isAtCapacity = useIsAtCapacity();
@@ -21,6 +26,7 @@ export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
   const selectSubkit = useKitStore((s) => s.selectSubkit);
   const deselectSubkit = useKitStore((s) => s.deselectSubkit);
   const setSubkitSize = useKitStore((s) => s.setSubkitSize);
+  const setCurrentConfigIndex = useKitStore((s) => s.setCurrentConfigIndex);
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -30,15 +36,28 @@ export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
   const sizeMap = new Map(selectedSubkits.map((s) => [s.subkitId, s.size]));
 
   const handleSelect = (categoryId: string) => {
+    const category = CATEGORIES[categoryId];
+    const categoryName = category?.name ?? categoryId;
+
     if (selectedIds.has(categoryId)) {
       deselectSubkit(categoryId);
+      announcePolite(`${categoryName} removed`);
     } else {
+      const currentSlots = calculateTotalSlots(selectedSubkits);
+      const newSlotIndex = currentSlots + 1;
       selectSubkit(categoryId);
+      announcePolite(`${categoryName} added to slot ${newSlotIndex}`);
     }
   };
 
   const handleSizeChange = (categoryId: string, size: SubkitSize): boolean => {
-    return setSubkitSize(categoryId, size);
+    const success = setSubkitSize(categoryId, size);
+    if (success) {
+      const category = CATEGORIES[categoryId];
+      const categoryName = category?.name ?? categoryId;
+      announcePolite(`${categoryName} changed to ${size}`);
+    }
+    return success;
   };
 
   const cardGrid = ALL_CATEGORIES.map((category) => {
@@ -64,7 +83,20 @@ export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
 
   const handleProceed = () => {
     if (!canProceed) return;
+    const sorted = [...selectedSubkits].sort((a, b) => a.selectionOrder - b.selectionOrder);
+    const firstSubkitId = sorted[0]?.subkitId;
+    if (!firstSubkitId) return;
+    setCurrentConfigIndex(0);
+    navigate(`/configure/${firstSubkitId}`);
   };
+
+  const minMessage = ctaDisabled
+    ? (
+      <p id={minMessageId} className="text-sm" style={{ color: 'var(--color-status-warning)' }}>
+        Choose at least 3 categories to continue
+      </p>
+    )
+    : null;
 
   return (
     <div>
@@ -89,24 +121,14 @@ export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
         {cardGrid}
       </div>
       <div className="mt-8 flex flex-col items-center gap-2">
-        {ctaDisabled && (
-          <p id={minMessageId} className="text-sm" style={{ color: 'var(--color-status-warning)' }}>
-            Choose at least 3 categories to continue
-          </p>
-        )}
-        <button
-          type="button"
+        {minMessage}
+        <PrimaryButton
           onClick={handleProceed}
-          aria-disabled={ctaDisabled}
-          aria-describedby={ctaDisabled ? minMessageId : undefined}
-          className="rounded-[var(--radius-md)] px-8 py-3 text-sm font-semibold text-white"
-          style={{
-            backgroundColor: ctaDisabled ? 'var(--color-neutral-400)' : 'var(--color-brand-primary)',
-            cursor: ctaDisabled ? 'not-allowed' : 'pointer',
-          }}
+          ariaDisabled={ctaDisabled}
+          ariaDescribedBy={ctaDisabled ? minMessageId : undefined}
         >
           Configure Items
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   );

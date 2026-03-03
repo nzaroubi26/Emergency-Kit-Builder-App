@@ -91,7 +91,14 @@ tests/
 - Story 2.4 (Visualizer Extensibility for Phase 2): Done
 - Story 3.1 (Subkit Category Cards): Done
 - Story 3.2 (Regular/Large Size Selection): Done
-- Stories 3.3–5.4: Draft
+- Story 3.3 (Visualizer Integration with Subkit Selection): Done
+- Story 3.4 (Proceed to Item Configuration): Done
+- Story 4.1 (Item Config Screen Layout): Done
+- Story 4.2 (Item Cards with Quantity): Done
+- Story 4.3 (Empty Container Option): Done
+- Story 4.4 (Custom Subkit All-Category Browser): Done
+- Story 4.5 (Navigation Between Config Screens): Done
+- Stories 5.1–5.4: Draft
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Placeholder purchase URL for "Get My Kit" CTA (MVP default: `#`)
