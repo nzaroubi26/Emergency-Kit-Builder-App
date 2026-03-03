@@ -26,10 +26,15 @@ src/
 │   ├── globals.css             # Tailwind v4 @import, @theme block, CSS custom props
 │   └── print.css               # @media print — imported by SummaryScreen only
 ├── types/
-│   └── index.ts                # Barrel export
+│   ├── kit.types.ts            # KitCategory, KitItem, SubkitSelection, ItemSelection, SubkitSize
+│   ├── visualizer.types.ts     # SlotState, HousingUnitVisualizerProps
+│   └── index.ts                # Barrel re-export
 ├── data/
-│   └── index.ts                # Barrel export
-├── utils/                      # Pure functions (slotCalculations, categoryUtils)
+│   ├── kitItems.ts             # CATEGORIES, ITEMS, ITEMS_BY_CATEGORY, STANDARD_CATEGORY_IDS, ITEM_ICON_OVERRIDES
+│   └── index.ts                # Barrel re-export
+├── utils/
+│   ├── slotCalculations.ts     # calculateTotalSlots, canFitSize, calculateSlotState, isSlotsAtCapacity (100% branch coverage)
+│   └── categoryUtils.ts        # getCategoryById, getCategoryColor, getCategoryIcon
 ├── store/                      # Zustand store (kitStore.ts)
 ├── router/
 │   ├── index.tsx               # createBrowserRouter routes
@@ -76,8 +81,9 @@ tests/
 - BMAD agents: `.bmad-core/agents/` (persona files for external AI chats)
 
 ## Story Progress
-- Story 1.1 (Project Scaffolding): Approved → In Progress
-- Stories 1.2–5.4: Draft
+- Story 1.1 (Project Scaffolding): Done
+- Story 1.2 (Data Architecture & Types): Done
+- Stories 1.3–5.4: Draft
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Placeholder purchase URL for "Get My Kit" CTA (MVP default: `#`)
