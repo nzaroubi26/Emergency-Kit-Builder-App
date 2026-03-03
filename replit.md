@@ -85,7 +85,8 @@ tests/
 - Story 1.1 (Project Scaffolding): Done
 - Story 1.2 (Data Architecture & Types): Done
 - Story 1.3 (Application Shell & Navigation): Done
-- Stories 2.1–5.4: Draft
+- Story 2.1 (Housing Unit Visualizer): Done
+- Stories 2.2–5.4: Draft
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Placeholder purchase URL for "Get My Kit" CTA (MVP default: `#`)

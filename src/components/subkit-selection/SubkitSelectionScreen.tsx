@@ -1,9 +1,13 @@
 import { type FC, useEffect, useRef } from 'react';
+import { HousingUnitVisualizer } from '../visualizer/HousingUnitVisualizer';
+import { useSlotState, useTotalSlotsUsed } from '../../hooks/useKitStore';
 
 interface SubkitSelectionScreenProps {}
 
 export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const slots = useSlotState();
+  const totalSlotsUsed = useTotalSlotsUsed();
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -22,6 +26,12 @@ export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
         Select at least 3 subkit categories to include in your emergency preparedness kit.
         Each subkit maps to a physical container in your modular storage unit.
       </p>
+      <div className="mt-6">
+        <HousingUnitVisualizer slots={slots} />
+        <p className="mt-3 text-center text-sm text-[var(--color-neutral-500)]">
+          {totalSlotsUsed} of 6 slots used
+        </p>
+      </div>
       <div className="mt-6 rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] bg-[var(--color-neutral-white)] p-6">
         <p className="text-sm text-[var(--color-neutral-500)]">
           Subkit category cards will be displayed here in a future story.
