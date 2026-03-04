@@ -196,35 +196,35 @@ export const ItemConfigScreen: FC<ItemConfigScreenProps> = () => {
       <p className="mt-1 text-sm text-[var(--color-neutral-500)]">
         Select the items you want to include
       </p>
-      <div className="mt-4">
+      <div className="mt-4 grid grid-cols-2 gap-3">
         <EmptyContainerOption
           checked={isEmpty}
           categoryColor={category.colorBase}
           onChange={() => toggleEmptyContainer(subkitId)}
         />
-      </div>
-      <div
-        className="mt-3 rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] p-3"
-        style={{
-          opacity: isEmpty ? 0.45 : 1,
-          cursor: isEmpty ? 'not-allowed' : 'auto',
-          transition: 'opacity var(--duration-default) var(--ease-standard)',
-        }}
-      >
-        <label className="flex cursor-pointer items-start gap-3" style={{ cursor: isEmpty ? 'not-allowed' : 'pointer' }}>
-          <input
-            type="checkbox"
-            checked={isAllFilled}
-            disabled={isEmpty}
-            onChange={handleFillToggle}
-            className="mt-0.5 h-4 w-4 rounded"
-            style={isAllFilled ? { accentColor: category.colorBase } : {}}
-            aria-label="Fill my kit for me"
-          />
-          <span className="text-sm text-[var(--color-neutral-700)]">
-            Fill my kit for me
-          </span>
-        </label>
+        <div
+          className="rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] p-3"
+          style={{
+            opacity: isEmpty ? 0.45 : 1,
+            cursor: isEmpty ? 'not-allowed' : 'auto',
+            transition: 'opacity var(--duration-default) var(--ease-standard)',
+          }}
+        >
+          <label className="flex cursor-pointer items-start gap-3" style={{ cursor: isEmpty ? 'not-allowed' : 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={isAllFilled}
+              disabled={isEmpty}
+              onChange={handleFillToggle}
+              className="mt-0.5 h-4 w-4 rounded"
+              style={isAllFilled ? { accentColor: category.colorBase } : {}}
+              aria-label="Fill my kit based on expert advice"
+            />
+            <span className="text-sm text-[var(--color-neutral-700)]">
+              Fill my kit based on expert advice
+            </span>
+          </label>
+        </div>
       </div>
       <div
         className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3"

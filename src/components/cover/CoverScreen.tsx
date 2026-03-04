@@ -17,8 +17,8 @@ export const CoverScreen: FC<CoverScreenProps> = () => {
           className="mt-4 max-w-[480px] text-base text-white"
           style={{ opacity: 0.9 }}
         >
-          Build a personalized emergency kit that maps directly to a real,
-          modular storage unit — engineered for severe weather.
+          Protect your home with confidence. Build a pro-grade emergency kit
+          tailored to your family's needs.
         </p>
         <Link
           to="/builder"

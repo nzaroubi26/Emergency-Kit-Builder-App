@@ -40,7 +40,7 @@ export const EmptyContainerOption: FC<EmptyContainerOptionProps> = ({
           aria-label="Send an empty container for this subkit"
         />
         <span className="text-sm text-[var(--color-neutral-700)]">
-          I already have these supplies — send an empty container
+          Send an empty container
         </span>
       </label>
       {confirmationContent}
