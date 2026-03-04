@@ -4,6 +4,7 @@ import { AppHeader } from './AppHeader';
 import { MobileInterstitial } from './MobileInterstitial';
 import { useIsMobile } from '../../hooks/useResponsive';
 import { initAnnouncer } from '../../utils/announce';
+import { injectGA4Script } from '../../utils/analytics';
 
 interface AppShellProps {}
 
@@ -11,6 +12,10 @@ export const AppShell: FC<AppShellProps> = () => {
   const isMobile = useIsMobile();
   const politeRef = useRef<HTMLDivElement>(null);
   const assertiveRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    injectGA4Script();
+  }, []);
 
   useEffect(() => {
     if (politeRef.current && assertiveRef.current) {

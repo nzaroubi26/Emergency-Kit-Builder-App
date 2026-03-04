@@ -5,19 +5,19 @@ export function subkitConfigGuard({ params }: { params: Record<string, string | 
   const { selectedSubkits } = useKitStore.getState();
   const subkitId = params.subkitId;
   const exists = selectedSubkits.some((s) => s.subkitId === subkitId);
-  if (!exists) return redirect('/');
+  if (!exists) return redirect('/builder');
   return null;
 }
 
 export function customConfigGuard() {
   const { selectedSubkits } = useKitStore.getState();
   const hasCustom = selectedSubkits.some((s) => s.categoryId === 'custom');
-  if (!hasCustom) return redirect('/');
+  if (!hasCustom) return redirect('/builder');
   return null;
 }
 
 export function summaryGuard() {
   const { selectedSubkits } = useKitStore.getState();
-  if (selectedSubkits.length < 3) return redirect('/');
+  if (selectedSubkits.length < 3) return redirect('/builder');
   return null;
 }

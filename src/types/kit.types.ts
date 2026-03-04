@@ -15,6 +15,8 @@ export interface KitItem {
   categoryId: string;
   name: string;
   description: string;
+  rating: number | null;
+  reviewCount: number | null;
   productId: string | null;
   pricePlaceholder: number | null;
   imageSrc: string | null;

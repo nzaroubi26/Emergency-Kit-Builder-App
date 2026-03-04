@@ -15,7 +15,7 @@ expect.extend(matchers);
 async function renderFlow(initialEntries = ['/configure/power']) {
   const router = createMemoryRouter(
     [
-      { path: '/', element: <SubkitSelectionScreen /> },
+      { path: '/builder', element: <SubkitSelectionScreen /> },
       { path: '/configure/custom', element: <CustomSubkitScreen />, loader: customConfigGuard },
       { path: '/configure/:subkitId', element: <ItemConfigScreen />, loader: subkitConfigGuard },
       { path: '/summary', element: <SummaryScreen />, loader: summaryGuard },

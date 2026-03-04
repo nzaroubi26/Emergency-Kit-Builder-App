@@ -29,11 +29,13 @@ export const VisualizerSlot: FC<VisualizerSlotProps> = ({
     ? 'text-white font-medium text-sm'
     : 'bg-[var(--color-neutral-white)]';
 
-  const containerClasses = `flex items-center justify-center ${borderClasses} ${fillClasses}`;
-
   const bgColor = isFilled && slot.subkitColor ? slot.subkitColor : undefined;
 
   const isInteractive = !readOnly && !!onSlotClick;
+
+  const hoverClass = isFilled && isInteractive ? 'hover:brightness-95' : '';
+
+  const containerClasses = `flex items-center justify-center ${borderClasses} ${fillClasses} ${hoverClass}`;
 
   const cursorStyle = isInteractive ? 'pointer' : undefined;
 

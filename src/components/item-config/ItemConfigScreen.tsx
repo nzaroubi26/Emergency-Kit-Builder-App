@@ -1,4 +1,4 @@
-import { type FC, useEffect, useRef, useState, useCallback } from 'react';
+import { type FC, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { CATEGORIES, ITEMS_BY_CATEGORY } from '../../data';
@@ -9,6 +9,7 @@ import { SubkitProgressIndicator } from './SubkitProgressIndicator';
 import { EmptyContainerOption } from './EmptyContainerOption';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
+import { Analytics } from '../../utils/analytics';
 
 interface ItemConfigScreenProps {}
 
@@ -33,6 +34,24 @@ export const ItemConfigScreen: FC<ItemConfigScreenProps> = () => {
   const category = subkitId ? CATEGORIES[subkitId] : undefined;
   const items = subkitId ? (ITEMS_BY_CATEGORY[subkitId] ?? []) : [];
 
+  const isAllFilled = useMemo(
+    () => items.length > 0 && items.every((item) => !!itemSelections[`${subkitId}::${item.id}`]),
+    [items, itemSelections, subkitId]
+  );
+
+  const handleFillToggle = useCallback(() => {
+    if (!subkitId) return;
+    if (isAllFilled) {
+      items
+        .filter((item) => !!itemSelections[`${subkitId}::${item.id}`])
+        .forEach((item) => toggleItem(subkitId, item.id));
+    } else {
+      items
+        .filter((item) => !itemSelections[`${subkitId}::${item.id}`])
+        .forEach((item) => toggleItem(subkitId, item.id));
+    }
+  }, [subkitId, isAllFilled, items, itemSelections, toggleItem]);
+
   const sorted = [...selectedSubkits].sort((a, b) => a.selectionOrder - b.selectionOrder);
   const currentIndex = sorted.findIndex((s) => s.subkitId === subkitId);
   const totalSubkits = sorted.length;
@@ -48,7 +67,12 @@ export const ItemConfigScreen: FC<ItemConfigScreenProps> = () => {
   const handleToggle = useCallback(
     (itemId: string) => {
       if (!subkitId) return;
+      const key = `${subkitId}::${itemId}`;
+      const isCurrentlySelected = !!useKitStore.getState().itemSelections[key];
       toggleItem(subkitId, itemId);
+      if (!isCurrentlySelected) {
+        Analytics.itemIncluded(subkitId, itemId);
+      }
     },
     [subkitId, toggleItem]
   );
@@ -108,7 +132,7 @@ export const ItemConfigScreen: FC<ItemConfigScreenProps> = () => {
 
   const handleConfirmBack = () => {
     setShowBackModal(false);
-    navigate('/');
+    navigate('/builder');
   };
 
   const handleCancelBack = () => {
@@ -178,6 +202,29 @@ export const ItemConfigScreen: FC<ItemConfigScreenProps> = () => {
           categoryColor={category.colorBase}
           onChange={() => toggleEmptyContainer(subkitId)}
         />
+      </div>
+      <div
+        className="mt-3 rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] p-3"
+        style={{
+          opacity: isEmpty ? 0.45 : 1,
+          cursor: isEmpty ? 'not-allowed' : 'auto',
+          transition: 'opacity var(--duration-default) var(--ease-standard)',
+        }}
+      >
+        <label className="flex cursor-pointer items-start gap-3" style={{ cursor: isEmpty ? 'not-allowed' : 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={isAllFilled}
+            disabled={isEmpty}
+            onChange={handleFillToggle}
+            className="mt-0.5 h-4 w-4 rounded"
+            style={isAllFilled ? { accentColor: category.colorBase } : {}}
+            aria-label="Fill my kit for me"
+          />
+          <span className="text-sm text-[var(--color-neutral-700)]">
+            Fill my kit for me
+          </span>
+        </label>
       </div>
       <div
         className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3"

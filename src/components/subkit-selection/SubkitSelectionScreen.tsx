@@ -8,6 +8,7 @@ import { useSlotState, useTotalSlotsUsed, useIsAtCapacity, useCanProceedToConfig
 import { useKitStore } from '../../store/kitStore';
 import { CATEGORIES } from '../../data';
 import { announcePolite } from '../../utils/announce';
+import { Analytics } from '../../utils/analytics';
 import { calculateTotalSlots } from '../../utils/slotCalculations';
 import type { KitCategory, SubkitSize } from '../../types';
 
@@ -46,6 +47,7 @@ export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
       const currentSlots = calculateTotalSlots(selectedSubkits);
       const newSlotIndex = currentSlots + 1;
       selectSubkit(categoryId);
+      Analytics.subkitSelected(categoryId, 'regular');
       announcePolite(`${categoryName} added to slot ${newSlotIndex}`);
     }
   };
@@ -111,7 +113,15 @@ export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
         Choose 3–6 categories for your kit
       </p>
       <div className="mt-6">
-        <HousingUnitVisualizer slots={slots} />
+        <HousingUnitVisualizer
+          slots={slots}
+          onSlotClick={(slotIndex) => {
+            const slot = slots[slotIndex];
+            if (slot && slot.status === 'filled' && slot.subkitId) {
+              navigate(`/configure/${slot.subkitId}`);
+            }
+          }}
+        />
         <p className="mt-3 text-center text-sm text-[var(--color-neutral-500)]">
           {totalSlotsUsed} of 6 slots used
         </p>

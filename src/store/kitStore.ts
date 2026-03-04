@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { calculateTotalSlots, canFitSize } from '../utils/slotCalculations';
 import type { SubkitSelection, ItemSelection, SubkitSize } from '../types';
 
@@ -27,7 +28,7 @@ const initial = {
   currentConfigIndex: 0,
 };
 
-export const useKitStore = create<KitStore>((set, get) => ({
+export const useKitStore = create<KitStore>()(persist((set, get) => ({
   ...initial,
 
   selectSubkit: (categoryId) => {
@@ -101,4 +102,4 @@ export const useKitStore = create<KitStore>((set, get) => ({
 
   setCurrentConfigIndex: (index) => set({ currentConfigIndex: index }),
   resetKit: () => set({ ...initial }),
-}));
+}), { name: 'emergency-kit-v1' }));

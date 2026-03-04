@@ -8,7 +8,8 @@ import { SubkitSummarySection } from './SubkitSummarySection';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { SecondaryButton } from '../ui/SecondaryButton';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
-import { ENV } from '../../tokens/env';
+import { Analytics } from '../../utils/analytics';
+import { initiateCheckout } from '../../services/checkoutService';
 import '../../styles/print.css';
 
 interface SummaryScreenProps {}
@@ -17,6 +18,8 @@ export const SummaryScreen: FC<SummaryScreenProps> = () => {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const navigate = useNavigate();
   const [showStartOverModal, setShowStartOverModal] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const selectedSubkits = useKitStore((s) => s.selectedSubkits);
   const itemSelections = useKitStore((s) => s.itemSelections);
@@ -27,17 +30,28 @@ export const SummaryScreen: FC<SummaryScreenProps> = () => {
 
   useEffect(() => {
     headingRef.current?.focus();
+    Analytics.kitCompleted();
   }, []);
 
   const sorted = [...selectedSubkits].sort((a, b) => a.selectionOrder - b.selectionOrder);
   const totalSubkits = sorted.length;
 
-  const handleGetMyKit = () => {
-    window.open(ENV.purchaseUrl, '_blank', 'noopener,noreferrer');
+  const handleGetMyKit = async () => {
+    if (checkoutLoading) return;
+    Analytics.ctaClicked();
+    setCheckoutError(null);
+    setCheckoutLoading(true);
+    const result = await initiateCheckout(selectedSubkits, itemSelections, emptyContainers);
+    setCheckoutLoading(false);
+    if (result.success) {
+      window.location.href = result.redirectUrl;
+    } else {
+      setCheckoutError(result.errorMessage);
+    }
   };
 
   const handleEditMyKit = () => {
-    navigate('/');
+    navigate('/builder');
   };
 
   const handlePrint = () => {
@@ -51,7 +65,7 @@ export const SummaryScreen: FC<SummaryScreenProps> = () => {
   const handleConfirmStartOver = () => {
     setShowStartOverModal(false);
     resetKit();
-    navigate('/');
+    navigate('/builder');
   };
 
   const handleCancelStartOver = () => {
@@ -100,9 +114,26 @@ export const SummaryScreen: FC<SummaryScreenProps> = () => {
           Your emergency kit is ready. Take the next step to protect your family.
         </p>
         <div className="mt-4 flex flex-col items-center gap-3">
-          <PrimaryButton onClick={handleGetMyKit} className="btn-get-my-kit">
-            Get My Kit
+          <PrimaryButton
+            onClick={handleGetMyKit}
+            ariaDisabled={checkoutLoading}
+            className="btn-get-my-kit"
+          >
+            {checkoutLoading ? 'Processing...' : 'Get My Kit'}
           </PrimaryButton>
+          {checkoutError && (
+            <div role="alert" className="flex items-center gap-2 rounded-md bg-red-50 px-4 py-2 text-sm text-red-700">
+              <span>{checkoutError}</span>
+              <button
+                type="button"
+                onClick={() => setCheckoutError(null)}
+                className="ml-1 font-medium underline"
+                aria-label="Dismiss error"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
           <SecondaryButton onClick={handleEditMyKit} className="btn-edit">
             Edit My Kit
           </SecondaryButton>

@@ -1,4 +1,4 @@
-import { type FC, useEffect, useRef, useState, useCallback } from 'react';
+import { type FC, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { CATEGORIES, ITEMS_BY_CATEGORY, STANDARD_CATEGORY_IDS } from '../../data';
@@ -10,6 +10,7 @@ import { EmptyContainerOption } from './EmptyContainerOption';
 import { CategoryGroupHeader } from './CategoryGroupHeader';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
+import { Analytics } from '../../utils/analytics';
 
 interface CustomSubkitScreenProps {}
 
@@ -45,9 +46,36 @@ export const CustomSubkitScreen: FC<CustomSubkitScreenProps> = () => {
 
   const category = CATEGORIES[SUBKIT_ID];
 
+  const allItems = useMemo(
+    () => STANDARD_CATEGORY_IDS.flatMap((catId) => ITEMS_BY_CATEGORY[catId] ?? []),
+    []
+  );
+
+  const isAllFilled = useMemo(
+    () => allItems.length > 0 && allItems.every((item) => !!itemSelections[`${SUBKIT_ID}::${item.id}`]),
+    [allItems, itemSelections]
+  );
+
+  const handleFillToggle = useCallback(() => {
+    if (isAllFilled) {
+      allItems
+        .filter((item) => !!itemSelections[`${SUBKIT_ID}::${item.id}`])
+        .forEach((item) => toggleItem(SUBKIT_ID, item.id));
+    } else {
+      allItems
+        .filter((item) => !itemSelections[`${SUBKIT_ID}::${item.id}`])
+        .forEach((item) => toggleItem(SUBKIT_ID, item.id));
+    }
+  }, [isAllFilled, allItems, itemSelections, toggleItem]);
+
   const handleToggle = useCallback(
     (itemId: string) => {
+      const key = `${SUBKIT_ID}::${itemId}`;
+      const isCurrentlySelected = !!useKitStore.getState().itemSelections[key];
       toggleItem(SUBKIT_ID, itemId);
+      if (!isCurrentlySelected) {
+        Analytics.itemIncluded(SUBKIT_ID, itemId);
+      }
     },
     [toggleItem]
   );
@@ -105,7 +133,7 @@ export const CustomSubkitScreen: FC<CustomSubkitScreenProps> = () => {
 
   const handleConfirmBack = () => {
     setShowBackModal(false);
-    navigate('/');
+    navigate('/builder');
   };
 
   const handleCancelBack = () => {
@@ -203,6 +231,29 @@ export const CustomSubkitScreen: FC<CustomSubkitScreenProps> = () => {
           categoryColor={category.colorBase}
           onChange={() => toggleEmptyContainer(SUBKIT_ID)}
         />
+      </div>
+      <div
+        className="mt-3 rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] p-3"
+        style={{
+          opacity: isEmpty ? 0.45 : 1,
+          cursor: isEmpty ? 'not-allowed' : 'auto',
+          transition: 'opacity var(--duration-default) var(--ease-standard)',
+        }}
+      >
+        <label className="flex cursor-pointer items-start gap-3" style={{ cursor: isEmpty ? 'not-allowed' : 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={isAllFilled}
+            disabled={isEmpty}
+            onChange={handleFillToggle}
+            className="mt-0.5 h-4 w-4 rounded"
+            style={isAllFilled ? { accentColor: category.colorBase } : {}}
+            aria-label="Fill my kit for me"
+          />
+          <span className="text-sm text-[var(--color-neutral-700)]">
+            Fill my kit for me
+          </span>
+        </label>
       </div>
       <nav className="mt-4 flex flex-wrap gap-2" aria-label="Jump to category">
         {jumpNav}

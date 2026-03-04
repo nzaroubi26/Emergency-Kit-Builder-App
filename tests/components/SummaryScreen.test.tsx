@@ -13,7 +13,7 @@ expect.extend(matchers);
 async function renderSummary() {
   const router = createMemoryRouter(
     [
-      { path: '/', element: <SubkitSelectionScreen /> },
+      { path: '/builder', element: <SubkitSelectionScreen /> },
       { path: '/summary', element: <SummaryScreen />, loader: summaryGuard },
     ],
     { initialEntries: ['/summary'] }
@@ -100,12 +100,12 @@ describe('SummaryScreen — Story 5.3: CTA and Purchase Intent', () => {
     expect(screen.getByRole('button', { name: 'Get My Kit' })).toBeInTheDocument();
   });
 
-  it('opens purchase URL in new tab on Get My Kit click', async () => {
-    const windowOpen = vi.spyOn(window, 'open').mockImplementation(() => null);
+  it('shows loading state on Get My Kit click', async () => {
     await renderSummary();
     fireEvent.click(screen.getByRole('button', { name: 'Get My Kit' }));
-    expect(windowOpen).toHaveBeenCalledWith('#', '_blank', 'noopener,noreferrer');
-    windowOpen.mockRestore();
+    await waitFor(() => {
+      expect(screen.getByText('Processing...')).toBeInTheDocument();
+    });
   });
 
   it('renders compelling message', async () => {

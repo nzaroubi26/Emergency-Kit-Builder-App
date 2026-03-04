@@ -2,6 +2,7 @@ import { type FC, type KeyboardEvent } from 'react';
 import type { KitItem, KitCategory } from '../../types';
 import { ITEM_IMAGES } from '../../data';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
+import { StarRating } from '../ui/StarRating';
 import { QuantitySelector } from './QuantitySelector';
 
 interface ItemCardProps {
@@ -85,6 +86,9 @@ export const ItemCard: FC<ItemCardProps> = ({
         <div className="flex flex-col gap-1 p-3">
           <span className="text-sm font-semibold text-[var(--color-neutral-900)]">{item.name}</span>
           <p className="text-xs text-[var(--color-neutral-500)]">{item.description}</p>
+          {item.rating != null && item.reviewCount != null && (
+            <StarRating rating={item.rating} reviewCount={item.reviewCount} />
+          )}
         </div>
       </div>
       <div className="px-3 pb-3">
