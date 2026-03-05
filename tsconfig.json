@@ -19,8 +19,8 @@
     "resolveJsonModule": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@assets/*": ["./attached_assets/*"]
+      "@assets/*": ["./src/assets/*"]
     }
   },
-  "include": ["src", "attached_assets"]
+  "include": ["src"]
 }

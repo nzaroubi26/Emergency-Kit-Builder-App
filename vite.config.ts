@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      '@assets': path.resolve(__dirname, 'attached_assets'),
+      '@assets': path.resolve(__dirname, 'src/assets'),
     },
   },
   server: {
