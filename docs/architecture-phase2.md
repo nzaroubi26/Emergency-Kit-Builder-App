@@ -31,8 +31,8 @@
 | 2026-03-02 | 1.0 | Initial architecture document | Winston, Architect |
 | 2026-03-02 | 1.1 | Vercel selected; rollback strategy added; analytics Phase 2 deferral noted | Sarah, PO |
 | 2026-03-04 | 1.2 | itemImages.ts added to project structure; product photography confirmed no Phase 2 work needed | Sarah, PO |
-| 2026-03-04 | 1.3 | Cover page and Fill my kit for me added as Phase 2; Bazaarvoice moved to Phase 3 | Sarah, PO |
-| 2026-03-04 | 2.0 | Phase 2 brownfield enhancement: localStorage persist, GA4 analytics, Playwright E2E + GitHub Actions CI, Fill my kit for me (derived state), clickable visualizer slots, hardcoded star ratings (KitItem.rating + KitItem.reviewCount), e-commerce checkoutService.ts, cover page + route restructure (/ to CoverScreen, /builder to SubkitSelectionScreen). Section 12 converted to Phase 3+ Roadmap. MobileInterstitial retained — mobile responsiveness deferred to Phase 3. | Winston, Architect |
+| 2026-03-04 | 1.3 | Cover page and Fill my kit based on expert advice added as Phase 2; Bazaarvoice moved to Phase 3 | Sarah, PO |
+| 2026-03-04 | 2.0 | Phase 2 brownfield enhancement: localStorage persist, GA4 analytics, Playwright E2E + GitHub Actions CI, Fill my kit based on expert advice (derived state), clickable visualizer slots, hardcoded star ratings (KitItem.rating + KitItem.reviewCount), e-commerce checkoutService.ts, cover page + route restructure (/ to CoverScreen, /builder to SubkitSelectionScreen). Section 12 converted to Phase 3+ Roadmap. MobileInterstitial retained — mobile responsiveness deferred to Phase 3. | Winston, Architect |
 | 2026-03-04 | 2.1 | Mobile responsiveness (Story 7.3) formally deferred to Phase 3; Section 8 breakpoint strategy reverted to Phase 1 desktop-first; MobileInterstitial and useResponsive.ts marked Unchanged; Phase 3+ Roadmap updated. | Sarah, PO |
 
 ---
@@ -57,7 +57,7 @@ No external starter template. Standard **Vite + React + TypeScript** scaffold. A
 | Analytics | Google Analytics 4 | Non-blocking; native e-commerce event support; free; `VITE_ANALYTICS_ID` env var |
 | E2E testing | Playwright + GitHub Actions | Standard Playwright CI; native GitHub + Vercel integration |
 | Partial star rendering | CSS width-clip technique | Two stacked star layers; top layer clipped to `(rating/5 * 100)%` width; no SVG path math |
-| Fill my kit for me | Derived state (not stored) | Checkbox reads as checked when all items selected; calls existing `toggleItem` in loop; no new store fields |
+| Fill my kit based on expert advice | Derived state (not stored) | Checkbox reads as checked when all items selected; calls existing `toggleItem` in loop; no new store fields; displayed side by side with "Send an empty container" in 2-column grid |
 | MobileInterstitial | Retained (deferred to Phase 3) | `MobileInterstitial.tsx` and `useResponsive.ts` remain in place; full mobile responsiveness ships in Phase 3 alongside Bazaarvoice |
 | `resetKit()` + persist | `set({ ...initial })` | Zustand persist writes empty state back to localStorage automatically; no `clearStorage()` needed at call site |
 
@@ -79,8 +79,8 @@ No external starter template. Standard **Vite + React + TypeScript** scaffold. A
 | `src/components/layout/MobileInterstitial.tsx` | **Unchanged** | Mobile barrier retained; full mobile responsiveness deferred to Phase 3 |
 | `src/hooks/useResponsive.ts` | **Unchanged** | Retained alongside `MobileInterstitial`; deferred to Phase 3 |
 | `src/components/subkit-selection/SubkitSelectionScreen.tsx` | Modified | Passes `onSlotClick` handler to `HousingUnitVisualizer` |
-| `src/components/item-config/ItemConfigScreen.tsx` | Modified | Add Fill my kit for me checkbox; render `StarRating` per item |
-| `src/components/item-config/CustomSubkitScreen.tsx` | Modified | Add Fill my kit for me checkbox; render `StarRating` per item |
+| `src/components/item-config/ItemConfigScreen.tsx` | Modified | Add "Fill my kit based on expert advice" checkbox (side by side with "Send an empty container"); render `StarRating` per item |
+| `src/components/item-config/CustomSubkitScreen.tsx` | Modified | Add "Fill my kit based on expert advice" checkbox (side by side with "Send an empty container"); render `StarRating` per item |
 | `src/components/summary/SummaryScreen.tsx` | Modified | CTA triggers `initiateCheckout`; loading state; dismissible error; no `StarRating` |
 
 ### Brownfield Rollback Strategy
@@ -184,8 +184,8 @@ emergency-prep-kit/
 │   │   │   ├── SubkitCard.tsx
 │   │   │   └── SizeToggle.tsx
 │   │   ├── item-config/
-│   │   │   ├── ItemConfigScreen.tsx         # + Fill my kit for me checkbox
-│   │   │   ├── CustomSubkitScreen.tsx       # + Fill my kit for me checkbox
+│   │   │   ├── ItemConfigScreen.tsx         # + Fill my kit based on expert advice checkbox
+│   │   │   ├── CustomSubkitScreen.tsx       # + Fill my kit based on expert advice checkbox
 │   │   │   ├── ItemCard.tsx                 # + StarRating below name/description
 │   │   │   ├── QuantitySelector.tsx
 │   │   │   ├── EmptyContainerOption.tsx
@@ -279,7 +279,7 @@ export const useKitStore = create<KitStore>()(
 
 ### Fill My Kit For Me — Derived State Pattern
 
-"Fill my kit for me" is **not stored in Zustand**. The checkbox is a derived UI state computed at the component level.
+"Fill my kit based on expert advice" is **not stored in Zustand**. The checkbox is a derived UI state computed at the component level. It is displayed side by side with the "Send an empty container" checkbox in a 2-column grid layout (`grid-cols-2 gap-3`).
 
 ```typescript
 // In ItemConfigScreen and CustomSubkitScreen
@@ -950,7 +950,7 @@ import { ENV } from '../tokens/env';
 - `CoverScreen` heading gets `ref` + `tabIndex={-1}` + `useEffect focus()` per the Phase 1 screen transition pattern
 - `StarRating` wrapper `div` carries the full `aria-label`; all star SVGs are `aria-hidden="true"`
 - Checkout error `div` uses `role="alert"` — screen readers announce it automatically on appearance
-- "Fill my kit for me" checkbox uses a visible `<label>` associated via `htmlFor` — no `aria-label` override needed
+- "Fill my kit based on expert advice" checkbox uses a visible `<label>` associated via `htmlFor` — no `aria-label` override needed
 
 ### Quick Reference — All Commands
 

@@ -255,9 +255,9 @@ Exit paths:
 │   │                                                  │  │
 │   │   "Be Ready Before the Storm."                  │  │
 │   │                                                  │  │
-│   │   Build a personalized emergency kit that        │  │
-│   │   maps directly to a real, modular storage       │  │
-│   │   unit — engineered for severe weather.          │  │
+│   │   Protect your home with confidence. Build a     │  │
+│   │   pro-grade emergency kit tailored to your       │  │
+│   │   family's needs.                                │  │
 │   │                                                  │  │
 │   │                                                  │  │
 │   │         [ Build My Kit → ]                       │  │
@@ -605,9 +605,10 @@ interface ItemCardProps {
 
 ### EmptyContainerOption
 
-`[Checkbox] "I already own these — send me an empty container instead"`
+`[Checkbox] "Send an empty container"`
 
 - Present on both standard subkit screens (S2) and the Custom subkit browser (S2-C)
+- Displayed side by side (2-column grid, `grid-cols-2 gap-3`) with the "Fill my kit based on expert advice" checkbox
 - Selected: item grid dims to opacity-35, pointer-events none; inline confirmation in category base color
 - Reversed: item grid re-enables; all previously set states restored
 - Still counts toward 3-subkit minimum and 6-slot constraint

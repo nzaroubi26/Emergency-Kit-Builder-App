@@ -33,7 +33,7 @@ IDE-based analysis using existing project documentation: `docs/prd.md` (v1.1) an
 
 **Enhancement Type:** New Feature Addition — multiple features across UX, data, and integration layers.
 
-**Enhancement Description:** Phase 2 adds six production features to the completed MVP: a cover/landing page, a "Fill my kit for me" auto-select feature, localStorage state persistence, clickable visualizer slots, hardcoded item star ratings (proof of concept ahead of Bazaarvoice integration in Phase 3), and e-commerce checkout integration. Analytics instrumentation and an automated Playwright E2E test suite are added as technical enablers. Branded product catalog and pricing display are deferred to a future phase when real product data is available. Bazaarvoice reviews integration and full mobile responsiveness are explicitly deferred to Phase 3, where they ship together as a coherent "trust and reach expansion" package.
+**Enhancement Description:** Phase 2 adds six production features to the completed MVP: a cover/landing page, a "Fill my kit based on expert advice" auto-select feature, localStorage state persistence, clickable visualizer slots, hardcoded item star ratings (proof of concept ahead of Bazaarvoice integration in Phase 3), and e-commerce checkout integration. Analytics instrumentation and an automated Playwright E2E test suite are added as technical enablers. Branded product catalog and pricing display are deferred to a future phase when real product data is available. Bazaarvoice reviews integration and full mobile responsiveness are explicitly deferred to Phase 3, where they ship together as a coherent "trust and reach expansion" package.
 
 **Impact Assessment:** Significant Impact — multiple screens and components are affected and one new e-commerce API layer is introduced. All changes are additive or minimally invasive by design, as the Phase 1 architecture pre-wired all Phase 2 extension points.
 
@@ -44,7 +44,7 @@ IDE-based analysis using existing project documentation: `docs/prd.md` (v1.1) an
 - Convert kit configuration into purchase intent by connecting the configured kit to a real checkout experience
 - Eliminate the frustration of losing kit progress on accidental page refresh via persistent localStorage state
 - Build item-level social proof and trust by displaying star ratings during item selection
-- Reduce time-to-complete for users who want a sensible default kit with the "Fill my kit for me" feature
+- Reduce time-to-complete for users who want a sensible default kit with the "Fill my kit based on expert advice" feature
 - Create a polished brand entry point via a cover/landing page that frames the product before users enter the builder
 - Enable data-driven product iteration by instrumenting core user behavior metrics
 - Reduce manual regression burden by establishing an automated E2E test suite
@@ -71,8 +71,8 @@ The single highest-impact Phase 2 deliverable is the e-commerce integration: for
 
 - **FR1:** The app shall display a cover/landing page as the new entry route (`/`) with brand messaging and a single CTA navigating to the Subkit Selection Screen (`/builder`).
 - **FR2:** The Subkit Selection Screen shall move from route `/` to `/builder`. All existing navigation guards shall be updated accordingly.
-- **FR3:** The Item Configuration Screen and Custom Subkit Screen shall each include a "Fill my kit for me" checkbox that, when checked, auto-selects all available items in the current subkit at quantity 1 using existing store actions.
-- **FR4:** Unchecking "Fill my kit for me" shall clear all item selections for that subkit, returning it to the default empty state.
+- **FR3:** The Item Configuration Screen and Custom Subkit Screen shall each include a "Fill my kit based on expert advice" checkbox that, when checked, auto-selects all available items in the current subkit at quantity 1 using existing store actions. This checkbox is displayed side by side (2-column grid) with the "Send an empty container" checkbox.
+- **FR4:** Unchecking "Fill my kit based on expert advice" shall clear all item selections for that subkit, returning it to the default empty state.
 - **FR5:** The application shall persist kit configuration state to `localStorage` so that users refreshing the page or returning later recover their in-progress kit without data loss.
 - **FR6:** The Housing Unit Visualizer shall support clickable slot interactivity on the Subkit Selection Screen — clicking a filled slot shall navigate the user to the Item Configuration screen for the corresponding subkit.
 - **FR7:** Empty slots in the visualizer shall remain non-interactive (clicking an empty slot has no effect in Phase 2).
@@ -115,14 +115,14 @@ All Phase 2 UI additions shall use the existing design token system, component l
 |--------|------------|-------------|
 | Cover/Landing Page (`/`) | New | Brand messaging screen with single CTA to `/builder`. Static, no store dependency. |
 | Subkit Selection Screen (`/builder`) | Modified | Route renamed from `/`; filled visualizer slots become clickable. |
-| Item Configuration Screen | Modified | Add "Fill my kit for me" checkbox; display star rating and review count per item. |
-| Custom Subkit Screen | Modified | Add "Fill my kit for me" checkbox; display star rating and review count per item. |
+| Item Configuration Screen | Modified | Add "Fill my kit based on expert advice" checkbox (side by side with "Send an empty container"); display star rating and review count per item. |
+| Custom Subkit Screen | Modified | Add "Fill my kit based on expert advice" checkbox (side by side with "Send an empty container"); display star rating and review count per item. |
 | Summary Page | Modified | CTA triggers checkout API call; checkout error state added. No star ratings displayed. |
 
 ### UI Consistency Requirements
 
 - The cover/landing page shall use the existing brand color palette (`--color-brand-primary: #1F4D35`, `--color-brand-accent: #22C55E`) and Inter typeface.
-- "Fill my kit for me" shall follow the existing `EmptyContainerOption` visual and behavioral pattern for consistency.
+- "Fill my kit based on expert advice" shall follow the existing `EmptyContainerOption` visual and behavioral pattern for consistency and is displayed in a 2-column grid layout alongside the "Send an empty container" checkbox.
 - The `StarRating` component shall use `--color-brand-accent` (#22C55E) for filled stars and `--color-neutral-200` for empty stars, consistent with the existing brand palette.
 - Star ratings shall render below the item name and description on `ItemCard` — positioned so they do not displace or crowd the include/exclude toggle or quantity selector.
 - Clickable visualizer slots shall add only `cursor-pointer` and a `hover:brightness-95` state — no structural changes to `VisualizerSlot`.
@@ -179,7 +179,7 @@ All Phase 2 UI additions shall use the existing design token system, component l
 **Epic Approach:** Three epics, ordered by dependency and business impact.
 
 - **Epic 6** — Phase 2 Foundation: persistence, analytics, E2E tooling, and cover page. Must complete before Epics 7 and 8 begin.
-- **Epic 7** — UX Enhancements: "Fill my kit for me" and clickable visualizer slots. Parallel-capable with Epic 8 after Epic 6 is complete. *(Full mobile responsiveness deferred to Phase 3.)*
+- **Epic 7** — UX Enhancements: "Fill my kit based on expert advice" and clickable visualizer slots. Parallel-capable with Epic 8 after Epic 6 is complete. *(Full mobile responsiveness deferred to Phase 3.)*
 - **Epic 8** — Social Proof and Checkout: hardcoded item star ratings (Phase 3 Bazaarvoice proof of concept) and e-commerce checkout integration.
 
 ---
@@ -285,7 +285,7 @@ so that I understand the product's value proposition before I start configuring 
 
 ### Epic 7: UX Enhancements
 
-**Epic Goal:** Deliver two targeted UX improvements — a "Fill my kit for me" auto-select shortcut and clickable visualizer slot navigation — reducing configuration friction for existing users. *(Full mobile responsiveness is deferred to Phase 3 alongside Bazaarvoice.)*
+**Epic Goal:** Deliver two targeted UX improvements — a "Fill my kit based on expert advice" auto-select shortcut and clickable visualizer slot navigation — reducing configuration friction for existing users. *(Full mobile responsiveness is deferred to Phase 3 alongside Bazaarvoice.)*
 
 ---
 
@@ -297,7 +297,7 @@ so that I can quickly populate a sensible default kit without toggling each item
 
 **Acceptance Criteria:**
 
-1. A "Fill my kit for me" checkbox is added to both `ItemConfigScreen` and `CustomSubkitScreen`, positioned above the item list.
+1. A "Fill my kit based on expert advice" checkbox is added to both `ItemConfigScreen` and `CustomSubkitScreen`, displayed side by side with the "Send an empty container" checkbox in a 2-column grid layout above the item list.
 2. Checking the checkbox calls the existing `toggleItem` store action for every unselected item in the current subkit, setting each to quantity 1.
 3. Unchecking the checkbox clears all item selections for the current subkit by calling `toggleItem` for each selected item, returning the subkit to the default empty state.
 4. The checkbox is visually consistent with the existing `EmptyContainerOption` component pattern.
@@ -305,8 +305,8 @@ so that I can quickly populate a sensible default kit without toggling each item
 6. The Summary Page correctly reflects all auto-selected items and their quantities.
 
 **Integration Verification:**
-- IV1: Checking "Fill my kit for me" then manually deselecting a single item leaves all remaining items selected — partial deselection is non-destructive.
-- IV2: The existing `EmptyContainerOption` behavior is unchanged — toggling empty container still clears all items regardless of "Fill my kit for me" state.
+- IV1: Checking "Fill my kit based on expert advice" then manually deselecting a single item leaves all remaining items selected — partial deselection is non-destructive.
+- IV2: The existing `EmptyContainerOption` behavior is unchanged — toggling empty container still clears all items regardless of "Fill my kit based on expert advice" state.
 - IV3: All existing component tests for `ItemConfigScreen` and `CustomSubkitScreen` pass without modification.
 
 ---
