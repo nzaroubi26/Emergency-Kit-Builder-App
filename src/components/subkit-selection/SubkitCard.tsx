@@ -114,7 +114,7 @@ export const SubkitCard: FC<SubkitCardProps> = ({
     : `${category.name} subkit`;
 
   return (
-    <div className={containerClasses} style={containerStyles}>
+    <div className={containerClasses} style={containerStyles} data-testid={`subkit-card-${category.id}`}>
       {checkContent}
       <div
         role="button"

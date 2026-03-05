@@ -71,7 +71,7 @@ tests/
 - `npm run test` — Run tests in watch mode
 - `npm run test:run` — Run tests once
 - `npm run test:coverage` — Run tests with coverage
-- `npm run test:e2e` — Run Playwright E2E tests
+- `npm run test:e2e` — Run Playwright E2E tests (uses Nix Chromium via PLAYWRIGHT_CHROMIUM_PATH env var)
 - `npm run lint` — ESLint check
 - `npm run typecheck` — TypeScript type check
 

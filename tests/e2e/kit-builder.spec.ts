@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
+  await page.goto('/');
   await page.evaluate(() => localStorage.clear());
 });
 
@@ -9,10 +10,9 @@ test.describe('Full configuration flow', () => {
     await page.goto('/builder');
     await expect(page.getByRole('heading', { name: 'Build Your Kit' })).toBeVisible();
 
-    const cards = page.locator('[data-testid^="subkit-card-"]');
-    await cards.nth(0).click();
-    await cards.nth(1).click();
-    await cards.nth(2).click();
+    await page.getByRole('button', { name: 'Power subkit' }).click();
+    await page.getByRole('button', { name: 'Lighting subkit' }).click();
+    await page.getByRole('button', { name: 'Communications subkit' }).click();
 
     await expect(page.getByText('3 of 6 slots used')).toBeVisible();
 
@@ -40,10 +40,9 @@ test.describe('Back-navigation state preservation', () => {
   test('navigating back preserves selections', async ({ page }) => {
     await page.goto('/builder');
 
-    const cards = page.locator('[data-testid^="subkit-card-"]');
-    await cards.nth(0).click();
-    await cards.nth(1).click();
-    await cards.nth(2).click();
+    await page.getByRole('button', { name: 'Power subkit' }).click();
+    await page.getByRole('button', { name: 'Lighting subkit' }).click();
+    await page.getByRole('button', { name: 'Communications subkit' }).click();
 
     await page.getByRole('button', { name: 'Configure Items' }).click();
     await expect(page.getByText(/Configure Your/)).toBeVisible();
@@ -71,10 +70,9 @@ test.describe('Start Over reset', () => {
   test('Start Over clears all state', async ({ page }) => {
     await page.goto('/builder');
 
-    const cards = page.locator('[data-testid^="subkit-card-"]');
-    await cards.nth(0).click();
-    await cards.nth(1).click();
-    await cards.nth(2).click();
+    await page.getByRole('button', { name: 'Power subkit' }).click();
+    await page.getByRole('button', { name: 'Lighting subkit' }).click();
+    await page.getByRole('button', { name: 'Communications subkit' }).click();
 
     await page.getByRole('button', { name: 'Configure Items' }).click();
     await page.getByRole('button', { name: 'Next Subkit' }).click();
@@ -86,7 +84,7 @@ test.describe('Start Over reset', () => {
     await page.getByText('Start Over').click();
     await expect(page.getByRole('alertdialog')).toBeVisible();
 
-    await page.getByRole('button', { name: 'Start Over' }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Start Over' }).click();
 
     await expect(page.getByRole('heading', { name: 'Build Your Kit' })).toBeVisible();
     await expect(page.getByText('0 of 6 slots used')).toBeVisible();

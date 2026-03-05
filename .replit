@@ -7,6 +7,7 @@ requiredFiles = [".replit", "replit.nix", "package.json", "package-lock.json"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["glib", "nss", "nspr", "atk", "at-spi2-atk", "cups", "libdrm", "gtk3", "pango", "cairo", "alsa-lib", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXext", "xorg.libXrandr", "xorg.libxcb", "xorg.libX11", "mesa", "expat", "xorg.libXfixes", "dbus", "at-spi2-core", "mesa_glu", "libxkbcommon", "pkg-config", "chromium"]
 
 [deployment]
 run = ["npm", "run", "start"]
@@ -61,3 +62,8 @@ externalPort = 5173
 [[ports]]
 localPort = 9323
 externalPort = 3001
+
+[userenv]
+
+[userenv.development]
+PLAYWRIGHT_CHROMIUM_PATH = "/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium"
