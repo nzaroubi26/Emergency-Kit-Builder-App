@@ -1,5 +1,6 @@
 import { type FC } from 'react';
-import * as Icons from 'lucide-react';
+import { Package } from 'lucide-react';
+import { resolveIcon } from '../../utils/iconResolver';
 import type { SubkitSelection } from '../../types';
 import type { KitCategory, KitItem } from '../../types';
 
@@ -16,7 +17,7 @@ export const SubkitSummarySection: FC<SubkitSummarySectionProps> = ({
   items,
   isEmpty,
 }) => {
-  const IconComponent = (Icons as unknown as Record<string, FC<{ size?: number; 'aria-hidden'?: string }>>)[category.icon];
+  const IconComponent = resolveIcon(category.icon);
   const sizeLabel = subkit.size === 'large' ? 'Large' : 'Regular';
 
   const itemList = items.map(({ item, quantity }) => (
@@ -62,7 +63,7 @@ export const SubkitSummarySection: FC<SubkitSummarySectionProps> = ({
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
             style={{ backgroundColor: category.colorTint, color: category.colorBase }}
           >
-            <Icons.Package size={12} aria-hidden="true" />
+            <Package size={12} aria-hidden="true" />
             Empty Container
           </div>
         ) : items.length > 0 ? (
