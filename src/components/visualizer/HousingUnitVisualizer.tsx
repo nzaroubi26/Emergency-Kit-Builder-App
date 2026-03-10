@@ -15,12 +15,12 @@ export const HousingUnitVisualizer: FC<HousingUnitVisualizerProps> = ({
     >
       <div
         data-testid="handle-tab"
-        className="h-6 w-20 rounded-t-md border-t-[6px] border-x-[6px] border-neutral-500 bg-transparent mb-[-2px] z-10"
+        className="h-6 w-20 rounded-t-md border-t-[6px] border-x-[6px] border-neutral-400 bg-transparent mb-[-2px] z-10"
       />
 
       <div
         data-testid="outer-frame"
-        className="relative w-full bg-neutral-500 rounded-xl p-3 pb-2 z-20"
+        className="relative w-full bg-neutral-400 rounded-xl p-3 pb-2 z-20"
       >
         <div className="bg-neutral-50 rounded-lg w-full overflow-hidden flex flex-col">
           {slots.map((slot, index) => (
@@ -36,11 +36,11 @@ export const HousingUnitVisualizer: FC<HousingUnitVisualizerProps> = ({
 
         <div
           data-testid="wheel-guard-left"
-          className="absolute bottom-1 -left-4 h-10 w-5 bg-neutral-500 rounded-sm z-[-1]"
+          className="absolute bottom-1 -left-6 h-20 w-10 bg-neutral-600 rounded-sm z-[-1]"
         />
         <div
           data-testid="wheel-guard-right"
-          className="absolute bottom-1 -right-4 h-10 w-5 bg-neutral-500 rounded-sm z-[-1]"
+          className="absolute bottom-1 -right-6 h-20 w-10 bg-neutral-600 rounded-sm z-[-1]"
         />
       </div>
     </div>
