@@ -36,11 +36,11 @@ export const HousingUnitVisualizer: FC<HousingUnitVisualizerProps> = ({
 
         <div
           data-testid="wheel-guard-left"
-          className="absolute bottom-1 -left-6 h-20 w-10 bg-neutral-600 rounded-sm z-[-1]"
+          className="absolute -bottom-3 -left-6 h-12 w-6 bg-neutral-600 rounded-sm"
         />
         <div
           data-testid="wheel-guard-right"
-          className="absolute bottom-1 -right-6 h-20 w-10 bg-neutral-600 rounded-sm z-[-1]"
+          className="absolute -bottom-3 -right-6 h-12 w-6 bg-neutral-600 rounded-sm"
         />
       </div>
     </div>
