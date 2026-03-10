@@ -9,6 +9,8 @@ interface SubkitSummarySectionProps {
   category: KitCategory;
   items: Array<{ item: KitItem; quantity: number }>;
   isEmpty: boolean;
+  weightLbs: number;
+  volumePct: number;
 }
 
 export const SubkitSummarySection: FC<SubkitSummarySectionProps> = ({
@@ -16,6 +18,8 @@ export const SubkitSummarySection: FC<SubkitSummarySectionProps> = ({
   category,
   items,
   isEmpty,
+  weightLbs,
+  volumePct,
 }) => {
   const IconComponent = resolveIcon(category.icon);
   const sizeLabel = subkit.size === 'large' ? 'Large' : 'Regular';
@@ -52,6 +56,23 @@ export const SubkitSummarySection: FC<SubkitSummarySectionProps> = ({
             {category.name}
           </h2>
           <p className="text-xs text-[var(--color-neutral-500)]">{sizeLabel} Subkit</p>
+        </div>
+        <div className="ml-auto flex items-center gap-1">
+          <span className="text-xs font-normal text-[var(--color-neutral-400)]">
+            ~{weightLbs.toFixed(1)} lbs · {volumePct}%
+          </span>
+          <div
+            className="rounded-full ml-1"
+            style={{ width: '40px', height: '4px', backgroundColor: '#E5E7EB' }}
+          >
+            <div
+              className="h-full rounded-full"
+              style={{
+                backgroundColor: category.colorBase,
+                width: Math.min(volumePct, 100) + '%',
+              }}
+            />
+          </div>
         </div>
       </div>
       <div

@@ -2,8 +2,10 @@ import { type FC, useEffect, useRef, useState, useCallback, useMemo } from 'reac
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { CATEGORIES, ITEMS_BY_CATEGORY, STANDARD_CATEGORY_IDS } from '../../data';
+import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../../utils/slotCalculations';
 import { useKitStore } from '../../store/kitStore';
 import { useIsEmptyContainer } from '../../hooks/useKitStore';
+import { SubkitStatsStrip } from './SubkitStatsStrip';
 import { ItemCard } from './ItemCard';
 import { SubkitProgressIndicator } from './SubkitProgressIndicator';
 import { EmptyContainerOption } from './EmptyContainerOption';
@@ -11,6 +13,9 @@ import { CategoryGroupHeader } from './CategoryGroupHeader';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
 import { Analytics } from '../../utils/analytics';
+
+const REGULAR_CAPACITY_IN3 = 1728;
+const LARGE_CAPACITY_IN3 = 3456;
 
 interface CustomSubkitScreenProps {}
 
@@ -145,6 +150,11 @@ export const CustomSubkitScreen: FC<CustomSubkitScreenProps> = () => {
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const customSubkit = sorted.find((s) => s.subkitId === SUBKIT_ID);
+  const capacityIn3 = customSubkit?.size === 'large' ? LARGE_CAPACITY_IN3 : REGULAR_CAPACITY_IN3;
+  const weightLbs = calculateSubkitWeightLbs(allItems, itemSelections, SUBKIT_ID);
+  const volumePct = calculateSubkitVolumePct(allItems, itemSelections, SUBKIT_ID, capacityIn3);
+
   const jumpNav = STANDARD_CATEGORY_IDS.map((catId) => {
     const cat = CATEGORIES[catId];
     if (!cat) return null;
@@ -255,6 +265,11 @@ export const CustomSubkitScreen: FC<CustomSubkitScreenProps> = () => {
           </label>
         </div>
       </div>
+      <SubkitStatsStrip
+        weightLbs={weightLbs}
+        volumePct={volumePct}
+        categoryColor={category.colorBase}
+      />
       <nav className="mt-4 flex flex-wrap gap-2" aria-label="Jump to category">
         {jumpNav}
       </nav>

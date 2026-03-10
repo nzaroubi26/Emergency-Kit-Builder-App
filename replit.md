@@ -117,11 +117,11 @@ tests/
 ### Phase 2.5 (In Progress)
 - Epic 9: Kit Weight & Volume Tracking (Stories 9.1 → 9.2 → 9.3 → 9.4, sequential dependency)
   - Story 9.1 (KitItem Data Extension): Done
-  - Story 9.2 (Calculation Functions): Draft
-  - Story 9.3 (SubkitStatsStrip Component): Draft
-  - Story 9.4 (Summary Page Stats Readout): Draft
+  - Story 9.2 (Calculation Functions): Done
+  - Story 9.3 (SubkitStatsStrip Component): Done
+  - Story 9.4 (Summary Page Stats Readout): Done
 - Epic 10: Visualizer Exterior Redesign (parallel with Epic 9 after 9.1)
-  - Story 10.1 (Outer Frame, Handle Tab, Wheel Guards): Draft
+  - Story 10.1 (Outer Frame, Handle Tab, Wheel Guards): Done
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Purchase API endpoint for checkout (default: `#`)

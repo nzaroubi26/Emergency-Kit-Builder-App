@@ -119,4 +119,24 @@ describe('HousingUnitVisualizer', () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
+
+  it('renders outer frame wrapper element', () => {
+    const { container } = render(<HousingUnitVisualizer slots={emptySlots} />);
+    const outerFrame = container.querySelector('[data-testid="outer-frame"]');
+    expect(outerFrame).toBeInTheDocument();
+  });
+
+  it('renders handle tab element', () => {
+    const { container } = render(<HousingUnitVisualizer slots={emptySlots} />);
+    const handleTab = container.querySelector('[data-testid="handle-tab"]');
+    expect(handleTab).toBeInTheDocument();
+  });
+
+  it('renders two wheel guard elements', () => {
+    const { container } = render(<HousingUnitVisualizer slots={emptySlots} />);
+    const wheelLeft = container.querySelector('[data-testid="wheel-guard-left"]');
+    const wheelRight = container.querySelector('[data-testid="wheel-guard-right"]');
+    expect(wheelLeft).toBeInTheDocument();
+    expect(wheelRight).toBeInTheDocument();
+  });
 });

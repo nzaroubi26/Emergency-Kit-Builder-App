@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { calculateTotalSlots, calculateSlotState, canFitSize, isSlotsAtCapacity } from '../../src/utils/slotCalculations';
-import type { SubkitSelection } from '../../src/types';
+import { calculateTotalSlots, calculateSlotState, canFitSize, isSlotsAtCapacity, calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../../src/utils/slotCalculations';
+import type { SubkitSelection, KitItem, ItemSelection } from '../../src/types';
 
 const sel = (id: string, size: 'regular' | 'large', order: number): SubkitSelection =>
   ({ subkitId: id, categoryId: id, size, selectionOrder: order });
@@ -79,5 +79,104 @@ describe('isSlotsAtCapacity', () => {
   });
   it('returns false below 6 slots', () => {
     expect(isSlotsAtCapacity([sel('power', 'regular', 1)])).toBe(false);
+  });
+});
+
+const mockItem = (id: string, weightGrams: number | null, volumeIn3: number | null): KitItem => ({
+  id,
+  categoryId: 'power',
+  name: id,
+  description: '',
+  rating: null,
+  reviewCount: null,
+  weightGrams,
+  volumeIn3,
+  productId: null,
+  pricePlaceholder: null,
+  imageSrc: null,
+});
+
+const mockSel = (subkitId: string, itemId: string, quantity: number): ItemSelection => ({
+  itemId,
+  subkitId,
+  quantity,
+});
+
+describe('calculateSubkitWeightLbs', () => {
+  const items = [
+    mockItem('item-a', 454, 100),
+    mockItem('item-b', 227, 50),
+  ];
+
+  it('returns correct lbs with all items at qty 1', () => {
+    const selections: Record<string, ItemSelection> = {
+      'sub1::item-a': mockSel('sub1', 'item-a', 1),
+      'sub1::item-b': mockSel('sub1', 'item-b', 1),
+    };
+    const result = calculateSubkitWeightLbs(items, selections, 'sub1');
+    expect(result).toBe(parseFloat(((454 + 227) / 453.592).toFixed(1)));
+  });
+
+  it('returns correct weighted lbs with mixed quantities', () => {
+    const selections: Record<string, ItemSelection> = {
+      'sub1::item-a': mockSel('sub1', 'item-a', 3),
+      'sub1::item-b': mockSel('sub1', 'item-b', 2),
+    };
+    const result = calculateSubkitWeightLbs(items, selections, 'sub1');
+    expect(result).toBe(parseFloat(((454 * 3 + 227 * 2) / 453.592).toFixed(1)));
+  });
+
+  it('returns 0 with no items selected', () => {
+    expect(calculateSubkitWeightLbs(items, {}, 'sub1')).toBe(0);
+  });
+
+  it('skips items with null weightGrams gracefully', () => {
+    const itemsWithNull = [mockItem('item-a', 454, 100), mockItem('item-c', null, 50)];
+    const selections: Record<string, ItemSelection> = {
+      'sub1::item-a': mockSel('sub1', 'item-a', 1),
+      'sub1::item-c': mockSel('sub1', 'item-c', 1),
+    };
+    const result = calculateSubkitWeightLbs(itemsWithNull, selections, 'sub1');
+    expect(result).toBe(parseFloat((454 / 453.592).toFixed(1)));
+  });
+});
+
+describe('calculateSubkitVolumePct', () => {
+  const items = [
+    mockItem('item-a', 454, 100),
+    mockItem('item-b', 227, 50),
+  ];
+
+  it('returns correct integer percentage with Regular capacity (1728 in³)', () => {
+    const selections: Record<string, ItemSelection> = {
+      'sub1::item-a': mockSel('sub1', 'item-a', 1),
+      'sub1::item-b': mockSel('sub1', 'item-b', 1),
+    };
+    const result = calculateSubkitVolumePct(items, selections, 'sub1', 1728);
+    expect(result).toBe(Math.round(((100 + 50) / 1728) * 100));
+  });
+
+  it('returns correct integer percentage with Large capacity (3456 in³)', () => {
+    const selections: Record<string, ItemSelection> = {
+      'sub1::item-a': mockSel('sub1', 'item-a', 1),
+      'sub1::item-b': mockSel('sub1', 'item-b', 1),
+    };
+    const result = calculateSubkitVolumePct(items, selections, 'sub1', 3456);
+    expect(result).toBe(Math.round(((100 + 50) / 3456) * 100));
+  });
+
+  it('returns 0 with no items selected', () => {
+    expect(calculateSubkitVolumePct(items, {}, 'sub1', 1728)).toBe(0);
+  });
+
+  it('returns unclamped integer for over-capacity', () => {
+    const bigItems = [mockItem('item-x', 454, 1000), mockItem('item-y', 227, 1000)];
+    const selections: Record<string, ItemSelection> = {
+      'sub1::item-x': mockSel('sub1', 'item-x', 1),
+      'sub1::item-y': mockSel('sub1', 'item-y', 1),
+    };
+    const result = calculateSubkitVolumePct(bigItems, selections, 'sub1', 1728);
+    expect(result).toBe(Math.round((2000 / 1728) * 100));
+    expect(result).toBeGreaterThan(100);
   });
 });

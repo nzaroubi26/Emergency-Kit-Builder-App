@@ -177,9 +177,35 @@ describe('SummaryScreen — Story 5.4: Print & Start Over', () => {
     expect(screen.getByRole('button', { name: 'Get My Kit' })).toBeInTheDocument();
   });
 
-  it('has no accessibility violations', async () => {
+  it('has no accessibility violations (print and start over)', async () => {
     const { container } = await renderSummary();
     const results = await axe(container);
     expect(results).toHaveNoViolations();
+  });
+});
+
+describe('SummaryScreen — Story 9.4: Weight and Volume Stats', () => {
+  beforeEach(() => setupKit());
+
+  it('renders kit-level stats row with correct total weight and subkit count', async () => {
+    const { container } = await renderSummary();
+    const statsRow = container.querySelector('[data-testid="kit-stats-row"]');
+    expect(statsRow).toBeInTheDocument();
+    expect(statsRow?.textContent).toContain('lbs total');
+    expect(statsRow?.textContent).toContain('2 subkits configured');
+  });
+
+  it('renders per-subkit inline stats in each SubkitSummarySection heading', async () => {
+    await renderSummary();
+    const statsTexts = screen.getAllByText(/~[\d.]+ lbs · \d+%/);
+    expect(statsTexts.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('stats row is not hidden by print CSS', async () => {
+    const { container } = await renderSummary();
+    const statsRow = container.querySelector('[data-testid="kit-stats-row"]');
+    expect(statsRow).toBeInTheDocument();
+    const styles = window.getComputedStyle(statsRow as Element);
+    expect(styles.display).not.toBe('none');
   });
 });

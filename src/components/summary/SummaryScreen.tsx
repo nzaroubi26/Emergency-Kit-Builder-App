@@ -2,7 +2,8 @@ import { type FC, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKitStore } from '../../store/kitStore';
 import { useSlotState, useTotalSlotsUsed } from '../../hooks/useKitStore';
-import { CATEGORIES, ITEMS } from '../../data';
+import { CATEGORIES, ITEMS, ITEMS_BY_CATEGORY } from '../../data';
+import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../../utils/slotCalculations';
 import { HousingUnitVisualizer } from '../visualizer/HousingUnitVisualizer';
 import { SubkitSummarySection } from './SubkitSummarySection';
 import { PrimaryButton } from '../ui/PrimaryButton';
@@ -11,6 +12,9 @@ import { ConfirmationModal } from '../ui/ConfirmationModal';
 import { Analytics } from '../../utils/analytics';
 import { initiateCheckout } from '../../services/checkoutService';
 import '../../styles/print.css';
+
+const REGULAR_CAPACITY_IN3 = 1728;
+const LARGE_CAPACITY_IN3 = 3456;
 
 interface SummaryScreenProps {}
 
@@ -72,7 +76,7 @@ export const SummaryScreen: FC<SummaryScreenProps> = () => {
     setShowStartOverModal(false);
   };
 
-  const subkitSections = sorted.map((subkit) => {
+  const subkitData = sorted.map((subkit) => {
     const category = CATEGORIES[subkit.categoryId];
     if (!category) return null;
 
@@ -85,16 +89,30 @@ export const SummaryScreen: FC<SummaryScreenProps> = () => {
       })
       .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
 
-    return (
-      <SubkitSummarySection
-        key={subkit.subkitId}
-        subkit={subkit}
-        category={category}
-        items={subkitItems}
-        isEmpty={isEmpty}
-      />
-    );
-  });
+    const categoryItems = subkit.categoryId === 'custom'
+      ? ITEMS
+      : (ITEMS_BY_CATEGORY[subkit.categoryId] ?? []);
+    const capacityIn3 = subkit.size === 'large' ? LARGE_CAPACITY_IN3 : REGULAR_CAPACITY_IN3;
+    const weightLbs = calculateSubkitWeightLbs(categoryItems, itemSelections, subkit.subkitId);
+    const volumePct = calculateSubkitVolumePct(categoryItems, itemSelections, subkit.subkitId, capacityIn3);
+
+    return { subkit, category, subkitItems, isEmpty, weightLbs, volumePct };
+  }).filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+
+  const totalKitWeightLbs = subkitData.reduce((sum, d) => sum + d.weightLbs, 0);
+  const nonEmptySubkitCount = subkitData.filter((d) => !d.isEmpty && d.subkitItems.length > 0).length;
+
+  const subkitSections = subkitData.map((d) => (
+    <SubkitSummarySection
+      key={d.subkit.subkitId}
+      subkit={d.subkit}
+      category={d.category}
+      items={d.subkitItems}
+      isEmpty={d.isEmpty}
+      weightLbs={d.weightLbs}
+      volumePct={d.volumePct}
+    />
+  ));
 
   return (
     <div>
@@ -145,6 +163,19 @@ export const SummaryScreen: FC<SummaryScreenProps> = () => {
       </div>
 
       <div className="mt-8 flex flex-col gap-4">
+        <div
+          className="flex items-center gap-3 py-2 px-4 mb-4"
+          style={{ backgroundColor: '#F3F4F6', borderRadius: '10px' }}
+          data-testid="kit-stats-row"
+        >
+          <span className="text-xs font-normal text-[var(--color-neutral-500)]">
+            ~{totalKitWeightLbs.toFixed(1)} lbs total
+          </span>
+          <span className="text-[var(--color-neutral-300)] mx-1">·</span>
+          <span className="text-xs font-normal text-[var(--color-neutral-500)]">
+            {nonEmptySubkitCount} subkits configured
+          </span>
+        </div>
         {subkitSections}
       </div>
 

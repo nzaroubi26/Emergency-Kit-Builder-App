@@ -2,14 +2,19 @@ import { type FC, useEffect, useRef, useState, useCallback, useMemo } from 'reac
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { CATEGORIES, ITEMS_BY_CATEGORY } from '../../data';
+import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../../utils/slotCalculations';
 import { useKitStore } from '../../store/kitStore';
 import { useIsEmptyContainer } from '../../hooks/useKitStore';
+import { SubkitStatsStrip } from './SubkitStatsStrip';
 import { ItemCard } from './ItemCard';
 import { SubkitProgressIndicator } from './SubkitProgressIndicator';
 import { EmptyContainerOption } from './EmptyContainerOption';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
 import { Analytics } from '../../utils/analytics';
+
+const REGULAR_CAPACITY_IN3 = 1728;
+const LARGE_CAPACITY_IN3 = 3456;
 
 interface ItemConfigScreenProps {}
 
@@ -143,6 +148,11 @@ export const ItemConfigScreen: FC<ItemConfigScreenProps> = () => {
     return null;
   }
 
+  const currentSubkit = sorted.find((s) => s.subkitId === subkitId);
+  const capacityIn3 = currentSubkit?.size === 'large' ? LARGE_CAPACITY_IN3 : REGULAR_CAPACITY_IN3;
+  const weightLbs = calculateSubkitWeightLbs(items, itemSelections, subkitId);
+  const volumePct = calculateSubkitVolumePct(items, itemSelections, subkitId, capacityIn3);
+
   const headingColor: React.CSSProperties = {
     borderLeftColor: category.colorBase,
   };
@@ -226,6 +236,11 @@ export const ItemConfigScreen: FC<ItemConfigScreenProps> = () => {
           </label>
         </div>
       </div>
+      <SubkitStatsStrip
+        weightLbs={weightLbs}
+        volumePct={volumePct}
+        categoryColor={category.colorBase}
+      />
       <div
         className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3"
         style={{

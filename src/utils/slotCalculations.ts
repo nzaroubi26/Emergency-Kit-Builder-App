@@ -1,4 +1,4 @@
-import type { SubkitSelection, SubkitSize, SlotState } from '../types';
+import type { SubkitSelection, SubkitSize, SlotState, KitItem, ItemSelection } from '../types';
 import { CATEGORIES } from '../data';
 
 export const MAX_SLOTS = 6;
@@ -43,4 +43,34 @@ export function calculateSlotState(selections: SubkitSelection[]): SlotState[] {
 
 export function isSlotsAtCapacity(selections: SubkitSelection[]): boolean {
   return calculateTotalSlots(selections) >= MAX_SLOTS;
+}
+
+export function calculateSubkitWeightLbs(
+  items: KitItem[],
+  selections: Record<string, ItemSelection>,
+  subkitId: string
+): number {
+  const totalGrams = items.reduce((sum, item) => {
+    const key = `${subkitId}::${item.id}`;
+    const sel = selections[key];
+    if (!sel || item.weightGrams === null) return sum;
+    return sum + item.weightGrams * sel.quantity;
+  }, 0);
+  return parseFloat((totalGrams / 453.592).toFixed(1));
+}
+
+export function calculateSubkitVolumePct(
+  items: KitItem[],
+  selections: Record<string, ItemSelection>,
+  subkitId: string,
+  capacityIn3: number
+): number {
+  if (capacityIn3 === 0) return 0;
+  const totalVolume = items.reduce((sum, item) => {
+    const key = `${subkitId}::${item.id}`;
+    const sel = selections[key];
+    if (!sel || item.volumeIn3 === null) return sum;
+    return sum + item.volumeIn3 * sel.quantity;
+  }, 0);
+  return Math.round((totalVolume / capacityIn3) * 100);
 }
