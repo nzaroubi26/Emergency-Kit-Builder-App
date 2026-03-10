@@ -15,7 +15,7 @@ export const HousingUnitVisualizer: FC<HousingUnitVisualizerProps> = ({
     >
       <div
         data-testid="handle-tab"
-        className="h-5 w-16 rounded-t-md bg-neutral-500 mb-[-2px] z-10"
+        className="h-6 w-20 rounded-t-md border-t-[6px] border-x-[6px] border-neutral-500 bg-transparent mb-[-2px] z-10"
       />
 
       <div
@@ -36,11 +36,11 @@ export const HousingUnitVisualizer: FC<HousingUnitVisualizerProps> = ({
 
         <div
           data-testid="wheel-guard-left"
-          className="absolute bottom-0 -left-3 h-6 w-4 bg-neutral-500 rounded-sm z-[-1]"
+          className="absolute bottom-1 -left-4 h-10 w-5 bg-neutral-500 rounded-sm z-[-1]"
         />
         <div
           data-testid="wheel-guard-right"
-          className="absolute bottom-0 -right-3 h-6 w-4 bg-neutral-500 rounded-sm z-[-1]"
+          className="absolute bottom-1 -right-4 h-10 w-5 bg-neutral-500 rounded-sm z-[-1]"
         />
       </div>
     </div>
