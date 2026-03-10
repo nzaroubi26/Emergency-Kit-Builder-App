@@ -9,62 +9,40 @@ export const HousingUnitVisualizer: FC<HousingUnitVisualizerProps> = ({
 }) => {
   return (
     <div
-      className="mx-auto max-w-sm overflow-hidden"
-      style={{
-        borderRadius: 'var(--radius-md)',
-        boxShadow: 'var(--shadow-2)',
-      }}
+      className="relative mx-auto inline-flex max-w-sm flex-col items-center"
       role="region"
       aria-label="Housing unit visualizer showing 6 storage slots"
     >
       <div
         data-testid="handle-tab"
-        className="mx-auto"
-        style={{
-          width: '48px',
-          height: '14px',
-          backgroundColor: '#6B7280',
-          borderRadius: '6px 6px 0 0',
-        }}
+        className="z-10 h-5 w-14 rounded-md border-2 border-neutral-400 bg-neutral-500 mb-[-2px]"
       />
+
       <div
         data-testid="outer-frame"
-        style={{
-          backgroundColor: '#6B7280',
-          borderRadius: 'var(--radius-md)',
-          padding: '28px 12px 20px 12px',
-        }}
+        className="z-20 rounded-xl bg-neutral-500 p-3 pb-2"
       >
-        {slots.map((slot, index) => (
-          <VisualizerSlot
-            key={index}
-            slot={slot}
-            slotIndex={index}
-            readOnly={readOnly}
-            onSlotClick={onSlotClick}
-          />
-        ))}
-        <div className="flex justify-between" style={{ marginTop: '0px' }}>
-          <div
-            data-testid="wheel-guard-left"
-            style={{
-              width: '18px',
-              height: '22px',
-              backgroundColor: '#4B5563',
-              borderRadius: '0 0 0 6px',
-            }}
-          />
-          <div
-            data-testid="wheel-guard-right"
-            style={{
-              width: '18px',
-              height: '22px',
-              backgroundColor: '#4B5563',
-              borderRadius: '0 0 6px 0',
-            }}
-          />
+        <div className="rounded-lg bg-neutral-50">
+          {slots.map((slot, index) => (
+            <VisualizerSlot
+              key={index}
+              slot={slot}
+              slotIndex={index}
+              readOnly={readOnly}
+              onSlotClick={onSlotClick}
+            />
+          ))}
         </div>
       </div>
+
+      <div
+        data-testid="wheel-guard-left"
+        className="absolute bottom-0 -left-4 z-0 h-6 w-4 rounded-sm bg-neutral-500"
+      />
+      <div
+        data-testid="wheel-guard-right"
+        className="absolute bottom-0 -right-4 z-0 h-6 w-4 rounded-sm bg-neutral-500"
+      />
     </div>
   );
 };
