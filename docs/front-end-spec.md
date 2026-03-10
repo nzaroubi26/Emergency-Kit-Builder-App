@@ -38,7 +38,7 @@
 | 11 | Cover page layout | Text-forward, no hero image — headline + value proposition paragraph + single CTA. Brand-primary background with white text. Mobile-ready from day one. |
 | 12 | Weight display (Phase 2.5) | Informational only — `~X.X lbs` per subkit on SubkitStatsStrip on ItemConfig; total `~X.X lbs total` on Summary. No warnings, no thresholds, no color changes at any weight level. |
 | 13 | Volume display (Phase 2.5) | Live `% filled` progress bar per subkit on SubkitStatsStrip; compact inline `XX% filled` badge per subkit on Summary. Container capacities: Regular = 1,728 in³, Large = 3,456 in³ (from Phase 1 PRD Story 1.2). No overflow warnings — purely informational. Bar fill clamped to 100% width for display; label shows true computed integer value. |
-| 14 | Visualizer exterior redesign (Phase 2.5) | Visual shell only — neutral-500 outer frame wrapping slot grid, centered handle tab at top, rectangular wheel guards at bottom corners flush with base. Zero changes to `HousingUnitVisualizer` props interface or `SlotState` data model. |
+| 14 | Visualizer exterior redesign (Phase 2.5) | Visual shell only — `neutral-400` outer frame (`rounded-xl`, `p-3`/`pb-2`) wrapping slot grid; hollow `border-neutral-400` handle tab (80×24px) as sibling div above frame with negative margin overlap; `neutral-600` wheel guards (24×48px, `rounded-sm`) absolutely positioned outside frame via negative offsets. Zero changes to `HousingUnitVisualizer` props interface or `SlotState` data model. |
 
 ---
 
@@ -405,15 +405,15 @@ The `HousingUnitVisualizer` receives a new outer visual shell wrapping the exist
 │  ├────────────────────────┤  │
 │  │  Slot 6                │  │
 │  └────────────────────────┘  │
-│ [wheel]              [wheel] │  ← flush with base
+│ [wheel]              [wheel] │  ← positioned outside frame
 └──────────────────────────────┘
 ```
 
 | Element | Spec |
 |---------|------|
-| Outer frame | `neutral-500` (`#6B7280`) background; `radius-md` (10px); padding: 12px sides, 20px bottom, 28px top (extra top clearance for handle tab) |
-| Handle tab | Centered horizontally at top of outer frame; 48px wide × 14px tall; `neutral-500` fill; `radius-sm` top corners (6px), bottom corners 0; sits flush against the top interior edge of the outer frame — appears to protrude upward from it |
-| Wheel guards | Two rectangular blocks, one at bottom-left and one at bottom-right of outer frame; each 18px wide × 22px tall; `neutral-600` (`#4B5563`) fill; `radius-sm` (6px) outer corners, square inner corners; flush with the base of the outer frame — appear as feet/casters |
+| Outer frame | `neutral-400` (`#9CA3AF`) background; `rounded-xl` (12px); padding: `p-3` (12px all sides), `pb-2` (8px bottom) |
+| Handle tab | Centered horizontally as a sibling div above the outer frame; 80px wide (`w-20`) × 24px tall (`h-6`); hollow border (`border-neutral-400`, `bg-transparent`) with 6px top border and side borders; `rounded-t-md` (6px) top corners, 0 bottom; visually protrudes upward via negative bottom margin overlap |
+| Wheel guards | Two rectangular blocks, absolutely positioned outside the outer frame; each 24px wide (`w-6`) × 48px tall (`h-12`); `neutral-600` (`#4B5563`) fill; `rounded-sm` (3px all corners, symmetric); positioned using negative offsets (`-bottom-3 -left-6` / `-right-6`) |
 | Slot grid | Unchanged — sits inside the outer frame exactly as before; the frame is a visual wrapper only |
 | Read-only variant (Summary Page) | Outer frame, handle tab, and wheel guards all present — same spec; `readOnly` mode is unaffected |
 
