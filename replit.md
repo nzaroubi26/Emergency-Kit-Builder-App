@@ -90,11 +90,10 @@ tests/
 ## BMAD Documentation
 - PRD Phase 1: `docs/prd/` (9 sharded files)
 - PRD Phase 2: `docs/prd-phase2.md`
-- Architecture Phase 1: `docs/architecture/` (15 sharded files)
-- Architecture Phase 2: `docs/architecture-phase2.md`
-- UI/UX Spec Phase 1: `attached_assets/front-end-spec_1772483167624.md`
-- UI/UX Spec Phase 2: `docs/front-end-spec-phase2.md`
-- Stories Phase 1: `docs/stories/` (21 stories across 5 epics)
+- PRD Phase 2.5: `docs/prd-phase2.5.md` → sharded to `docs/prd-phase2.5/` (8 files)
+- Architecture: `docs/architecture.md` (v2.2) → sharded to `docs/architecture/` (15 files)
+- UI/UX Spec: `docs/front-end-spec.md` (v1.2 — Phase 2.5 updates)
+- Stories: `docs/stories/` (Phase 1–2.5)
 - BMAD agents: `.bmad-core/agents/` (persona files for external AI chats)
 
 ## Story Progress
@@ -114,6 +113,15 @@ tests/
 - Story 7.2 (Clickable Visualizer Slots): Done
 - Story 8.1 (Hardcoded Star Ratings): Done
 - Story 8.2 (E-commerce Checkout): Done
+
+### Phase 2.5 (In Progress)
+- Epic 9: Kit Weight & Volume Tracking (Stories 9.1 → 9.2 → 9.3 → 9.4, sequential dependency)
+  - Story 9.1 (KitItem Data Extension): Draft
+  - Story 9.2 (Calculation Functions): Draft
+  - Story 9.3 (SubkitStatsStrip Component): Draft
+  - Story 9.4 (Summary Page Stats Readout): Draft
+- Epic 10: Visualizer Exterior Redesign (parallel with Epic 9 after 9.1)
+  - Story 10.1 (Outer Frame, Handle Tab, Wheel Guards): Draft
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Purchase API endpoint for checkout (default: `#`)
