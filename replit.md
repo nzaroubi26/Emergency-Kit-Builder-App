@@ -114,7 +114,7 @@ tests/
 - Story 8.1 (Hardcoded Star Ratings): Done
 - Story 8.2 (E-commerce Checkout): Done
 
-### Phase 2.5 (In Progress)
+### Phase 2.5 (Complete)
 - Epic 9: Kit Weight & Volume Tracking (Stories 9.1 → 9.2 → 9.3 → 9.4, sequential dependency)
   - Story 9.1 (KitItem Data Extension): Done
   - Story 9.2 (Calculation Functions): Done
