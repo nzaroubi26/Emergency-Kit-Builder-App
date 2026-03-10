@@ -1,9 +1,9 @@
 # Emergency Prep Kit Builder — Frontend Architecture Document
 
-**Prepared by:** Winston, Architect  
-**Date:** 2026-03-02  
-**Version:** 1.0  
-**Status:** Complete — Ready for Development
+**Prepared by:** Winston, Architect
+**Date:** 2026-03-09
+**Version:** 2.2
+**Status:** Complete — Phase 2.5 Edition
 
 ---
 
@@ -20,7 +20,7 @@
 9. Testing Requirements
 10. Environment Configuration
 11. Frontend Developer Standards
-12. Phase 2 Extension Points
+12. Phase 3+ Roadmap
 
 ---
 
@@ -29,7 +29,12 @@
 | Date | Version | Description | Author |
 |------|---------|-------------|--------|
 | 2026-03-02 | 1.0 | Initial architecture document | Winston, Architect |
-| 2026-03-02 | 1.1 | Vercel selected as deployment platform; rollback strategy added; analytics Phase 2 deferral added | Sarah, PO |
+| 2026-03-02 | 1.1 | Vercel selected; rollback strategy added; analytics Phase 2 deferral noted | Sarah, PO |
+| 2026-03-04 | 1.2 | itemImages.ts added to project structure; product photography confirmed no Phase 2 work needed | Sarah, PO |
+| 2026-03-04 | 1.3 | Cover page and Fill my kit for me added as Phase 2; Bazaarvoice moved to Phase 3 | Sarah, PO |
+| 2026-03-04 | 2.0 | Phase 2 brownfield enhancement: localStorage persist, GA4 analytics, Playwright E2E + GitHub Actions CI, Fill my kit for me (derived state), clickable visualizer slots, hardcoded star ratings (KitItem.rating + KitItem.reviewCount), e-commerce checkoutService.ts, cover page + route restructure (/ to CoverScreen, /builder to SubkitSelectionScreen). Section 12 converted to Phase 3+ Roadmap. MobileInterstitial retained — mobile responsiveness deferred to Phase 3. | Winston, Architect |
+| 2026-03-04 | 2.1 | Mobile responsiveness (Story 7.3) formally deferred to Phase 3; Section 8 breakpoint strategy reverted to Phase 1 desktop-first; MobileInterstitial and useResponsive.ts marked Unchanged; Phase 3+ Roadmap updated. | Sarah, PO |
+| 2026-03-09 | 2.2 | Phase 2.5: KitItem extended with weightGrams + volumeIn3; two new pure functions in slotCalculations.ts; new SubkitStatsStrip component; ItemConfigScreen, CustomSubkitScreen, SummaryScreen updated with weight/volume readouts; HousingUnitVisualizer exterior shell added. Zero store changes, zero new routes, zero new env vars. | Winston, Architect |
 
 ---
 
@@ -37,62 +42,88 @@
 
 ### Project Context
 
-This is a **brownfield refactor** of an existing React project. The Developer Implementation Notes in the UI/UX Specification identify existing files (`SubkitTypeSelectionNew.tsx`, `SummaryPage.tsx`, `ItemQuestionnaireFlow.tsx`, `kitItems.ts`, `ImageWithFallback`) that require targeted corrections. This document defines the **target state** — all existing components must be refactored to conform to these patterns.
+This is a **Phase 2 brownfield enhancement** of the fully-delivered Phase 1 MVP. All Phase 2 extension points were pre-wired in the Phase 1 architecture: the `onSlotClick` prop, `KitItem` nullable product fields, `ENV.purchaseUrl`, and the Zustand `persist` middleware path. Phase 2 work is additive by design — no existing component interfaces change.
+
+The five Phase 1 files that required targeted corrections (`SubkitTypeSelectionNew.tsx` → `SubkitSelectionScreen.tsx`, `SummaryPage.tsx` → `SummaryScreen.tsx`, `ItemQuestionnaireFlow.tsx` → `ItemConfigScreen.tsx`, `kitItems.ts`, `ImageWithFallback`) are confirmed complete. Phase 2 builds on the corrected, renamed files.
 
 ### Scaffold
 
-No external starter template. The foundation is a standard **Vite + React + TypeScript** scaffold, which the existing project is assumed to already approximate. The focus is aligning the existing codebase to the patterns defined here.
+No external starter template. Standard **Vite + React + TypeScript** scaffold. All Phase 2 code conforms to the existing project patterns without exception.
 
-### Key Framework Decisions
+### Key Phase 2 Framework Decisions
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| Build tool | Vite 6.x | Fastest HMR; first-class TS + React + Tailwind v4 support; trivial static export to Vercel |
-| Framework | React 18.x + TypeScript 5.x strict | Per PRD; `strict: true` mandatory |
-| State management | Zustand 5.x | Kit state is deeply cross-cutting with computed slot values; avoids Provider nesting; Phase 2 localStorage is one middleware line |
-| Routing | React Router v6.4+ | Data Router API handles `/configure/:subkitId` guards cleanly; loader-based redirects for invalid direct navigation |
-| Testing | Vitest + RTL + axe-core/react | Natural Vite companion; matches spec a11y automation requirement |
-| Icons | lucide-react (named imports only) | Specified in UX spec; named imports mandatory for tree-shaking |
+| localStorage persistence | Zustand `persist` middleware | One wrapper change to `kitStore.ts`; zero consumer changes; Phase 3 clear path |
+| Analytics | Google Analytics 4 | Non-blocking; native e-commerce event support; free; `VITE_ANALYTICS_ID` env var |
+| E2E testing | Playwright + GitHub Actions | Standard Playwright CI; native GitHub + Vercel integration |
+| Partial star rendering | CSS width-clip technique | Two stacked star layers; top layer clipped to `(rating/5 * 100)%` width; no SVG path math |
+| Fill my kit for me | Derived state (not stored) | Checkbox reads as checked when all items selected; calls existing `toggleItem` in loop; no new store fields |
+| MobileInterstitial | Retained (deferred to Phase 3) | `MobileInterstitial.tsx` and `useResponsive.ts` remain in place; full mobile responsiveness ships in Phase 3 alongside Bazaarvoice |
+| `resetKit()` + persist | `set({ ...initial })` | Zustand persist writes empty state back to localStorage automatically; no `clearStorage()` needed at call site |
 
-### Existing Files — Required Corrections
+### Phase 2 Modified and New Files
 
-| Existing File | Action | Key Changes |
-|---------------|--------|-------------|
-| `SubkitTypeSelectionNew.tsx` → `SubkitSelectionScreen.tsx` | Rename + refactor | Top-to-bottom fill; `>= 3` minimum; 9-category colors; SizeToggle; slot-based constraint; `opacity-45 cursor-not-allowed` disabled state |
-| `SummaryPage.tsx` → `SummaryScreen.tsx` | Rename + refactor | Add `HousingUnitVisualizer readOnly={true}`; 'Get My Kit' CTA; `window.print()` replacing .txt export; remove weight/volume display |
-| `ItemQuestionnaireFlow.tsx` → `ItemConfigScreen.tsx` | Rename + refactor | Remove dual volume bars; add `EmptyContainerOption`; cap quantity at 10; replace free-form Custom with category browser |
-| `kitItems.ts` | Correct in place | Add 4 items + Clothing category; remove Repairs/Tools entirely; remove Starlink |
-| `ImageWithFallback` | Correct in place | Fallback = category tint bg + centered category icon 32px + bottom gradient overlay |
-| All files | Global | Replace all dark theme classes with light theme per Section 8 |
+| File | Action | Key Changes |
+|------|--------|-------------|
+| `src/components/cover/CoverScreen.tsx` | **New** | Cover page at `/`; static; no store dependency; mobile-ready from day one |
+| `src/components/ui/StarRating.tsx` | **New** | CSS width-clip star rendering; aria-label; brand-accent filled stars |
+| `src/services/checkoutService.ts` | **New** | `initiateCheckout()` — typed `CheckoutPayload` + `CheckoutResult`; POST to `ENV.purchaseUrl` |
+| `src/utils/analytics.ts` | **New** | GA4 wrapper; `Analytics.*` typed helpers; all calls silently try/catch |
+| `src/store/kitStore.ts` | Modified | Wrap `create<KitStore>()` with `persist` middleware; storage key `emergency-kit-v1` |
+| `src/types/kit.types.ts` | Modified | Add `rating: number \| null` and `reviewCount: number \| null` to `KitItem` |
+| `src/data/kitItems.ts` | Modified | Populate `rating` and `reviewCount` on all 28 items |
+| `src/router/index.tsx` | Modified | `/` → CoverScreen; `/builder` → SubkitSelectionScreen; all guards redirect to `/builder` |
+| `src/router/guards.ts` | Modified | All `redirect('/')` calls updated to `redirect('/builder')` |
+| `src/tokens/env.ts` | Modified | Add `analyticsId: import.meta.env['VITE_ANALYTICS_ID']` |
+| `src/components/layout/AppShell.tsx` | Modified | GA4 script injection via `useEffect`; `MobileInterstitial` retained unchanged |
+| `src/components/layout/MobileInterstitial.tsx` | **Unchanged** | Mobile barrier retained; full mobile responsiveness deferred to Phase 3 |
+| `src/hooks/useResponsive.ts` | **Unchanged** | Retained alongside `MobileInterstitial`; deferred to Phase 3 |
+| `src/components/subkit-selection/SubkitSelectionScreen.tsx` | Modified | Passes `onSlotClick` handler to `HousingUnitVisualizer` |
+| `src/components/item-config/ItemConfigScreen.tsx` | Modified | Add Fill my kit for me checkbox; render `StarRating` per item |
+| `src/components/item-config/CustomSubkitScreen.tsx` | Modified | Add Fill my kit for me checkbox; render `StarRating` per item |
+| `src/components/summary/SummaryScreen.tsx` | Modified | CTA triggers `initiateCheckout`; loading state; dismissible error; no `StarRating` |
 
 ### Brownfield Rollback Strategy
 
-The five files being modified carry the following risk levels:
+The Phase 1 rollback strategy (git branch per story; `v0-pre-refactor` tag; merge to `main` only after QA approval) applies identically to Phase 2. Story branches follow `story/6.1-localstorage`, `story/6.2-analytics`, etc.
 
-| File | Risk Level | Reason |
-|------|-----------|--------|
-| `SubkitTypeSelectionNew.tsx` | High | Full slot logic rewrite |
-| `ItemQuestionnaireFlow.tsx` | High | Custom subkit logic replaced |
-| `SummaryPage.tsx` | Medium | Mostly additive changes |
-| `kitItems.ts` | Low | Data only |
-| `ImageWithFallback` | Low | Fallback rendering only |
+Phase 2 risk levels:
 
-**Strategy: Git branch per story, corrections spread across epics.**
+| File / Area | Risk | Reason |
+|-------------|------|--------|
+| `kitStore.ts` — persist middleware | Medium | Rehydration edge cases must be verified (missing key, corrupted data) |
+| `router/index.tsx` — route restructure | Medium | `/` to `/builder` rename; existing bookmarks break; communicate before Epic 6 ships |
+| `SummaryScreen.tsx` — checkout | Medium | New async API call; error states must not corrupt kit state |
+| `KitItem` type extension | Low | Two additive nullable fields; all existing consumers unaffected |
+| `AppShell.tsx` — MobileInterstitial | None | MobileInterstitial retained unchanged in Phase 2; no regression risk |
+| `CoverScreen.tsx` | Low | New static screen; no store dependency |
+| `StarRating.tsx` | Low | New presentational component |
+| `checkoutService.ts` | Low | New isolated service module |
+| `analytics.ts` | Low | New isolated utility; silently try/catch on all calls |
 
-1. **Pre-refactor tag:** Before any story begins, ensure the current working state is committed and tagged on `main` (e.g., `git tag v0-pre-refactor`). This is the unconditional restore point.
+### Phase 2.5 Framework Decisions
 
-2. **Branch per story:** Each story runs on its own branch (`story/1.1-scaffolding`, `story/2.1-visualizer`, etc.). The SM agent creates the story; the Dev agent works the branch. Nothing merges to `main` until the story is marked Done by QA.
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| SubkitStatsStrip derivation pattern | Parent pre-computes `weightLbs` and `volumePct`; passes as props | Consistent with Rule 13 (derived state never stored in Zustand). No internal state in the component. All conversion logic lives exclusively in `slotCalculations.ts` pure functions — single source of truth, fully testable in isolation. The UX spec's Component Library entry lists raw `weightGrams`/`volumeIn3` props; that entry is superseded by PRD Story 9.3 AC1 and the Technical Decisions table, which are the authoritative spec. |
+| Visualizer exterior approach | Interior markup only — `div` elements; no SVG, no canvas, no new npm packages | `HousingUnitVisualizer` props interface (`slots`, `readOnly`, `onSlotClick`) is unchanged. The outer shell (frame, handle tab, wheel guards) lives entirely inside the component's root element and is invisible to all consumers. Both the interactive variant (SubkitSelectionScreen) and the read-only variant (SummaryScreen) render the shell identically. |
+| No new npm dependencies | Zero new packages introduced in Phase 2.5 | All Phase 2.5 styling uses the existing Tailwind v4 + CSS custom properties pipeline. Dynamic category color on the volume bar fill uses inline `style={{ backgroundColor: categoryColor }}` per existing Rule 8 (Section 11) — never Tailwind arbitrary values. Asymmetric border radius on wheel guards (outer corners rounded, inner corners square) uses explicit inline `borderRadius` style if Tailwind classes cannot achieve the asymmetric result cleanly. |
 
-3. **Corrections spread across epics — not batched into Story 1.1.** Each existing file is corrected in the story where it is first logically required:
-   - `kitItems.ts` → corrected in **Story 1.2** (data architecture)
-   - `SubkitTypeSelectionNew.tsx` → corrected in **Epic 3** (subkit selection)
-   - `ItemQuestionnaireFlow.tsx` → corrected in **Epic 4** (item configuration)
-   - `SummaryPage.tsx` → corrected in **Epic 5** (summary page)
-   - `ImageWithFallback` → corrected in **Epic 4** (first screen to render item images)
+### Phase 2.5 Modified and New Files
 
-4. **Regression on a story branch:** `git checkout main` restores the last QA-approved state instantly.
-
-5. **Nuclear option:** `git checkout v0-pre-refactor` restores the entire project to its pre-refactor state in one command if multiple merged stories produce cascading regressions.
+| File | Action | Key Changes |
+|------|--------|-------------|
+| `src/types/kit.types.ts` | Modified | Add `weightGrams: number \| null` and `volumeIn3: number \| null` to `KitItem` after `reviewCount` |
+| `src/data/kitItems.ts` | Modified | Populate `weightGrams` and `volumeIn3` on all 28 items per Story 9.1 AC2 lookup table; no item has a null value for either field in Phase 2.5 |
+| `src/utils/slotCalculations.ts` | Modified | Append `calculateSubkitWeightLbs` and `calculateSubkitVolumePct` after all existing exports; no existing function modified |
+| `src/components/item-config/ItemConfigScreen.tsx` | Modified | Import and render `SubkitStatsStrip` between subkit heading/accent bar and item grid; derive `weightLbs` and `volumePct` inline from existing `itemSelections` store data |
+| `src/components/item-config/CustomSubkitScreen.tsx` | Modified | Identical `SubkitStatsStrip` treatment; container capacity derived from the custom subkit's selected size |
+| `src/components/summary/SummaryScreen.tsx` | Modified | Add kit-level stats row above `SubkitSummarySection` list; add per-subkit inline weight/volume to each `SubkitSummarySection` heading row |
+| `src/components/visualizer/HousingUnitVisualizer.tsx` | Modified | Add `div.visualizer-outer-shell` wrapping existing slot grid; handle tab child `div`; two wheel guard child `div`s; exported props interface unchanged |
+| `src/components/item-config/SubkitStatsStrip.tsx` | **New** | Purely presentational strip; no internal state; no store dependency; all values received as props |
+| `tests/components/SubkitStatsStrip.test.tsx` | **New** | 6 test cases per Story 9.3 AC10 |
+| `tests/unit/slotCalculations.test.ts` | Extended | 8 new test cases appended (4 per new function); all pre-existing test cases untouched |
 
 ---
 
@@ -100,20 +131,20 @@ The five files being modified carry the following risk levels:
 
 | Category | Technology | Version | Purpose | Rationale |
 |----------|------------|---------|---------|----------|
-| Language | TypeScript | 5.x strict | Primary language | Strict mode enforces type safety across slot calculations, category colors, and state |
-| Framework | React | 18.x | UI component tree | Per PRD |
-| Build Tool | Vite | 6.x | Dev server, bundling, HMR | Fastest HMR; Tailwind v4 plugin support; static SPA output |
-| Styling | Tailwind CSS | v4.x | Utility-first + CSS variable theme | Per PRD; v4 CSS-variable-native theme maps directly to design-tokens.ts |
-| State Management | Zustand | 5.x | Global kit configuration state | Cross-screen state without Provider nesting; Phase 2 localStorage middleware is additive |
-| Routing | React Router | 6.4+ Data Router | Client-side routing, navigation guards | Loader-based guards; handles `/configure/:subkitId` |
+| Language | TypeScript | 5.x strict | Primary language | Unchanged from Phase 1 |
+| Framework | React | 18.x | UI component tree | Unchanged from Phase 1 |
+| Build Tool | Vite | 6.x | Dev server, bundling, HMR | Unchanged from Phase 1 |
+| Styling | Tailwind CSS | v4.x | Utility-first + CSS variable theme | Unchanged from Phase 1 |
+| State Management | Zustand | 5.x + persist | Global kit state + localStorage | `persist` middleware wraps existing `create()` — one file, zero consumer changes |
+| Routing | React Router | 6.4+ | Client-side routing + navigation guards | `/` cover page; `/builder` kit entry |
 | Icons | lucide-react | latest | Category + UI icons | Named imports only — mandatory for tree-shaking |
-| Testing | Vitest | 2.x | Unit and component tests | Native Vite integration; Jest-compatible API |
-| Testing DOM | React Testing Library | 16.x | Component interaction tests | Tests user-facing behavior |
-| Testing a11y | @axe-core/react | 4.x | Automated a11y checks in dev | Per UX spec requirement |
-| Linting a11y | eslint-plugin-jsx-a11y | 6.x | Static ARIA enforcement | Runs in CI per spec |
-| Linting | ESLint + @typescript-eslint | 8.x | Code quality | |
-| Formatting | Prettier | 3.x | Code formatting | |
-| Deployment | Vercel | — | Static SPA hosting | Zero-config Vite detection; React Router client-side routing handled natively (no `_redirects` file needed); preview deployments per branch; env vars set in dashboard |
+| Testing (unit) | Vitest + RTL + axe-core/react | 2.x / 16.x / 4.x | Unit and component tests | Unchanged from Phase 1 |
+| Testing (E2E) | Playwright | latest | Automated end-to-end suite | Three critical flows; GitHub Actions CI |
+| Analytics | Google Analytics 4 | — | User behavior event tracking | Non-blocking; e-commerce event support; `VITE_ANALYTICS_ID` env var |
+| Linting | ESLint + @typescript-eslint + eslint-plugin-jsx-a11y | 8.x / 6.x | Code quality + a11y | Unchanged from Phase 1 |
+| Formatting | Prettier | 3.x | Code formatting | Unchanged from Phase 1 |
+| Deployment | Vercel | — | Static SPA hosting | Unchanged from Phase 1 |
+| CI | GitHub Actions | — | Playwright E2E runner | New in Phase 2 |
 
 ---
 
@@ -121,78 +152,96 @@ The five files being modified carry the following risk levels:
 
 ```
 emergency-prep-kit/
+├── .github/
+│   └── workflows/
+│       └── e2e.yml                          # GitHub Actions — Playwright CI runner
 ├── public/
 │   └── favicon.ico
 ├── src/
-│   ├── main.tsx                         # Entry — React.StrictMode + RouterProvider
-│   ├── App.tsx                           # RouterProvider root
+│   ├── main.tsx
+│   ├── App.tsx
 │   ├── tokens/
-│   │   └── design-tokens.ts             # Colors, motion — single source of truth from UX spec
+│   │   ├── design-tokens.ts
+│   │   └── env.ts                           # VITE_PURCHASE_URL + VITE_ANALYTICS_ID
 │   ├── styles/
-│   │   ├── globals.css                   # Tailwind v4 @import, @theme block, CSS custom properties
-│   │   └── print.css                     # @media print — imported by SummaryScreen only
+│   │   ├── globals.css
+│   │   └── print.css
 │   ├── types/
-│   │   ├── kit.types.ts                  # KitCategory, KitItem, SubkitSelection, ItemSelection
-│   │   ├── visualizer.types.ts           # SlotState, HousingUnitVisualizerProps
-│   │   └── index.ts                      # Barrel export
+│   │   ├── kit.types.ts                     # KitItem extended: rating + reviewCount + weightGrams + volumeIn3 (Phase 2.5)
+│   │   ├── visualizer.types.ts
+│   │   └── index.ts
 │   ├── data/
-│   │   ├── kitItems.ts                   # All subkit categories + items (corrected per spec)
-│   │   └── index.ts                      # Barrel export
+│   │   ├── kitItems.ts                      # All 28 items: rating + reviewCount + weightGrams + volumeIn3 populated
+│   │   ├── itemImages.ts
+│   │   └── index.ts
 │   ├── utils/
-│   │   ├── slotCalculations.ts           # Pure functions: calculateSlotState, calculateTotalSlots, canFitSize
-│   │   └── categoryUtils.ts              # getCategoryById, getCategoryColor, getCategoryIcon
+│   │   ├── slotCalculations.ts              # Extended (Phase 2.5) — calculateSubkitWeightLbs + calculateSubkitVolumePct appended
+│   │   ├── categoryUtils.ts
+│   │   └── analytics.ts                     # NEW — GA4 wrapper
+│   ├── services/
+│   │   └── checkoutService.ts               # NEW — cart serialization + fetch POST
 │   ├── store/
-│   │   └── kitStore.ts                   # Zustand store — all kit configuration state + actions
+│   │   └── kitStore.ts                      # persist middleware added
 │   ├── router/
-│   │   ├── index.tsx                     # createBrowserRouter — routes + loader guards
-│   │   └── guards.ts                     # Loader functions for navigation guard logic
+│   │   ├── index.tsx                        # / → CoverScreen; /builder → SubkitSelectionScreen
+│   │   └── guards.ts                        # All redirects updated to /builder
 │   ├── components/
+│   │   ├── cover/
+│   │   │   └── CoverScreen.tsx              # NEW — landing page at /
 │   │   ├── layout/
-│   │   │   ├── AppShell.tsx              # Outlet wrapper — header + mobile interstitial
-│   │   │   ├── AppHeader.tsx             # App name + StepProgressIndicator
-│   │   │   ├── StepProgressIndicator.tsx # Step 1 / 2 / 3 — informational, not clickable
-│   │   │   └── MobileInterstitial.tsx    # Rendered below 768px — not a route
+│   │   │   ├── AppShell.tsx                 # GA4 script injection; MobileInterstitial retained (Phase 3)
+│   │   │   ├── AppHeader.tsx
+│   │   │   └── StepProgressIndicator.tsx
+│   │   │   ├── MobileInterstitial.tsx       # Unchanged — deferred to Phase 3
 │   │   ├── ui/
-│   │   │   ├── PrimaryButton.tsx         # brand-primary CTA; aria-disabled when inactive
-│   │   │   ├── SecondaryButton.tsx       # Neutral secondary actions
-│   │   │   ├── ConfirmationModal.tsx     # Focus-trapped dialog; Escape = cancel only
-│   │   │   └── ImageWithFallback.tsx     # Category tint bg + icon fallback (Phase 2: real images)
+│   │   │   ├── PrimaryButton.tsx
+│   │   │   ├── SecondaryButton.tsx
+│   │   │   ├── ConfirmationModal.tsx
+│   │   │   ├── ImageWithFallback.tsx
+│   │   │   └── StarRating.tsx               # NEW — CSS width-clip stars; aria-label
 │   │   ├── visualizer/
-│   │   │   ├── HousingUnitVisualizer.tsx  # Fully props-driven, stateless internally
-│   │   │   ├── VisualizerSlot.tsx         # Single slot — all 5 visual states
-│   │   │   └── SlotFullIndicator.tsx      # Amber inline indicator below visualizer
+│   │   │   ├── HousingUnitVisualizer.tsx    # Unchanged interface; onSlotClick now active; + exterior shell (Phase 2.5)
+│   │   │   ├── VisualizerSlot.tsx           # cursor-pointer + hover:brightness-95 on filled
+│   │   │   └── SlotFullIndicator.tsx
 │   │   ├── subkit-selection/
-│   │   │   ├── SubkitSelectionScreen.tsx  # Screen root — composes S1 components
-│   │   │   ├── SubkitCard.tsx             # Category card — default/selected/disabled
-│   │   │   └── SizeToggle.tsx             # [Regular][Large] inline toggle; slides in on selection
+│   │   │   ├── SubkitSelectionScreen.tsx    # Passes onSlotClick handler
+│   │   │   ├── SubkitCard.tsx
+│   │   │   └── SizeToggle.tsx
 │   │   ├── item-config/
-│   │   │   ├── ItemConfigScreen.tsx       # Standard subkit config screen root
-│   │   │   ├── CustomSubkitScreen.tsx     # Custom subkit all-category browser
-│   │   │   ├── ItemCard.tsx               # Image + toggle + quantity bar
-│   │   │   ├── QuantitySelector.tsx       # [−] [n] [+] min 1, max 10
-│   │   │   ├── EmptyContainerOption.tsx   # Checkbox — dims item grid on selection
-│   │   │   ├── CategoryGroupHeader.tsx    # Group label in Custom browser
-│   │   │   └── SubkitProgressIndicator.tsx  # Progress bar + 'Subkit N of M' label
+│   │   │   ├── ItemConfigScreen.tsx         # + Fill my kit for me checkbox; + SubkitStatsStrip (Phase 2.5)
+│   │   │   ├── CustomSubkitScreen.tsx       # + Fill my kit for me checkbox; + SubkitStatsStrip (Phase 2.5)
+│   │   │   ├── SubkitStatsStrip.tsx         # NEW (Phase 2.5) — weight + volume strip; no internal state
+│   │   │   ├── ItemCard.tsx                 # + StarRating below name/description
+│   │   │   ├── QuantitySelector.tsx
+│   │   │   ├── EmptyContainerOption.tsx
+│   │   │   ├── CategoryGroupHeader.tsx
+│   │   │   └── SubkitProgressIndicator.tsx
 │   │   └── summary/
-│   │       ├── SummaryScreen.tsx          # Screen root — imports print.css
-│   │       └── SubkitSummarySection.tsx   # Per-subkit card: color bar + items + empty badge
+│   │       ├── SummaryScreen.tsx            # CTA → initiateCheckout; loading + error states; + weight/volume stats (Phase 2.5)
+│   │       └── SubkitSummarySection.tsx     # No StarRating rendered here
 │   └── hooks/
-│       ├── useKitStore.ts                 # Typed Zustand selector hooks
-│       └── useResponsive.ts              # useMediaQuery for MobileInterstitial threshold
+│       ├── useKitStore.ts
+│       └── useResponsive.ts             # Unchanged — deferred to Phase 3
 ├── tests/
 │   ├── setup.ts
 │   ├── unit/
-│   │   └── slotCalculations.test.ts
-│   └── components/
-│       ├── HousingUnitVisualizer.test.tsx
-│       ├── SubkitCard.test.tsx
-│       ├── ItemCard.test.tsx
-│       └── QuantitySelector.test.tsx
+│   │   ├── slotCalculations.test.ts         # Extended (Phase 2.5) — 8 new cases appended; existing cases untouched
+│   │   └── checkoutService.test.ts          # NEW — mocked fetch: success, network fail, non-2xx
+│   ├── components/
+│   │   ├── HousingUnitVisualizer.test.tsx
+│   │   ├── SubkitCard.test.tsx
+│   │   ├── ItemCard.test.tsx
+│   │   ├── QuantitySelector.test.tsx
+│   │   ├── StarRating.test.tsx              # NEW — star fill, aria-label, null-safe
+│   │   └── SubkitStatsStrip.test.tsx        # NEW (Phase 2.5) — 6 test cases per Story 9.3 AC10
+│   └── e2e/
+│       └── kit-builder.spec.ts              # NEW — three Playwright flows
+├── playwright.config.ts                     # NEW
 ├── index.html
 ├── vite.config.ts
 ├── vitest.config.ts
 ├── tailwind.config.ts
-├── tsconfig.json                          # strict: true
+├── tsconfig.json
 ├── .eslintrc.cjs
 ├── .prettierrc
 └── package.json
@@ -202,430 +251,468 @@ emergency-prep-kit/
 
 ## 4. Component Standards
 
-### Naming Conventions
+Unchanged from Phase 1. All Phase 2 components follow the identical naming conventions, FC<Props> pattern, named exports only, no logic in JSX, and accessibility-first rules defined in the Phase 1 architecture.
+
+**Naming Conventions (unchanged):**
 
 | Element | Convention | Example |
-|---------|------------|--------|
-| Component files | PascalCase `.tsx` | `HousingUnitVisualizer.tsx` |
-| Component functions | PascalCase | `export const HousingUnitVisualizer: FC<...>` |
-| Props interfaces | `{ComponentName}Props` | `HousingUnitVisualizerProps` |
+|---------|------------|---------|
+| Component files | PascalCase `.tsx` | `StarRating.tsx`, `CoverScreen.tsx` |
+| Component functions | PascalCase | `export const StarRating: FC<...>` |
+| Props interfaces | `{ComponentName}Props` | `StarRatingProps` |
 | Hook files | camelCase `use` prefix | `useKitStore.ts` |
-| Utility files | camelCase `.ts` | `slotCalculations.ts` |
-| Type files | camelCase `.types.ts` | `kit.types.ts` |
-| CSS | Tailwind utilities only — no custom class names in components | |
-| Test files | Mirror source path + `.test.tsx` | `HousingUnitVisualizer.test.tsx` |
-
-### Component Template
-
-All components follow this pattern. No class components. No default exports.
-
-```typescript
-// src/components/domain/ComponentName.tsx
-import { type FC } from 'react';
-
-interface ComponentNameProps {
-  requiredProp: string;
-  optionalProp?: boolean;
-  onAction?: () => void;
-}
-
-export const ComponentName: FC<ComponentNameProps> = ({
-  requiredProp,
-  optionalProp = false,
-  onAction,
-}) => {
-  // Derive all computed values above the return — no logic in JSX
-  const derivedValue = requiredProp.toUpperCase();
-
-  return (
-    <div className="">
-      {/* Implementation */}
-    </div>
-  );
-};
-```
-
-### Component Rules
-
-- **Named exports only** — no `export default`. Enables reliable refactoring and import tracing.
-- **FC\<Props\> type** — always explicitly typed.
-- **Props interface co-located** — in same file unless shared across multiple files (then in `types/`).
-- **No logic in JSX** — extract conditionals and derived values to `const` above `return`.
-- **Accessibility first** — all interactive elements must have `aria-label` or associated visible label. See Section 11.
+| Utility files | camelCase `.ts` | `analytics.ts`, `checkoutService.ts` |
+| Service files | camelCase `.ts` in `src/services/` | `checkoutService.ts` |
+| Test files | Mirror source path + `.test.tsx` | `StarRating.test.tsx` |
 
 ---
 
 ## 5. State Management
 
-### Architecture Decision
+### localStorage Persistence — Phase 2 Change
 
-**Zustand 5.x** manages all kit configuration state. It is the single source of truth for selected subkits, item selections and quantities, empty container flags, and item config navigation index.
-
-**Critical constraint: Slot state is never stored.** It is always computed from `selectedSubkits` via pure functions in `utils/slotCalculations.ts`. Components that need slot state call `useSlotState()` which runs `calculateSlotState()` live.
-
-### Type Definitions
+Zustand `persist` middleware wraps the existing `create<KitStore>()` call. This is a **one-import, one-wrapper change** to `kitStore.ts`. Zero changes to selectors, actions, or consuming components.
 
 ```typescript
-// src/types/kit.types.ts
-export type SubkitSize = 'regular' | 'large';
-
-export interface KitCategory {
-  id: string;            // e.g. 'power'
-  name: string;          // e.g. 'Power'
-  colorBase: string;     // Hex — visualizer fills, borders
-  colorTint: string;     // Hex — card selected backgrounds
-  icon: string;          // lucide-react icon name
-  description: string;
-  sizeOptions: SubkitSize[];
-}
-
-export interface KitItem {
-  id: string;            // e.g. 'power-solar-panel'
-  categoryId: string;
-  name: string;
-  description: string;
-  // Phase 2 fields — present but nullable in MVP
-  productId: string | null;
-  pricePlaceholder: number | null;
-  imageSrc: string | null;
-}
-
-export interface SubkitSelection {
-  subkitId: string;         // categoryId — unique per instance in MVP
-  categoryId: string;
-  size: SubkitSize;
-  selectionOrder: number;   // 1-indexed; drives config sequence and slot fill order
-}
-
-export interface ItemSelection {
-  itemId: string;
-  subkitId: string;
-  quantity: number;         // 1–10
-}
-```
-
-```typescript
-// src/types/visualizer.types.ts
-export interface SlotState {
-  status: 'empty' | 'filled';
-  subkitId?: string;
-  subkitName?: string;
-  subkitColor?: string;    // Hex from category colorBase
-  size: SubkitSize;
-  isLargeStart?: boolean;  // First row of a Large block
-  isLargeEnd?: boolean;    // Second row of a Large block
-}
-
-export interface HousingUnitVisualizerProps {
-  slots: SlotState[];              // Always length 6; index 0 = top slot
-  readOnly?: boolean;              // true on Summary Page
-  onSlotClick?: (slotIndex: number) => void;  // Phase 2 — wired, dormant in MVP
-}
-```
-
-### Store
-
-```typescript
-// src/store/kitStore.ts
+// src/store/kitStore.ts — Phase 2 change: persist wrapper
 import { create } from 'zustand';
-import { calculateTotalSlots, canFitSize } from '../utils/slotCalculations';
-import type { SubkitSelection, ItemSelection, SubkitSize } from '../types';
+import { persist } from 'zustand/middleware';
+// ... all existing imports unchanged
 
-const MAX_SLOTS = 6;
-
-interface KitStore {
-  selectedSubkits: SubkitSelection[];
-  itemSelections: Record<string, ItemSelection>;  // key: `${subkitId}::${itemId}`
-  emptyContainers: string[];                       // subkitIds
-  currentConfigIndex: number;
-
-  selectSubkit: (categoryId: string) => void;
-  deselectSubkit: (subkitId: string) => void;
-  setSubkitSize: (subkitId: string, size: SubkitSize) => boolean; // false = not enough slots
-  toggleItem: (subkitId: string, itemId: string) => void;
-  setItemQuantity: (subkitId: string, itemId: string, qty: number) => void;
-  toggleEmptyContainer: (subkitId: string) => void;
-  setCurrentConfigIndex: (index: number) => void;
-  resetKit: () => void;
-}
-
-const initial = {
-  selectedSubkits: [] as SubkitSelection[],
-  itemSelections: {} as Record<string, ItemSelection>,
-  emptyContainers: [] as string[],
-  currentConfigIndex: 0,
-};
-
-export const useKitStore = create<KitStore>((set, get) => ({
-  ...initial,
-
-  selectSubkit: (categoryId) => {
-    const { selectedSubkits } = get();
-    if (selectedSubkits.some((s) => s.categoryId === categoryId)) return;
-    if (calculateTotalSlots(selectedSubkits) + 1 > MAX_SLOTS) return;
-    set({
-      selectedSubkits: [
-        ...selectedSubkits,
-        { subkitId: categoryId, categoryId, size: 'regular', selectionOrder: selectedSubkits.length + 1 },
-      ],
-    });
-  },
-
-  deselectSubkit: (subkitId) => {
-    const { selectedSubkits, itemSelections, emptyContainers } = get();
-    const filtered = selectedSubkits
-      .filter((s) => s.subkitId !== subkitId)
-      .map((s, i) => ({ ...s, selectionOrder: i + 1 }));
-    const cleanedItems = Object.fromEntries(
-      Object.entries(itemSelections).filter(([k]) => !k.startsWith(`${subkitId}::`))
-    );
-    set({
-      selectedSubkits: filtered,
-      itemSelections: cleanedItems,
-      emptyContainers: emptyContainers.filter((id) => id !== subkitId),
-    });
-  },
-
-  setSubkitSize: (subkitId, size) => {
-    const { selectedSubkits } = get();
-    if (!canFitSize(selectedSubkits, subkitId, size, MAX_SLOTS)) return false;
-    set({
-      selectedSubkits: selectedSubkits.map((s) =>
-        s.subkitId === subkitId ? { ...s, size } : s
-      ),
-    });
-    return true;
-  },
-
-  toggleItem: (subkitId, itemId) => {
-    const { itemSelections, emptyContainers } = get();
-    if (emptyContainers.includes(subkitId)) return; // blocked on empty-container subkits
-    const key = `${subkitId}::${itemId}`;
-    if (itemSelections[key]) {
-      const { [key]: _, ...rest } = itemSelections;
-      set({ itemSelections: rest });
-    } else {
-      set({ itemSelections: { ...itemSelections, [key]: { itemId, subkitId, quantity: 1 } } });
+export const useKitStore = create<KitStore>()(
+  persist(
+    (set, get) => ({
+      ...initial,
+      // ALL EXISTING ACTIONS UNCHANGED
+      selectSubkit: (categoryId) => { /* unchanged */ },
+      deselectSubkit: (subkitId) => { /* unchanged */ },
+      setSubkitSize: (subkitId, size) => { /* unchanged */ },
+      toggleItem: (subkitId, itemId) => { /* unchanged */ },
+      setItemQuantity: (subkitId, itemId, qty) => { /* unchanged */ },
+      toggleEmptyContainer: (subkitId) => { /* unchanged */ },
+      setCurrentConfigIndex: (index) => set({ currentConfigIndex: index }),
+      resetKit: () => set({ ...initial }), // persist writes empty state to localStorage automatically
+    }),
+    {
+      name: 'emergency-kit-v1',  // localStorage key
+      // No partialize — persist full store state
     }
-  },
-
-  setItemQuantity: (subkitId, itemId, qty) => {
-    const { itemSelections } = get();
-    const key = `${subkitId}::${itemId}`;
-    if (!itemSelections[key]) return;
-    set({ itemSelections: { ...itemSelections, [key]: { ...itemSelections[key], quantity: Math.max(1, Math.min(10, qty)) } } });
-  },
-
-  toggleEmptyContainer: (subkitId) => {
-    const { emptyContainers, itemSelections } = get();
-    if (emptyContainers.includes(subkitId)) {
-      set({ emptyContainers: emptyContainers.filter((id) => id !== subkitId) });
-    } else {
-      const cleanedItems = Object.fromEntries(
-        Object.entries(itemSelections).filter(([k]) => !k.startsWith(`${subkitId}::`))
-      );
-      set({ emptyContainers: [...emptyContainers, subkitId], itemSelections: cleanedItems });
-    }
-  },
-
-  setCurrentConfigIndex: (index) => set({ currentConfigIndex: index }),
-  resetKit: () => set({ ...initial }),
-}));
+  )
+);
 ```
 
-### Selector Hooks
+**`resetKit()` behavior with persist:** Calling `set({ ...initial })` triggers Zustand persist to write the empty initial state back to `localStorage['emergency-kit-v1']`. No `clearStorage()` call is needed at the call site. First-time visitors with no existing key initialize to empty state identically to Phase 1.
+
+### Fill My Kit For Me — Derived State Pattern
+
+"Fill my kit for me" is **not stored in Zustand**. The checkbox is a derived UI state computed at the component level.
 
 ```typescript
-// src/hooks/useKitStore.ts
-import { useKitStore } from '../store/kitStore';
-import { calculateSlotState, calculateTotalSlots, isSlotsAtCapacity } from '../utils/slotCalculations';
+// In ItemConfigScreen and CustomSubkitScreen
+const { itemSelections, toggleItem } = useKitStore();
+const items = getItemsForSubkit(subkitId); // items for current subkit
 
-// Never call calculateSlotState directly in components — always use this hook
-export const useSlotState = () =>
-  useKitStore((s) => calculateSlotState(s.selectedSubkits));
+// Derived — true when every item in this subkit is selected
+const isAllFilled = items.every(
+  (item) => !!itemSelections[`${subkitId}::${item.id}`]
+);
 
-export const useTotalSlotsUsed = () =>
-  useKitStore((s) => calculateTotalSlots(s.selectedSubkits));
-
-export const useIsAtCapacity = () =>
-  useKitStore((s) => isSlotsAtCapacity(s.selectedSubkits));
-
-export const useCanProceedToConfig = () =>
-  useKitStore((s) => s.selectedSubkits.length >= 3);
-
-export const useItemSelection = (subkitId: string, itemId: string) =>
-  useKitStore((s) => s.itemSelections[`${subkitId}::${itemId}`]);
-
-export const useIsEmptyContainer = (subkitId: string) =>
-  useKitStore((s) => s.emptyContainers.includes(subkitId));
-```
-
-### Slot Calculation Pure Functions
-
-These are the most safety-critical functions in the application. They live outside the store, are pure, and must achieve 100% branch coverage in tests.
-
-```typescript
-// src/utils/slotCalculations.ts
-import type { SubkitSelection, SubkitSize, SlotState } from '../types';
-import { CATEGORIES } from '../data';
-
-export const MAX_SLOTS = 6;
-
-export function calculateTotalSlots(selections: SubkitSelection[]): number {
-  return selections.reduce((total, s) => total + (s.size === 'large' ? 2 : 1), 0);
-}
-
-/**
- * Returns true if switching subkitId to targetSize fits within maxSlots.
- * Calculates as if the current size were replaced by targetSize.
- */
-export function canFitSize(
-  selections: SubkitSelection[],
-  subkitId: string,
-  targetSize: SubkitSize,
-  maxSlots = MAX_SLOTS
-): boolean {
-  const hypothetical = selections.map((s) =>
-    s.subkitId === subkitId ? { ...s, size: targetSize } : s
-  );
-  return calculateTotalSlots(hypothetical) <= maxSlots;
-}
-
-/**
- * Derives the full 6-element SlotState array for HousingUnitVisualizer.
- * ALWAYS returns exactly 6 SlotState objects.
- * Index 0 = top slot. Fills top-to-bottom in selection order.
- * Large subkits occupy two consecutive indices with isLargeStart/isLargeEnd flags.
- */
-export function calculateSlotState(selections: SubkitSelection[]): SlotState[] {
-  const slots: SlotState[] = Array.from({ length: 6 }, () => ({
-    status: 'empty' as const,
-    size: 'regular' as const,
-  }));
-  let i = 0;
-  for (const selection of selections) {
-    if (i >= 6) break;
-    const category = CATEGORIES[selection.categoryId];
-    if (!category) continue;
-    if (selection.size === 'regular') {
-      slots[i] = { status: 'filled', subkitId: selection.subkitId, subkitName: category.name, subkitColor: category.colorBase, size: 'regular' };
-      i += 1;
-    } else {
-      slots[i]     = { status: 'filled', subkitId: selection.subkitId, subkitName: category.name, subkitColor: category.colorBase, size: 'large', isLargeStart: true };
-      slots[i + 1] = { status: 'filled', subkitId: selection.subkitId, subkitName: category.name, subkitColor: category.colorBase, size: 'large', isLargeEnd: true };
-      i += 2;
-    }
+const handleFillToggle = () => {
+  if (isAllFilled) {
+    // Uncheck: clear all items for this subkit
+    items.filter((item) => itemSelections[`${subkitId}::${item.id}`])
+         .forEach((item) => toggleItem(subkitId, item.id));
+  } else {
+    // Check: select all unselected items at qty 1
+    items.filter((item) => !itemSelections[`${subkitId}::${item.id}`])
+         .forEach((item) => toggleItem(subkitId, item.id));
   }
-  return slots;
-}
-
-export function isSlotsAtCapacity(selections: SubkitSelection[]): boolean {
-  return calculateTotalSlots(selections) >= MAX_SLOTS;
-}
+};
 ```
+
+**Bidirectional state with EmptyContainerOption:** When `EmptyContainerOption` is checked, it clears all `itemSelections` for the subkit. Because `isAllFilled` is derived from `itemSelections`, the Fill checkbox automatically reads as unchecked. No extra logic required. The Fill checkbox is visually disabled (`opacity-45 cursor-not-allowed`) when the subkit is in empty container state.
+
+### Selector Hooks, Slot Calculations, and Store Shape
+
+All selector hooks (`useKitStore.ts`), slot calculation pure functions (`slotCalculations.ts`), and the Zustand store shape (including `KitStore` interface) are **unchanged from Phase 1**. The persist middleware is fully transparent to all consumers.
 
 ---
 
 ## 6. Data Layer
 
-No API calls exist in this application. All data is static TypeScript imported at build time.
+### Updated KitItem Type
 
-The following corrections from the UX Spec Developer Notes are applied in `kitItems.ts`:
-- ✅ Add: Feminine Hygiene Products (Hygiene)
-- ✅ Add: Ice Packs (Medical)
-- ✅ Add: Clothing category with Ponchos + Shoe Covers
-- ✅ Remove: Repairs/Tools category entirely
-- ✅ Remove: Starlink from Communications
+Two new nullable fields added to `KitItem`. All existing consumers are unaffected — the fields are additive.
 
 ```typescript
-// src/data/kitItems.ts
-import type { KitCategory, KitItem } from '../types';
+// src/types/kit.types.ts — Phase 2 addition
+export interface KitItem {
+  id: string;
+  categoryId: string;
+  name: string;
+  description: string;
+  // Phase 2 fields — populated with hardcoded values for all 28 items
+  rating: number | null;       // 3.8–5.0, one decimal place
+  reviewCount: number | null;  // Realistic count
+  // Phase 3+ fields — remain nullable
+  productId: string | null;
+  pricePlaceholder: number | null;
+  imageSrc: string | null;
+}
+```
 
-export const CATEGORIES: Record<string, KitCategory> = {
-  power:          { id: 'power',          name: 'Power',          colorBase: '#C2410C', colorTint: '#FFF7ED', icon: 'Zap',              description: 'Charge devices and power essentials without the grid',          sizeOptions: ['regular', 'large'] },
-  lighting:       { id: 'lighting',       name: 'Lighting',       colorBase: '#A16207', colorTint: '#FEFCE8', icon: 'Lightbulb',        description: 'Stay oriented and safe when the lights go out',               sizeOptions: ['regular', 'large'] },
-  communications: { id: 'communications', name: 'Communications', colorBase: '#1D4ED8', colorTint: '#EFF6FF', icon: 'Radio',            description: 'Stay informed and in contact with your household',            sizeOptions: ['regular', 'large'] },
-  hygiene:        { id: 'hygiene',        name: 'Hygiene',        colorBase: '#0F766E', colorTint: '#F0FDFA', icon: 'Droplets',         description: 'Maintain health and sanitation for your household',           sizeOptions: ['regular', 'large'] },
-  cooking:        { id: 'cooking',        name: 'Cooking',        colorBase: '#15803D', colorTint: '#F0FDF4', icon: 'UtensilsCrossed',  description: 'Prepare food and purify water without utilities',             sizeOptions: ['regular', 'large'] },
-  medical:        { id: 'medical',        name: 'Medical',        colorBase: '#991B1B', colorTint: '#FEF2F2', icon: 'HeartPulse',       description: 'Handle injuries and health needs during an emergency',        sizeOptions: ['regular', 'large'] },
-  comfort:        { id: 'comfort',        name: 'Comfort',        colorBase: '#6D28D9', colorTint: '#F5F3FF', icon: 'Smile',            description: 'Reduce stress and maintain wellbeing during extended events', sizeOptions: ['regular', 'large'] },
-  clothing:       { id: 'clothing',       name: 'Clothing',       colorBase: '#334155', colorTint: '#F8FAFC', icon: 'Shirt',            description: 'Protect against weather conditions and debris',              sizeOptions: ['regular', 'large'] },
-  custom:         { id: 'custom',         name: 'Custom',         colorBase: '#3730A3', colorTint: '#EEF2FF', icon: 'Settings2',        description: 'Choose any items from across all categories',                sizeOptions: ['regular', 'large'] },
-};
+### Updated kitItems.ts — Rating and ReviewCount
 
+All 28 items are populated with hardcoded `rating` (3.8–5.0, one decimal) and `reviewCount` values. Phase 3 Bazaarvoice live data replaces these values at the data layer only — `StarRating` component and `ItemCard` integration are data-source agnostic.
+
+```typescript
+// src/data/kitItems.ts — sample showing updated shape for all items
 export const ITEMS: KitItem[] = [
   // Power
-  { id: 'power-station',    categoryId: 'power',    name: 'Portable Power Station', description: 'Lithium battery for device charging',        productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'power-solar',      categoryId: 'power',    name: 'Solar Panel',            description: 'Foldable panel for off-grid charging',       productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'power-cables',     categoryId: 'power',    name: 'Charging Cables',        description: 'USB-C and USB-A multi-cable set',            productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'power-banks',      categoryId: 'power',    name: 'Power Banks',            description: 'Pocket-sized backup battery',                productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'power-batteries',  categoryId: 'power',    name: 'Batteries AA/AAA',       description: 'Standard alkaline multi-pack',               productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'power-station',    categoryId: 'power',    name: 'Portable Power Station', description: 'Lithium battery for device charging',   rating: 4.8, reviewCount: 342, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'power-solar',      categoryId: 'power',    name: 'Solar Panel',            description: 'Foldable panel for off-grid charging',  rating: 4.6, reviewCount: 218, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'power-cables',     categoryId: 'power',    name: 'Charging Cables',        description: 'USB-C and USB-A multi-cable set',       rating: 4.5, reviewCount: 512, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'power-banks',      categoryId: 'power',    name: 'Power Banks',            description: 'Pocket-sized backup battery',           rating: 4.7, reviewCount: 289, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'power-batteries',  categoryId: 'power',    name: 'Batteries AA/AAA',       description: 'Standard alkaline multi-pack',          rating: 4.4, reviewCount: 731, productId: null, pricePlaceholder: null, imageSrc: null },
   // Lighting
-  { id: 'light-matches',    categoryId: 'lighting', name: 'Matches',                description: 'Waterproof strike-anywhere matches',         productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'light-flashlight', categoryId: 'lighting', name: 'Flashlights',            description: 'High-lumen LED flashlight',                  productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'light-lantern',    categoryId: 'lighting', name: 'Electric Lanterns',      description: 'Rechargeable 360 degree area lantern',       productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'light-headlamp',   categoryId: 'lighting', name: 'Headlamp',               description: 'Hands-free adjustable headlamp',             productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'light-candles',    categoryId: 'lighting', name: 'Candles',                description: 'Long-burn emergency candles',                productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'light-lighter',    categoryId: 'lighting', name: 'Lighter',                description: 'Windproof refillable lighter',               productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'light-string',     categoryId: 'lighting', name: 'String Lights',          description: 'Battery-powered ambient lighting',           productId: null, pricePlaceholder: null, imageSrc: null },
-  // Communications — Starlink removed
-  { id: 'comms-radio',      categoryId: 'communications', name: 'Hand Crank Radio',  description: 'NOAA weather + AM/FM, no power needed',      productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'comms-walkie',     categoryId: 'communications', name: 'Walkie Talkies',   description: 'Two-way communication up to 35 miles',       productId: null, pricePlaceholder: null, imageSrc: null },
-  // Hygiene — Feminine Hygiene Products added
-  { id: 'hygiene-dental',   categoryId: 'hygiene',  name: 'Dental Hygiene Kit',     description: 'Travel toothbrush, toothpaste, floss',       productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'hygiene-cups',     categoryId: 'hygiene',  name: 'Paper Cups',             description: 'Disposable cups for clean water use',        productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'hygiene-tp',       categoryId: 'hygiene',  name: 'Toilet Paper',           description: 'Compact emergency-use rolls',                productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'hygiene-wipes',    categoryId: 'hygiene',  name: 'Baby Wipes',             description: 'No-rinse full-body cleansing wipes',         productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'hygiene-feminine', categoryId: 'hygiene',  name: 'Feminine Hygiene Products', description: 'Assorted period care essentials',         productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'light-matches',    categoryId: 'lighting', name: 'Matches',                description: 'Waterproof strike-anywhere matches',    rating: 4.3, reviewCount: 198, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'light-flashlight', categoryId: 'lighting', name: 'Flashlights',            description: 'High-lumen LED flashlight',             rating: 4.8, reviewCount: 456, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'light-lantern',    categoryId: 'lighting', name: 'Electric Lanterns',      description: 'Rechargeable 360 degree area lantern', rating: 4.7, reviewCount: 324, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'light-headlamp',   categoryId: 'lighting', name: 'Headlamp',               description: 'Hands-free adjustable headlamp',       rating: 4.9, reviewCount: 612, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'light-candles',    categoryId: 'lighting', name: 'Candles',                description: 'Long-burn emergency candles',          rating: 4.2, reviewCount: 143, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'light-lighter',    categoryId: 'lighting', name: 'Lighter',                description: 'Windproof refillable lighter',         rating: 4.5, reviewCount: 387, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'light-string',     categoryId: 'lighting', name: 'String Lights',          description: 'Battery-powered ambient lighting',     rating: 3.9, reviewCount: 97,  productId: null, pricePlaceholder: null, imageSrc: null },
+  // Communications
+  { id: 'comms-radio',      categoryId: 'communications', name: 'Hand Crank Radio',  description: 'NOAA weather + AM/FM, no power needed', rating: 4.8, reviewCount: 521, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'comms-walkie',     categoryId: 'communications', name: 'Walkie Talkies',    description: 'Two-way communication up to 35 miles',  rating: 4.4, reviewCount: 276, productId: null, pricePlaceholder: null, imageSrc: null },
+  // Hygiene
+  { id: 'hygiene-dental',   categoryId: 'hygiene',  name: 'Dental Hygiene Kit',        description: 'Travel toothbrush, toothpaste, floss', rating: 4.3, reviewCount: 189, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'hygiene-cups',     categoryId: 'hygiene',  name: 'Paper Cups',                description: 'Disposable cups for clean water use',  rating: 4.1, reviewCount: 234, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'hygiene-tp',       categoryId: 'hygiene',  name: 'Toilet Paper',              description: 'Compact emergency-use rolls',          rating: 4.6, reviewCount: 445, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'hygiene-wipes',    categoryId: 'hygiene',  name: 'Baby Wipes',                description: 'No-rinse full-body cleansing wipes',   rating: 4.7, reviewCount: 398, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'hygiene-feminine', categoryId: 'hygiene',  name: 'Feminine Hygiene Products', description: 'Assorted period care essentials',      rating: 4.5, reviewCount: 312, productId: null, pricePlaceholder: null, imageSrc: null },
   // Cooking
-  { id: 'cook-lifestraw',   categoryId: 'cooking',  name: 'Lifestraw',              description: 'Personal water filtration straw',            productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'cook-propane',     categoryId: 'cooking',  name: 'Propane Tank',           description: '1lb canister for camp stove',                productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'cook-stove',       categoryId: 'cooking',  name: 'Camping Stove',          description: 'Compact single-burner propane stove',        productId: null, pricePlaceholder: null, imageSrc: null },
-  // Medical — Ice Packs added
-  { id: 'med-first-aid',    categoryId: 'medical',  name: 'First Aid Kit',          description: 'Comprehensive 200-piece trauma kit',         productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'med-ice-packs',    categoryId: 'medical',  name: 'Ice Packs',              description: 'Instant cold compress packs',                productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'cook-lifestraw',   categoryId: 'cooking',  name: 'Lifestraw',      description: 'Personal water filtration straw',       rating: 4.9, reviewCount: 687, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'cook-propane',     categoryId: 'cooking',  name: 'Propane Tank',   description: '1lb canister for camp stove',           rating: 4.5, reviewCount: 203, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'cook-stove',       categoryId: 'cooking',  name: 'Camping Stove',  description: 'Compact single-burner propane stove',   rating: 4.7, reviewCount: 318, productId: null, pricePlaceholder: null, imageSrc: null },
+  // Medical
+  { id: 'med-first-aid',    categoryId: 'medical',  name: 'First Aid Kit',  description: 'Comprehensive 200-piece trauma kit',    rating: 4.8, reviewCount: 524, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'med-ice-packs',    categoryId: 'medical',  name: 'Ice Packs',      description: 'Instant cold compress packs',           rating: 4.4, reviewCount: 167, productId: null, pricePlaceholder: null, imageSrc: null },
   // Comfort
-  { id: 'comfort-fan',      categoryId: 'comfort',  name: 'Portable Fan',           description: 'Battery-powered USB desk fan',               productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'comfort-earplugs', categoryId: 'comfort',  name: 'Ear Plugs',              description: 'High-NRR foam ear plugs',                    productId: null, pricePlaceholder: null, imageSrc: null },
-  // Clothing — new category; Repairs/Tools removed entirely
-  { id: 'cloth-ponchos',    categoryId: 'clothing', name: 'Ponchos',                description: 'Waterproof hooded emergency ponchos',        productId: null, pricePlaceholder: null, imageSrc: null },
-  { id: 'cloth-shoe-covers',categoryId: 'clothing', name: 'Shoe Covers',            description: 'Heavy-duty waterproof boot covers',          productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'comfort-fan',      categoryId: 'comfort',  name: 'Portable Fan',   description: 'Battery-powered USB desk fan',          rating: 4.3, reviewCount: 241, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'comfort-earplugs', categoryId: 'comfort',  name: 'Ear Plugs',      description: 'High-NRR foam ear plugs',               rating: 4.6, reviewCount: 378, productId: null, pricePlaceholder: null, imageSrc: null },
+  // Clothing
+  { id: 'cloth-ponchos',    categoryId: 'clothing', name: 'Ponchos',        description: 'Waterproof hooded emergency ponchos',   rating: 4.2, reviewCount: 134, productId: null, pricePlaceholder: null, imageSrc: null },
+  { id: 'cloth-shoe-covers',categoryId: 'clothing', name: 'Shoe Covers',    description: 'Heavy-duty waterproof boot covers',     rating: 3.8, reviewCount: 89,  productId: null, pricePlaceholder: null, imageSrc: null },
 ];
+// CATEGORIES, ITEMS_BY_CATEGORY, STANDARD_CATEGORY_IDS, ITEM_ICON_OVERRIDES — unchanged from Phase 1
+```
 
-/** Items grouped by categoryId — used by Custom subkit browser. */
-export const ITEMS_BY_CATEGORY: Record<string, KitItem[]> = ITEMS.reduce(
-  (acc, item) => ({ ...acc, [item.categoryId]: [...(acc[item.categoryId] ?? []), item] }),
-  {} as Record<string, KitItem[]>
-);
+### New: checkoutService.ts
 
-/** Standard category IDs in display order — excludes 'custom'. */
-export const STANDARD_CATEGORY_IDS = [
-  'power', 'lighting', 'communications', 'hygiene',
-  'cooking', 'medical', 'comfort', 'clothing',
-] as const;
+The e-commerce API contract is TBD. `checkoutService.ts` is designed behind a typed interface so the implementation can be swapped when the real API spec arrives without touching `SummaryScreen`.
 
-/**
- * lucide-react icon names for items that need non-category icons.
- * Per UX spec Section 6 — new items for added categories.
- */
-export const ITEM_ICON_OVERRIDES: Record<string, string> = {
-  'hygiene-feminine':  'Droplet',
-  'med-ice-packs':     'Snowflake',
-  'cloth-ponchos':     'CloudRain',
-  'cloth-shoe-covers': 'Footprints',
+```typescript
+// src/services/checkoutService.ts
+import type { SubkitSelection, ItemSelection } from '../types';
+import { ENV } from '../tokens/env';
+
+export interface CheckoutPayload {
+  kitId: string;           // uuid generated at checkout time — idempotency key
+  subkits: Array<{
+    subkitId: string;
+    categoryId: string;
+    size: 'regular' | 'large';
+    selectionOrder: number;
+    items: Array<{
+      itemId: string;
+      quantity: number;
+    }>;
+    emptyContainer: boolean;
+  }>;
+}
+
+export type CheckoutResult =
+  | { success: true; redirectUrl: string }
+  | { success: false; errorMessage: string };
+
+function buildPayload(
+  selectedSubkits: SubkitSelection[],
+  itemSelections: Record<string, ItemSelection>,
+  emptyContainers: string[]
+): CheckoutPayload {
+  return {
+    kitId: crypto.randomUUID(),
+    subkits: selectedSubkits.map((s) => ({
+      subkitId: s.subkitId,
+      categoryId: s.categoryId,
+      size: s.size,
+      selectionOrder: s.selectionOrder,
+      emptyContainer: emptyContainers.includes(s.subkitId),
+      items: Object.values(itemSelections)
+        .filter((sel) => sel.subkitId === s.subkitId)
+        .map((sel) => ({ itemId: sel.itemId, quantity: sel.quantity })),
+    })),
+  };
+}
+
+export async function initiateCheckout(
+  selectedSubkits: SubkitSelection[],
+  itemSelections: Record<string, ItemSelection>,
+  emptyContainers: string[]
+): Promise<CheckoutResult> {
+  const payload = buildPayload(selectedSubkits, itemSelections, emptyContainers);
+  try {
+    const response = await fetch(ENV.purchaseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      return { success: false, errorMessage: 'Something went wrong. Please try again.' };
+    }
+    const data = await response.json() as { redirectUrl: string };
+    return { success: true, redirectUrl: data.redirectUrl };
+  } catch {
+    return { success: false, errorMessage: 'Unable to connect. Please check your connection and try again.' };
+  }
+}
+```
+
+### New: analytics.ts
+
+```typescript
+// src/utils/analytics.ts
+import { ENV } from '../tokens/env';
+
+// gtag is injected by Google Analytics script. Declare to satisfy TypeScript.
+declare function gtag(command: string, action: string, params?: Record<string, unknown>): void;
+
+function track(eventName: string, params?: Record<string, unknown>): void {
+  try {
+    if (typeof gtag === 'undefined' || !ENV.analyticsId) return;
+    gtag('event', eventName, params);
+  } catch {
+    // Analytics failures are always silently swallowed — never user-facing
+  }
+}
+
+export const Analytics = {
+  kitCompleted: () =>
+    track('kit_completed'),
+  subkitSelected: (categoryId: string, size: string) =>
+    track('subkit_selected', { categoryId, size }),
+  itemIncluded: (itemId: string, categoryId: string) =>
+    track('item_included', { itemId, categoryId }),
+  ctaClicked: () =>
+    track('cta_clicked'),
+} as const;
+```
+
+**GA4 script injection in AppShell.tsx:**
+
+```typescript
+// In AppShell.tsx — useEffect runs once on mount
+useEffect(() => {
+  if (!ENV.analyticsId) return;
+  const script = document.createElement('script');
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${ENV.analyticsId}`;
+  script.async = true;
+  document.head.appendChild(script);
+  script.onload = () => {
+    (window as Record<string, unknown>)['dataLayer'] = (window as Record<string, unknown>)['dataLayer'] || [];
+    gtag('js', new Date().toISOString());
+    gtag('config', ENV.analyticsId);
+  };
+}, []);
+```
+
+### New: StarRating Component
+
+```typescript
+// src/components/ui/StarRating.tsx
+import { type FC } from 'react';
+
+interface StarRatingProps {
+  rating: number;       // e.g. 4.3
+  reviewCount: number;  // e.g. 128
+}
+
+export const StarRating: FC<StarRatingProps> = ({ rating, reviewCount }) => {
+  const percentage = (rating / 5) * 100;
+  return (
+    <div
+      className="flex items-center gap-1.5"
+      aria-label={`Rated ${rating} out of 5 based on ${reviewCount} reviews`}
+    >
+      {/* CSS width-clip stars: empty layer below, filled layer clipped on top */}
+      <div className="relative inline-flex" aria-hidden="true">
+        {/* Empty stars */}
+        <div className="flex">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <svg key={i} className="w-3.5 h-3.5" viewBox="0 0 20 20">
+              <path
+                d="M10 1l2.39 4.84L18 6.77l-4 3.9.94 5.52L10 13.77l-4.94 2.42L6 10.67 2 6.77l5.61-.93L10 1z"
+                fill="var(--color-neutral-200)"
+              />
+            </svg>
+          ))}
+        </div>
+        {/* Filled stars — clipped to rating percentage */}
+        <div
+          className="absolute inset-0 flex overflow-hidden"
+          style={{ width: `${percentage}%` }}
+        >
+          {Array.from({ length: 5 }).map((_, i) => (
+            <svg key={i} className="w-3.5 h-3.5 shrink-0" viewBox="0 0 20 20">
+              <path
+                d="M10 1l2.39 4.84L18 6.77l-4 3.9.94 5.52L10 13.77l-4.94 2.42L6 10.67 2 6.77l5.61-.93L10 1z"
+                fill="var(--color-brand-accent)"
+              />
+            </svg>
+          ))}
+        </div>
+      </div>
+      <span className="text-xs text-[var(--color-neutral-500)]">
+        {rating.toFixed(1)} ({reviewCount.toLocaleString()} reviews)
+      </span>
+    </div>
+  );
 };
 ```
+
+**ItemCard integration:** `StarRating` renders below item name and description, above the include/exclude toggle row. It is conditionally rendered only when `item.rating !== null`. The include/exclude toggle and `QuantitySelector` layout are unchanged.
+
+**SubkitSummarySection:** Does not import or render `StarRating`. Per PRD FR11 — star ratings do not appear on the Summary Page.
+
+### Phase 2.5 Changes — Data Layer
+
+#### Updated KitItem Type
+
+Two additional nullable fields added to `KitItem` after `reviewCount`. All existing consumers are unaffected — the fields are additive. TypeScript strict mode requires no changes at any call site.
+
+```typescript
+// src/types/kit.types.ts — Phase 2.5 addition (after reviewCount)
+export interface KitItem {
+  id: string;
+  categoryId: string;
+  name: string;
+  description: string;
+  // Phase 2 fields
+  rating: number | null;
+  reviewCount: number | null;
+  // Phase 2.5 fields — weight and volume metadata
+  weightGrams: number | null;  // estimated item weight in grams; null-safe in calculations
+  volumeIn3: number | null;    // estimated item displaced volume in cubic inches; null-safe
+  // Phase 3+ fields — remain nullable
+  productId: string | null;
+  pricePlaceholder: number | null;
+  imageSrc: string | null;
+}
+```
+
+All 28 items in `src/data/kitItems.ts` are populated with researched `weightGrams` and `volumeIn3` values per the Story 9.1 AC2 lookup table. No item has a `null` value for either field in Phase 2.5. The full lookup table is the authoritative source in the PRD — values are not repeated here.
+
+#### New Pure Functions — slotCalculations.ts
+
+Two new exported functions are appended to `src/utils/slotCalculations.ts` after all existing exports. No existing function is modified.
+
+**Key format:** Both functions look up item selections using the `${subkitId}::${item.id}` key — consistent with the existing store key convention used throughout the application.
+
+**Null safety:** Items with `weightGrams === null` or `volumeIn3 === null` contribute 0 to their respective sums. Items whose selection key is absent from `selections` contribute nothing.
+
+```typescript
+// Appended to src/utils/slotCalculations.ts — Phase 2.5
+
+/**
+ * Returns the total estimated weight in pounds of all selected items in a subkit.
+ * Sums (weightGrams × quantity) for each included item; divides by 453.592.
+ * Returns parseFloat(result.toFixed(1)) — number with one decimal.
+ * Returns 0 if no items are included.
+ */
+export function calculateSubkitWeightLbs(
+  items: KitItem[],
+  selections: Record<string, ItemSelection>,
+  subkitId: string
+): number {
+  const totalGrams = items.reduce((sum, item) => {
+    const key = `${subkitId}::${item.id}`;
+    const sel = selections[key];
+    if (!sel?.included || item.weightGrams === null) return sum;
+    return sum + item.weightGrams * sel.quantity;
+  }, 0);
+  return parseFloat((totalGrams / 453.592).toFixed(1));
+}
+
+/**
+ * Returns the volume fill percentage as an unclamped integer.
+ * Sums (volumeIn3 × quantity) for each included item; divides by capacityIn3; multiplies by 100.
+ * Returns Math.round(result) — unclamped (callers clamp bar width to min(pct, 100)% for display).
+ * Returns 0 if no items are included or capacityIn3 is 0.
+ */
+export function calculateSubkitVolumePct(
+  items: KitItem[],
+  selections: Record<string, ItemSelection>,
+  subkitId: string,
+  capacityIn3: number
+): number {
+  if (capacityIn3 === 0) return 0;
+  const totalVolume = items.reduce((sum, item) => {
+    const key = `${subkitId}::${item.id}`;
+    const sel = selections[key];
+    if (!sel?.included || item.volumeIn3 === null) return sum;
+    return sum + item.volumeIn3 * sel.quantity;
+  }, 0);
+  return Math.round((totalVolume / capacityIn3) * 100);
+}
+```
+
+**Container capacities (from Phase 1 PRD Story 1.2):**
+- Regular container: 1,728 in³
+- Large container: 3,456 in³
+
+**Clamping boundary:** Both functions return unclamped values. The caller is responsible for clamping the volume bar fill width to `Math.min(pct, 100)%` for display. The label always shows the true computed integer (e.g., `112% filled`). No warnings are triggered at any value — FR13 is absolute.
+
+#### SubkitStatsStrip Component Spec
+
+```typescript
+// src/components/item-config/SubkitStatsStrip.tsx
+
+interface SubkitStatsStripProps {
+  weightLbs: number;              // pre-computed by parent via calculateSubkitWeightLbs
+  volumePct: number;              // pre-computed by parent via calculateSubkitVolumePct (unclamped integer)
+  categoryColor: string;          // category base hex; used for volume bar fill via inline style
+}
+```
+
+**Note on props interface:** The `front-end-spec.md` v1.2 Component Library section documents `weightGrams`, `volumeIn3`, and `containerCapacityIn3` as raw props with internal unit conversion. **This is superseded by PRD Story 9.3 AC1 and the Technical Decisions table.** The correct interface passes pre-computed `weightLbs` and `volumePct` — unit conversion happens in the parent via `calculateSubkitWeightLbs` and `calculateSubkitVolumePct`. `containerCapacityIn3` is not part of the interface — the percentage is fully encoded in `volumePct` and the ARIA label uses plain-English phrasing rather than the raw divisor.
+
+**Rendering rules:**
+- Weight label (left): `` `~${weightLbs.toFixed(1)} lbs` `` — `text-caption` (12px/400), `neutral-500`
+- Volume bar fill: `style={{ backgroundColor: categoryColor, width: Math.min(volumePct, 100) + '%' }}` — `radius-full`, `transition: width 150ms cubic-bezier(0.4,0,0.2,1)`
+- Volume label (right): `` `${volumePct}% filled` `` — true unclamped integer; `text-caption`, `neutral-500`
+- Bar width is clamped; label is not — the two values may diverge above 100%
+- Dynamic `backgroundColor` always via inline `style` prop — never Tailwind arbitrary values (Rule 8)
+
+**Accessibility:**
+- Container `div`: `aria-label="Subkit stats — {weightLbs.toFixed(1)} lbs, {volumePct}% of container capacity filled"`
+- Volume bar track: `role="progressbar"`, `aria-valuenow={volumePct}`, `aria-valuemin={0}`, `aria-valuemax={100}`, `aria-label="Container volume"`
+
+**Empty container state:** Parent passes `weightLbs={0}` and `volumePct={0}`; strip renders `~0.0 lbs` and `0% filled` with an empty bar. No special branch in the component — zero values flow through identically to non-zero values.
 
 ---
 
 ## 7. Routing
 
-### Route Configuration
+### Phase 2 Route Structure
+
+`/` is now the cover/landing page. The Subkit Selection Screen moves to `/builder`. All guards redirect to `/builder`.
 
 ```typescript
-// src/router/index.tsx
+// src/router/index.tsx — Phase 2 updated
 import { createBrowserRouter, redirect } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
+import { CoverScreen } from '../components/cover/CoverScreen';
 import { SubkitSelectionScreen } from '../components/subkit-selection/SubkitSelectionScreen';
 import { ItemConfigScreen } from '../components/item-config/ItemConfigScreen';
 import { CustomSubkitScreen } from '../components/item-config/CustomSubkitScreen';
@@ -634,34 +721,32 @@ import { subkitConfigGuard, customConfigGuard, summaryGuard } from './guards';
 
 export const router = createBrowserRouter([
   {
-    element: <AppShell />,  // Persistent header + MobileInterstitial wrapper
+    element: <AppShell />,
     children: [
       {
         path: '/',
+        element: <CoverScreen />,  // NEW — static landing page
+      },
+      {
+        path: '/builder',          // RENAMED from /
         element: <SubkitSelectionScreen />,
       },
       {
-        // Guard: redirect to '/' if subkitId not in selectedSubkits
         path: '/configure/:subkitId',
         element: <ItemConfigScreen />,
         loader: subkitConfigGuard,
       },
       {
-        // Guard: redirect to '/' if 'custom' not in selectedSubkits
-        // React Router v6 Data Router automatically ranks static paths over dynamic
-        // segments — no special ordering required.
         path: '/configure/custom',
         element: <CustomSubkitScreen />,
         loader: customConfigGuard,
       },
       {
-        // Guard: redirect to '/' if fewer than 3 subkits selected
         path: '/summary',
         element: <SummaryScreen />,
         loader: summaryGuard,
       },
       {
-        // Catch-all — unknown paths redirect to entry
         path: '*',
         loader: () => redirect('/'),
       },
@@ -671,211 +756,147 @@ export const router = createBrowserRouter([
 ```
 
 ```typescript
-// src/router/guards.ts
-// Guards use getState() — not hooks — because loaders run outside React render cycle.
+// src/router/guards.ts — Phase 2: all redirects updated to /builder
 import { redirect } from 'react-router-dom';
 import { useKitStore } from '../store/kitStore';
 
 export function subkitConfigGuard({ params }: { params: Record<string, string | undefined> }) {
   const { selectedSubkits } = useKitStore.getState();
   const isValid = selectedSubkits.some((s) => s.subkitId === params['subkitId']);
-  return isValid ? null : redirect('/');
+  return isValid ? null : redirect('/builder');  // was redirect('/')
 }
 
 export function customConfigGuard() {
   const { selectedSubkits } = useKitStore.getState();
   const hasCustom = selectedSubkits.some((s) => s.categoryId === 'custom');
-  return hasCustom ? null : redirect('/');
+  return hasCustom ? null : redirect('/builder');  // was redirect('/')
 }
 
 export function summaryGuard() {
   const { selectedSubkits } = useKitStore.getState();
-  return selectedSubkits.length >= 3 ? null : redirect('/');
+  return selectedSubkits.length >= 3 ? null : redirect('/builder');  // was redirect('/')
 }
 ```
 
-### Navigation Flow
+### Navigation Flow — Phase 2
 
 ```
-/ (SubkitSelectionScreen)
-└── [Configure Items — active only with >= 3 subkits]
-    └── /configure/:firstSubkitId  (ItemConfigScreen)
-        └── [Next Subkit] → /configure/:nextSubkitId  (repeat per subkit)
-        └── [Next Subkit — if Custom selected] → /configure/custom  (CustomSubkitScreen)
-        └── [Review My Kit — on final subkit] → /summary
+/ (CoverScreen)  [NEW]
+└── [Build My Kit CTA]
+    └── /builder (SubkitSelectionScreen)  [RENAMED from /]
+        └── [Configure Items — active only with >= 3 subkits]
+            └── /configure/:firstSubkitId (ItemConfigScreen)
+                └── [Next Subkit] → /configure/:nextSubkitId
+                └── [Next Subkit — Custom] → /configure/custom
+                └── [Review My Kit — final subkit] → /summary
+
+/builder — Filled visualizer slots now clickable [Phase 2]
+    └── [Click filled slot] → /configure/:subkitId  (direct navigation)
 
 /summary (SummaryScreen)
-├── [Edit My Kit] → /  (full store state preserved)
-└── [Start Over] → ConfirmationModal → resetKit() → /
+├── [Get My Kit] → initiateCheckout() → redirect to checkout URL on success
+├── [API failure] → dismissible error message; kit state preserved
+├── [Edit My Kit] → /builder
+└── [Start Over] → ConfirmationModal → resetKit() → /builder
 ```
 
-### Screen Transition Directions
+### Clickable Slot Implementation
 
-Forward transitions (`/` → `/configure/:id` → `/summary`): exit `translateX(-16px)` + fade; enter from `+16px`.
-Back transitions: direction reverses. Duration: `var(--duration-screen)` (240ms). This must be implemented at the router level using a transition wrapper, not inside individual screen components.
+`HousingUnitVisualizer` interface is **unchanged** — `onSlotClick?: (slotIndex: number) => void` was already typed and wired in Phase 1. Phase 2 passes a handler from `SubkitSelectionScreen`:
+
+```typescript
+// In SubkitSelectionScreen.tsx — Phase 2 addition
+const navigate = useNavigate();
+const slots = useSlotState();
+
+const handleSlotClick = (slotIndex: number) => {
+  const slot = slots[slotIndex];
+  if (slot.status !== 'filled' || !slot.subkitId) return; // empty slots: no-op
+  navigate(`/configure/${slot.subkitId}`);
+};
+
+// Passed to visualizer:
+<HousingUnitVisualizer
+  slots={slots}
+  onSlotClick={handleSlotClick}
+/>
+```
+
+`VisualizerSlot` adds `cursor-pointer` and `hover:brightness-95` only when `status === 'filled'` and `onSlotClick` is defined. Empty slots receive no cursor change. `readOnly` mode on `SummaryScreen` does not pass `onSlotClick` — slots remain non-interactive.
+
 
 ---
 
 ## 8. Styling Guidelines
 
-### Approach
+Unchanged from Phase 1. All Phase 2 components follow the identical Tailwind v4 + CSS custom properties pipeline, dynamic category colors via inline styles, and GPU-composited animation rules.
 
-**Tailwind CSS v4 + CSS Custom Properties.** All design tokens from `design-tokens.ts` are mirrored as CSS custom properties in the `@theme` block in `globals.css`. This creates one authoritative styling pipeline:
+### StarRating Styling Notes
 
-```
-design-tokens.ts  →  globals.css @theme  →  Tailwind utility classes in components
-```
+- Filled stars use `var(--color-brand-accent)` (#22C55E) — consistent with existing brand palette
+- Empty stars use `var(--color-neutral-200)`
+- Star SVG size: `w-3.5 h-3.5` — sized to sit comfortably below item name/description without crowding the toggle row
+- The `aria-label` on the wrapper `div` conveys the full rating to screen readers; the star SVGs are `aria-hidden`
 
-**Dynamic category colors** (visualizer fills, card borders, progress bar fills) must use **inline styles** — Tailwind cannot generate classes for runtime hex values:
+### Cover Page Styling
 
-```tsx
-// Correct — dynamic color as inline style
-<div style={{ backgroundColor: category.colorBase }} className="h-10 rounded-[var(--radius-md)]" />
+`CoverScreen` uses brand tokens only. It is a simple static full-viewport screen built mobile-ready from day one — no breakpoint changes are required in Phase 2 for any other screen.
 
-// Wrong — Tailwind cannot generate this at runtime
-<div className={`bg-[${category.colorBase}]`} />
-```
+- Background: `var(--color-brand-primary)` `#1F4D35` — full viewport (not neutral-50; the cover page is a branded full-bleed screen)
+- Headline: white (`#FFFFFF`), `font-bold`, large type scale (`text-display` 36px)
+- Value proposition: white at `opacity-90`, `text-body-lg` (16px)
+- CTA button: **inverted variant** — white background with `--color-brand-primary` text. The standard `PrimaryButton` (dark green fill, white text) would be near-invisible against the dark green background. Use `className="bg-white text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-light)]"` on the `PrimaryButton` or pass an `inverted` prop if one is added. Min height 44px per NFR3.
+- Accent elements: `var(--color-brand-accent)` sparingly (e.g. thin horizontal rule or headline underline)
 
-**All static structural UI** (layout, spacing, neutral colors, typography sizing) uses Tailwind utility classes.
+### Mobile Responsiveness — Breakpoint Strategy
 
-### globals.css
+**Phase 2 retains the Phase 1 desktop-first strategy.** Full mobile responsiveness is deferred to Phase 3 alongside Bazaarvoice. `MobileInterstitial.tsx` and `useResponsive.ts` remain in place and are unchanged.
 
-```css
-/* src/styles/globals.css */
-@import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+| Breakpoint | Min Width | Max Width | Usage |
+|-----------|-----------|-----------|-------|
+| desktop-lg | 1280px | — | `2xl:` |
+| desktop | 1024px | 1279px | `lg:` |
+| tablet | 768px | 1023px | `md:` |
+| tablet-sm | 640px | 767px | `sm:` |
+| mobile | 0px | 639px | MobileInterstitial — graceful degradation only |
 
-@theme {
-  /* Font */
-  --font-sans: 'Inter', system-ui, sans-serif;
+**Phase 2 breakpoint behaviour:** No new breakpoint values or mobile layout classes are introduced in Phase 2. Users below 768px continue to see the `MobileInterstitial` screen. All Phase 2 layout work targets the 768px–1920px working range. The `CoverScreen` is an exception — it is built mobile-ready from day one as it is a simple static full-viewport screen with no complex layout, but no other screens receive mobile layout changes in Phase 2.
 
-  /* Brand */
-  --color-brand-primary:       #1F4D35;
-  --color-brand-primary-hover: #163828;
-  --color-brand-primary-light: #E8F5EE;
-  --color-brand-accent:        #22C55E;
+**Phase 3 mobile work (deferred):** `MobileInterstitial` removal, mobile layout variants for all five screens, WCAG 2.1 AA touch target enforcement (44×44px), and single-column grid on mobile. See Phase 3+ Roadmap.
 
-  /* Neutrals */
-  --color-neutral-white: #FFFFFF;
-  --color-neutral-50:    #F8F9FA;
-  --color-neutral-100:   #F3F4F6;
-  --color-neutral-200:   #E5E7EB;
-  --color-neutral-300:   #D1D5DB;
-  --color-neutral-400:   #9CA3AF;
-  --color-neutral-500:   #6B7280;
-  --color-neutral-700:   #374151;
-  --color-neutral-900:   #111827;
+### SummaryScreen Checkout States
 
-  /* Semantic */
-  --color-status-success: #16A34A;
-  --color-status-warning: #D97706;
-  --color-status-error:   #DC2626;
-  --color-status-info:    #2563EB;
-
-  /* Border radius */
-  --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   16px;
-  --radius-full: 9999px;
-
-  /* Elevation */
-  --shadow-1: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-2: 0 4px 6px rgba(0,0,0,0.07);
-  --shadow-3: 0 20px 25px rgba(0,0,0,0.12);
-
-  /* Motion durations */
-  --duration-instant:  0ms;
-  --duration-fast:     130ms;
-  --duration-default:  150ms;
-  --duration-moderate: 200ms;
-  --duration-standard: 220ms;
-  --duration-screen:   240ms;
-  --duration-reward:   360ms;
-
-  /* Motion easings */
-  --ease-standard:   cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
-  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
-  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Global base */
-:root {
-  font-family: var(--font-sans);
-  background-color: var(--color-neutral-50);
-  color: var(--color-neutral-700);
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Focus indicators — per UX spec Section 7 */
-:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-.subkit-card:focus-visible {
-  outline: 3px solid var(--color-brand-primary);
-  outline-offset: 0;
-}
-:focus:not(:focus-visible) { outline: none; }
-
-/* Reduced motion — hard requirement from UX spec Section 9 */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
-
-### print.css
-
-Imported **only** in `SummaryScreen.tsx` — not global.
-
-```css
-/* src/styles/print.css */
-@media print {
-  header,
-  .step-progress-indicator,
-  .btn-get-my-kit,
-  .btn-edit,
-  .btn-print,
-  .btn-start-over { display: none !important; }
-
-  body { background: white; font-size: 12pt; color: #000; }
-
-  .summary-subkit-section { page-break-inside: avoid; }
-
-  /* No + icons in print — empty slots render as clean boxes */
-  .visualizer-slot-empty::after { content: none; }
-  .visualizer-slot-empty {
-    background-color: #f8f9fa !important;
-    border: 1px solid #e5e7eb !important;
-  }
-}
-```
-
-### Animation Rules
-
-All animations use **`transform` and `opacity` only** — GPU-composited, zero layout reflow. This is the hard architectural constraint behind NFR2 (slot updates < 100ms).
+Two new visual states added to `SummaryScreen` — both use existing design tokens:
 
 ```tsx
-// Correct — GPU-composited properties only
-style={{ opacity: filled ? 1 : 0, transition: `opacity var(--duration-standard) var(--ease-standard)` }}
-style={{ transform: 'translateX(0)', transition: `transform var(--duration-screen) var(--ease-standard)` }}
+{/* Loading state — CTA disabled during API call */}
+<PrimaryButton
+  disabled
+  aria-disabled="true"
+  className="opacity-70 cursor-not-allowed"
+>
+  Processing...
+</PrimaryButton>
 
-// Never animate these — they cause layout reflow:
-// width, height, top, left, right, bottom, padding, margin
+{/* Error state — dismissible, below CTA */}
+{checkoutError && (
+  <div
+    role="alert"
+    className="mt-3 flex items-start gap-2 rounded-[var(--radius-md)] bg-red-50 border border-red-200 p-3 text-sm text-[var(--color-status-error)]"
+  >
+    <span className="flex-1">{checkoutError}</span>
+    <button
+      onClick={() => setCheckoutError(null)}
+      aria-label="Dismiss error"
+      className="shrink-0 text-[var(--color-neutral-400)] hover:text-[var(--color-neutral-700)]"
+    >
+      <X size={16} />
+    </button>
+  </div>
+)}
 ```
 
-**Slot fill animation detail** (Animation #1 from UX spec):
-- The slot `div` transitions `background-color` over 220ms
-- The name `span` inside delays its `opacity` transition by 80ms
-- These are two separate CSS transitions on two separate elements — not a single combined transition
-
-**Large block behavior** (Animation #9):
-- Both rows (`isLargeStart` and `isLargeEnd`) receive the same `background-color` transition simultaneously
-- The internal divider between them transitions `opacity` to 0 — both rows visually merge into one continuous block
+Kit state is never cleared on checkout failure — `checkoutError` lives in local component state only.
 
 ---
 
@@ -883,321 +904,248 @@ style={{ transform: 'translateX(0)', transition: `transform var(--duration-scree
 
 ### Strategy
 
-Per PRD Technical Assumptions:
-- **Unit tests:** Core logic — slot calculations, size constraints, item catalog filtering. 100% branch coverage required on `slotCalculations.ts`.
-- **Component tests:** HousingUnitVisualizer, SubkitCard, ItemCard, QuantitySelector — each must include an axe accessibility assertion.
-- **Manual E2E:** Full flows tested manually in MVP. Automated E2E (Playwright) deferred to Phase 2.
-- **Accessibility:** `@axe-core/react` mounted in development. `eslint-plugin-jsx-a11y` runs in CI. Manual screen reader test (NVDA+Chrome or VoiceOver+Safari) required at each epic completion.
+Phase 1 unit and component testing strategy unchanged. Phase 2 adds:
 
-### vitest.config.ts
+- New component tests: `StarRating.test.tsx`
+- New unit tests: `checkoutService.test.ts`
+- New E2E suite: Playwright (3 flows, 2 projects)
+- New CI: GitHub Actions
+
+### Playwright Configuration
 
 ```typescript
-// vitest.config.ts
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./tests/setup.ts'],
-    coverage: {
-      provider: 'v8',
-      include: ['src/utils/**', 'src/store/**', 'src/components/**'],
-      exclude: ['src/data/**', 'src/types/**', 'src/tokens/**'],
-    },
+  testDir: './tests/e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env['CI'],
+  retries: process.env['CI'] ? 2 : 0,
+  reporter: process.env['CI'] ? 'github' : 'list',
+  use: {
+    baseURL: 'http://localhost:5173',
+    trace: 'on-first-retry',
+  },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // iPhone SE mobile project deferred to Phase 3 — MobileInterstitial is retained in Phase 2
+    // and would block all E2E flows on mobile viewport. Add mobile project in Phase 3
+    // alongside the MobileInterstitial removal and full mobile responsiveness work.
+  ],
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env['CI'],
   },
 });
 ```
 
-### Test Setup
+### GitHub Actions CI
 
-```typescript
-// tests/setup.ts
-import '@testing-library/jest-dom';
-import { configure } from '@testing-library/react';
-
-configure({ testIdAttribute: 'data-testid' });
+```yaml
+# .github/workflows/e2e.yml
+name: Playwright E2E
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
 ```
 
-### Slot Calculation Unit Tests (required coverage: 100% branches)
+Playwright runs on `push` and `pull_request` to `main`. Vitest unit tests run separately — `npm run test:run` is not part of `e2e.yml`. Add a separate `ci.yml` for Vitest if desired.
+
+### E2E Test Flows
+
+All three flows in a single `tests/e2e/kit-builder.spec.ts` file, tagged by describe block. Phase 2 runs `chromium` (Desktop Chrome) only — the iPhone SE project is deferred to Phase 3 when `MobileInterstitial` is removed. Adding it in Phase 2 would cause all three flows to fail against the interstitial screen:
+
+| Flow | Key Assertions |
+|------|----------------|
+| Full kit configuration | Select 3 subkits → configure items → reach Summary → all subkits + items visible |
+| Back-navigation state preservation | Configure 2 subkits → navigate back → both selections + sizes preserved |
+| Start Over reset | Complete config → Start Over → confirm modal → store resets → 6 empty slots |
+
+Each test clears localStorage before running (`page.evaluate(() => localStorage.clear())`) to ensure clean state.
+
+### New Component + Unit Tests
 
 ```typescript
-// tests/unit/slotCalculations.test.ts
-import { describe, it, expect } from 'vitest';
-import { calculateTotalSlots, calculateSlotState, canFitSize, isSlotsAtCapacity } from '../../src/utils/slotCalculations';
-import type { SubkitSelection } from '../../src/types';
-
-const sel = (id: string, size: 'regular' | 'large', order: number): SubkitSelection =>
-  ({ subkitId: id, categoryId: id, size, selectionOrder: order });
-
-describe('calculateTotalSlots', () => {
-  it('counts regular as 1 slot', () => expect(calculateTotalSlots([sel('power','regular',1)])).toBe(1));
-  it('counts large as 2 slots',  () => expect(calculateTotalSlots([sel('power','large',1)])).toBe(2));
-  it('handles mixed sizes',       () => expect(calculateTotalSlots([sel('a','large',1), sel('b','regular',2), sel('c','regular',3)])).toBe(4));
-  it('returns 0 for empty',       () => expect(calculateTotalSlots([])).toBe(0));
+// tests/components/StarRating.test.tsx
+describe('StarRating', () => {
+  it('renders filled layer clipped to correct percentage for a given rating');
+  it('outputs correct aria-label: "Rated 4.3 out of 5 based on 128 reviews"');
+  it('renders review count with toLocaleString formatting');
+  it('passes axe accessibility assertion');
 });
 
-describe('canFitSize', () => {
-  it('blocks large when switching would exceed 6', () => {
-    const s = [sel('a','large',1), sel('b','large',2), sel('c','regular',3), sel('d','regular',4)];
-    expect(canFitSize(s, 'c', 'large', 6)).toBe(false);
-  });
-  it('allows large when slots are available', () => {
-    expect(canFitSize([sel('a','regular',1)], 'a', 'large', 6)).toBe(true);
-  });
-  it('allows shrinking large to regular always', () => {
-    const s = [sel('a','large',1), sel('b','large',2), sel('c','regular',3)];
-    expect(canFitSize(s, 'a', 'regular', 6)).toBe(true);
-  });
-});
-
-describe('calculateSlotState', () => {
-  it('always returns exactly 6 slots', () => {
-    expect(calculateSlotState([]).length).toBe(6);
-    expect(calculateSlotState([sel('power','large',1), sel('medical','large',2), sel('hygiene','regular',3)]).length).toBe(6);
-  });
-  it('fills top-to-bottom in selection order', () => {
-    const slots = calculateSlotState([sel('power','regular',1)]);
-    expect(slots[0].status).toBe('filled');
-    expect(slots[1].status).toBe('empty');
-  });
-  it('sets isLargeStart and isLargeEnd on large blocks', () => {
-    const slots = calculateSlotState([sel('power','large',1)]);
-    expect(slots[0].isLargeStart).toBe(true);
-    expect(slots[1].isLargeEnd).toBe(true);
-    expect(slots[2].status).toBe('empty');
-  });
-  it('all slots empty when no selections', () => {
-    calculateSlotState([]).forEach((s) => expect(s.status).toBe('empty'));
-  });
-  it('does not exceed 6 slots even with overflow input', () => {
-    const over = Array.from({length:7}, (_,i) => sel(`cat${i}`,'regular',i+1));
-    const slots = calculateSlotState(over);
-    expect(slots.length).toBe(6);
-    expect(slots.every((s) => s.status === 'filled')).toBe(false); // last slot empty guard
-  });
-});
-
-describe('isSlotsAtCapacity', () => {
-  it('returns true at exactly 6 slots', () => {
-    const s = Array.from({length:6}, (_,i) => sel(`cat${i}`,'regular',i+1));
-    expect(isSlotsAtCapacity(s)).toBe(true);
-  });
-  it('returns false below 6 slots', () => {
-    expect(isSlotsAtCapacity([sel('a','regular',1)])).toBe(false);
-  });
+// tests/unit/checkoutService.test.ts (mocking fetch)
+describe('initiateCheckout', () => {
+  it('returns { success: true, redirectUrl } on 200 response with redirect URL');
+  it('returns { success: false, errorMessage } on non-2xx response');
+  it('returns { success: false, errorMessage } on network error (fetch throws)');
 });
 ```
 
-### Component Test Template
+### Updated package.json Scripts
 
-```typescript
-// tests/components/HousingUnitVisualizer.test.tsx
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import { HousingUnitVisualizer } from '../../src/components/visualizer/HousingUnitVisualizer';
-import { calculateSlotState } from '../../src/utils/slotCalculations';
-
-const emptySlots = calculateSlotState([]);
-
-describe('HousingUnitVisualizer', () => {
-  it('renders 6 slot containers', () => {
-    const { container } = render(<HousingUnitVisualizer slots={emptySlots} />);
-    expect(container.querySelectorAll('[data-testid^="slot-"]').length).toBe(6);
-  });
-  it('shows subkit name when slot is filled', () => {
-    const slots = calculateSlotState([{ subkitId: 'power', categoryId: 'power', size: 'regular', selectionOrder: 1 }]);
-    render(<HousingUnitVisualizer slots={slots} />);
-    expect(screen.getByText('Power')).toBeInTheDocument();
-  });
-  it('hides + icons in readOnly mode', () => {
-    render(<HousingUnitVisualizer slots={emptySlots} readOnly />);
-    expect(screen.queryAllByRole('img', { name: /add/i }).length).toBe(0);
-  });
-  it('uses 44px slot height in readOnly mode', () => {
-    const { container } = render(<HousingUnitVisualizer slots={emptySlots} readOnly />);
-    const firstSlot = container.querySelector('[data-testid="slot-0"]') as HTMLElement;
-    expect(firstSlot.style.height).toBe('44px');
-  });
-});
+```json
+{
+  "scripts": {
+    "dev":           "vite",
+    "build":         "tsc && vite build",
+    "preview":       "vite preview",
+    "lint":          "eslint src --ext ts,tsx",
+    "typecheck":     "tsc --noEmit",
+    "test":          "vitest",
+    "test:run":      "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e":      "playwright test"
+  }
+}
 ```
-
-### Testing Best Practices
-
-1. **`slotCalculations.ts` — 100% branch coverage is mandatory.** This is the most safety-critical code in the app; incorrect slot math produces physically invalid kit configurations.
-2. **Test behavior, not implementation.** Use `getByRole`, `getByText`, `getByLabelText` — never class names or internal state.
-3. **axe assertion on every component test file.** At minimum one `axe(container)` + `toHaveNoViolations()` per file.
-4. **No snapshot tests.** The design system evolves; snapshots break on every style change and provide no behavioral signal.
-5. **Zustand store resets between tests.** Call `useKitStore.getState().resetKit()` in `beforeEach` for any test that exercises the store.
 
 ---
 
 ## 10. Environment Configuration
 
-This is a static SPA — no backend, no secrets, no runtime environment variables in MVP. Vite's `import.meta.env` is used for the single deployment-time value.
-
 ```bash
-# .env.example
-# Copy to .env.local for local development
+# .env.example — Phase 2
 
-# Phase 2: e-commerce endpoint
-# VITE_PURCHASE_URL=https://example.com/buy
-
-# MVP: placeholder purchase URL used by 'Get My Kit' CTA
+# E-commerce checkout endpoint — POST receives CheckoutPayload; expects { redirectUrl } response
 VITE_PURCHASE_URL=https://example.com/purchase
+
+# Google Analytics 4 Measurement ID
+# Leave empty in local development to disable analytics
+VITE_ANALYTICS_ID=G-XXXXXXXXXX
 ```
 
 ```typescript
-// src/tokens/env.ts — typed env access; never use import.meta.env directly in components
+// src/tokens/env.ts — Phase 2
 export const ENV = {
-  purchaseUrl: import.meta.env['VITE_PURCHASE_URL'] as string ?? '#',
+  purchaseUrl:  import.meta.env['VITE_PURCHASE_URL']  as string ?? '#',
+  analyticsId:  import.meta.env['VITE_ANALYTICS_ID'] as string ?? '',
 } as const;
 ```
 
-**Rules:**
-- Never use `import.meta.env.VITE_*` directly in components — always import from `src/tokens/env.ts`.
-- All `VITE_` prefixed values are public and bundled into the client — never put secrets here.
-- In Phase 2, additional `VITE_` variables for e-commerce API endpoints are added to `.env.example` and `env.ts` only.
+**Rules (unchanged + additions):**
+
+- Never use `import.meta.env.VITE_*` directly in components — always import from `src/tokens/env.ts`
+- All `VITE_` values are public and bundled into the client — never put API secrets here
+- `VITE_ANALYTICS_ID` and `VITE_PURCHASE_URL` set in Vercel dashboard for production and preview environments
+- When `VITE_ANALYTICS_ID` is empty (local dev), `AppShell` skips GA4 script injection cleanly
+- When `VITE_PURCHASE_URL` is the placeholder `#`, the CTA fires but the fetch immediately returns a non-2xx — the error state is displayed; kit state is preserved
 
 ---
 
 ## 11. Frontend Developer Standards
 
-### Critical Rules — Dev Agent Must Follow
+### All Phase 1 Critical Rules Apply
 
-These rules exist because violations here produce bugs that are invisible at compile time but break the physical kit constraint logic at runtime.
+All 10 critical rules from Phase 1 apply to all Phase 2 code without exception. Phase 2 adds four additional rules:
 
 | # | Rule | Why |
 |---|------|-----|
-| 1 | **Never store slot state in Zustand.** Slot state is always computed via `calculateSlotState()`. Storing it creates sync bugs. | NFR2 + slot constraint correctness |
-| 2 | **Never call `calculateSlotState()` directly in components.** Always use `useSlotState()` from `src/hooks/useKitStore.ts`. | Prevents duplicated computation and ensures consistency |
-| 3 | **Dynamic category colors must use inline styles.** `style={{ backgroundColor: category.colorBase }}` — never template literal Tailwind classes. | Tailwind purges unused dynamic classes at build time |
-| 4 | **All animations use `transform` and `opacity` only.** Animating `width`, `height`, or positional properties breaks the 100ms slot update NFR. | NFR2 |
-| 5 | **All interactive elements must have an accessible label.** Use `aria-label`, `aria-labelledby`, or visible associated `<label>`. The axe test will catch violations. | WCAG 2.1 AA |
-| 6 | **The Configure Items CTA uses `aria-disabled` + `aria-describedby`, not the `disabled` attribute.** Keyboard users must be able to reach it and read the minimum message. | UX spec Section 7 |
-| 7 | **Named imports only from `lucide-react`.** Never `import * as Icons from 'lucide-react'`. | Bundle size — prevents importing 1000+ icons |
-| 8 | **`QuantitySelector` container always reserves its layout space.** Only `opacity` and `pointer-events` change. Never conditionally render or hide with `display:none`. | CLS prevention — UX spec Section 10 |
-| 9 | **`EmptyContainerOption` is rendered on both `ItemConfigScreen` and `CustomSubkitScreen`.** The Custom subkit supports the empty container option identically to standard subkits per PRD FR9. Behavior: deselects all Custom items, dims item grid, displays inline confirmation in Custom category color (`#3730A3`), reflected on Summary Page. | PRD FR9 scope |
-| 10 | **The `HousingUnitVisualizer` receives no store references.** It takes only `slots: SlotState[]`, `readOnly?`, and `onSlotClick?`. All derivation happens in the parent. | NFR6 — self-contained extensible module |
+| 11 | **Never call `window.gtag` or any analytics script API directly in components.** Always use `Analytics.*` from `src/utils/analytics.ts`. | Testability; silent failure guarantee; single call-site pattern |
+| 12 | **`Analytics.ctaClicked()` must fire before `initiateCheckout()` is called.** The analytics event is not contingent on API success. | PRD FR story 8.2 AC7 |
+| 13 | **`isAllFilled` is derived state — never store it in Zustand.** Compute from `itemSelections` in the component. | Prevents sync bugs between derived and stored state |
+| 14 | **`StarRating` must not render in `SubkitSummarySection`.** Star ratings appear only during item selection screens — not on the Summary Page. | PRD FR11 |
 
-### Quick Reference
+### Key Import Patterns — Phase 2 Additions
+
+```typescript
+// Analytics — always via this module, never window.gtag directly
+import { Analytics } from '../utils/analytics';
+
+// Checkout
+import { initiateCheckout } from '../services/checkoutService';
+import type { CheckoutPayload, CheckoutResult } from '../services/checkoutService';
+
+// Star rating
+import { StarRating } from '../components/ui/StarRating';
+
+// Env tokens
+import { ENV } from '../tokens/env';
+// ENV.purchaseUrl  — checkout POST endpoint
+// ENV.analyticsId  — GA4 Measurement ID
+```
+
+### Focus Management and ARIA — Phase 2 Additions
+
+- `CoverScreen` heading gets `ref` + `tabIndex={-1}` + `useEffect focus()` per the Phase 1 screen transition pattern
+- `StarRating` wrapper `div` carries the full `aria-label`; all star SVGs are `aria-hidden="true"`
+- Checkout error `div` uses `role="alert"` — screen readers announce it automatically on appearance
+- "Fill my kit for me" checkbox uses a visible `<label>` associated via `htmlFor` — no `aria-label` override needed
+
+### Phase 2.5 Coding Standards
+
+All 14 critical rules (Rules 1–14, Section 11) apply to all Phase 2.5 code without exception. No new rules are introduced. The following reminders apply specifically to Phase 2.5 implementation:
+
+- **Rule 8 (dynamic colors via inline style):** The `SubkitStatsStrip` volume bar fill color uses `style={{ backgroundColor: categoryColor }}`. Never use Tailwind arbitrary values for category colors.
+- **Rule 13 (derived state not stored):** `weightLbs` and `volumePct` are always computed inline in the parent using `calculateSubkitWeightLbs` / `calculateSubkitVolumePct`. They are never stored in Zustand and never lifted into component state.
+- **Rule 14 (no StarRating in SubkitSummarySection):** Unchanged — Phase 2.5 adds weight/volume stats to `SubkitSummarySection` heading rows but does not add `StarRating`.
+- **FR13 (no warnings):** No color changes, no icons, no text changes at any weight or volume value — including values above 100% fill. The word "informational" is absolute. Do not add any conditional rendering based on weight or volume thresholds.
+
+### Phase 2.5 Import Patterns
+
+```typescript
+// Weight and volume calculation functions
+import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../utils/slotCalculations';
+
+// SubkitStatsStrip — item-config screens only
+import { SubkitStatsStrip } from './SubkitStatsStrip';
+
+// Container capacities — use these constants, never magic numbers
+const REGULAR_CAPACITY_IN3 = 1728;
+const LARGE_CAPACITY_IN3 = 3456;
+```
+
+### Quick Reference — All Commands
 
 ```bash
-# Development
-npm run dev          # Vite dev server — http://localhost:5173
-npm run build        # Production build to dist/
-npm run preview      # Preview production build locally
-
-# Quality
-npm run lint         # ESLint + jsx-a11y
-npm run typecheck    # tsc --noEmit
-
-# Testing
-npm run test         # Vitest — watch mode
-npm run test:run     # Vitest — single run (CI)
+npm run dev            # Vite dev server — http://localhost:5173
+npm run build          # Production build to dist/
+npm run preview        # Preview production build locally
+npm run lint           # ESLint + jsx-a11y
+npm run typecheck      # tsc --noEmit
+npm run test           # Vitest — watch mode
+npm run test:run       # Vitest — single run (CI)
 npm run test:coverage  # Coverage report
+npm run test:e2e       # Playwright E2E (starts dev server automatically)
 ```
-
-### Key Import Patterns
-
-```typescript
-// Types
-import type { KitCategory, KitItem, SubkitSelection } from '../types';
-import type { SlotState, HousingUnitVisualizerProps } from '../types';
-
-// Data
-import { CATEGORIES, ITEMS, ITEMS_BY_CATEGORY, STANDARD_CATEGORY_IDS } from '../data';
-
-// Store
-import { useKitStore } from '../store/kitStore';
-import { useSlotState, useIsAtCapacity, useCanProceedToConfig } from '../hooks/useKitStore';
-
-// Slot utils — only in tests and the store; never import directly into components
-import { calculateSlotState, canFitSize } from '../utils/slotCalculations';
-
-// Icons — named imports only
-import { Zap, Radio, HeartPulse, Settings2 } from 'lucide-react';
-
-// Env
-import { ENV } from '../tokens/env';
-```
-
-### Focus Management on Screen Transitions
-
-Per UX spec Section 7, focus must move to the main heading on every screen change:
-
-```typescript
-// Pattern to use in every screen component
-import { useEffect, useRef } from 'react';
-
-export const ItemConfigScreen: FC = () => {
-  const headingRef = useRef<HTMLHeadingElement>(null);
-
-  useEffect(() => {
-    headingRef.current?.focus();
-  }, []);  // Runs on mount — each screen mounts fresh on navigation
-
-  return (
-    <main>
-      <h1 ref={headingRef} tabIndex={-1} className="text-[var(--text-h1)] font-bold text-[var(--color-neutral-900)] outline-none">
-        Configure Your Power Subkit
-      </h1>
-      {/* ... */}
-    </main>
-  );
-};
-```
-
-### ARIA Live Region Setup
-
-A single `aria-live` region for polite announcements and one for assertive announcements should be mounted in `AppShell` and populated via a shared announcement utility — not duplicated per component:
-
-```typescript
-// src/utils/announce.ts
-let politeEl: HTMLElement | null = null;
-let assertiveEl: HTMLElement | null = null;
-
-export function initAnnouncer(polite: HTMLElement, assertive: HTMLElement) {
-  politeEl = polite;
-  assertiveEl = assertive;
-}
-
-export function announcePolite(message: string) {
-  if (!politeEl) return;
-  politeEl.textContent = '';
-  requestAnimationFrame(() => { if (politeEl) politeEl.textContent = message; });
-}
-
-export function announceAssertive(message: string) {
-  if (!assertiveEl) return;
-  assertiveEl.textContent = '';
-  requestAnimationFrame(() => { if (assertiveEl) assertiveEl.textContent = message; });
-}
-```
-
-Call `announcePolite` / `announceAssertive` from store action side-effects or component event handlers per the ARIA announcements table in UX spec Section 7.
 
 ---
 
-## 12. Phase 2 Extension Points
+## 12. Phase 3+ Roadmap
 
-All Phase 2 features are **designed for** in this architecture without being implemented in MVP. No stubs or placeholder components are required — the extension paths are purely additive.
+All items below are **not implemented** in Phase 1 or Phase 2. Extension paths are documented for planning purposes.
 
-| Feature | Extension Path | What Changes |
-|---------|---------------|-------------|
-| **`onSlotClick` — clickable visualizer** | `HousingUnitVisualizer` already accepts `onSlotClick?: (slotIndex: number) => void`. Each `VisualizerSlot` has `data-slot-index` attribute. In Phase 2: pass a handler from `SubkitSelectionScreen` and add visual affordance (cursor pointer, hover state) to slots. No component rebuild required. | Handler wired, no visual affordance in MVP |
-| **localStorage state persistence** | Add Zustand `persist` middleware to `kitStore.ts`. One import, one `create` wrapper change. All selectors and actions unchanged. | `import { persist } from 'zustand/middleware'` + wrap store definition |
-| **Weight tracking** | Add `weightGrams` field to `KitItem` in `kitItems.ts`. Add `calculateTotalWeight()` pure function in `slotCalculations.ts`. Display in `SummaryScreen`. No state layer changes. | Data field + utility function + display component |
-| **Product photography** | `KitItem.imageSrc` is already defined as `string \| null`. `ImageWithFallback` already handles `null` with the category tint fallback. In Phase 2: populate `imageSrc` in `kitItems.ts`. No component changes. | Data population only |
-| **Branded product mapping + pricing** | `KitItem.productId` and `KitItem.pricePlaceholder` already defined. In Phase 2: populate fields, add price display to `ItemCard` and `SubkitSummarySection`. | Data population + display components |
-| **E-commerce / checkout** | `ENV.purchaseUrl` is already consumed by the 'Get My Kit' CTA. Phase 2 replaces the static URL with a cart-building API call that receives the serialized kit state. The store's `selectedSubkits` and `itemSelections` are the payload. No routing changes. | API layer + cart serialization utility |
-| **Full mobile responsive** | Tailwind breakpoint classes are already used throughout. The `MobileInterstitial` threshold is a single `useMediaQuery` hook value. In Phase 2: remove the 768px redirect, implement mobile-specific layouts per breakpoint. | Remove interstitial guard + add mobile layout variants |
-| **Bazaarvoice reviews integration** | No architectural impact. Will be a new route or modal, consuming an external script. Add to `AppShell` script loading. | New route/component only |
-| **Automated E2E (Playwright)** | Add `playwright` to `devDependencies`. Add `tests/e2e/` directory. No changes to application code. | Test tooling only |
-| **Analytics** | User behavior tracking formally deferred. Priority metrics to instrument: kit completion rate, subkit selection frequency, item inclusion rates, Summary Page CTA conversion. Recommended tool: Plausible or Google Analytics 4. Add to `AppShell` script loading and `ENV` token file. No application logic changes required. | Script tag + env var only |
+| Feature | Extension Path | Phase |
+|---------|---------------|-------|
+| **Bazaarvoice reviews integration** | `StarRating` component and `ItemCard` integration are data-source agnostic. Phase 3 replaces hardcoded `rating`/`reviewCount` values in `kitItems.ts` with live Bazaarvoice data fetched at build time or runtime. Component is unchanged. | Phase 3 |
+| **Branded product mapping + pricing** | `KitItem.productId` and `KitItem.pricePlaceholder` already defined and nullable. Phase 3+: populate fields, add price display to `ItemCard` and `SubkitSummarySection`. No type changes required. | Phase 3 |
+| ~~**Weight tracking**~~ | ~~Add `weightGrams: number \| null` field to `KitItem`. Add `calculateTotalWeight()` pure function in `slotCalculations.ts`. Display in `SummaryScreen`. No state layer changes required.~~ | **Delivered in Phase 2.5.** `weightGrams` and `volumeIn3` fields added to `KitItem`; `calculateSubkitWeightLbs` and `calculateSubkitVolumePct` pure functions added to `slotCalculations.ts`; weight and volume readouts on `ItemConfigScreen`, `CustomSubkitScreen`, and `SummaryScreen`. |
+| **User profiles + saved kits** | Requires backend introduction. Zustand `persist` already handles local persistence. Phase 3+: add auth layer and cloud sync endpoint. Store shape unchanged. | Phase 3+ |
+| **E2E expanded coverage** | Playwright infrastructure in place. Add spec files to `tests/e2e/` for new flows. No config changes. | Ongoing |
+| **Checkout API contract finalized** | `checkoutService.ts` is designed behind a typed interface. When the real API spec arrives, update `CheckoutPayload`, `CheckoutResult`, and the `fetch` implementation inside `initiateCheckout` only — `SummaryScreen` is unchanged. | Phase 3 |
+| **Full mobile responsiveness** | Remove `MobileInterstitial.tsx` and `useResponsive.ts`. Add mobile layout variants (375px baseline) to all five screens. Enforce WCAG 2.1 AA touch targets (44×44px) on all interactive elements. Single-column subkit card grid on mobile. Ships alongside Bazaarvoice as Phase 3 "trust and reach expansion" package. | Phase 3 |
 
 ---
 
-*Emergency Prep Kit Builder — Frontend Architecture Document | Version 1.0 | 2026-03-02 | Winston, Architect*
+*Emergency Prep Kit Builder — Frontend Architecture Document | Version 2.2 | 2026-03-09 | Winston, Architect / Sarah, PO*

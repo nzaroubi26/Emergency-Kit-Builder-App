@@ -1,28 +1,30 @@
 # 10. Environment Configuration
 
-This is a static SPA — no backend, no secrets, no runtime environment variables in MVP. Vite's `import.meta.env` is used for the single deployment-time value.
-
 ```bash
-# .env.example
-# Copy to .env.local for local development
+# .env.example — Phase 2
 
-# Phase 2: e-commerce endpoint
-# VITE_PURCHASE_URL=https://example.com/buy
-
-# MVP: placeholder purchase URL used by 'Get My Kit' CTA
+# E-commerce checkout endpoint — POST receives CheckoutPayload; expects { redirectUrl } response
 VITE_PURCHASE_URL=https://example.com/purchase
+
+# Google Analytics 4 Measurement ID
+# Leave empty in local development to disable analytics
+VITE_ANALYTICS_ID=G-XXXXXXXXXX
 ```
 
 ```typescript
-// src/tokens/env.ts — typed env access; never use import.meta.env directly in components
+// src/tokens/env.ts — Phase 2
 export const ENV = {
-  purchaseUrl: import.meta.env['VITE_PURCHASE_URL'] as string ?? '#',
+  purchaseUrl:  import.meta.env['VITE_PURCHASE_URL']  as string ?? '#',
+  analyticsId:  import.meta.env['VITE_ANALYTICS_ID'] as string ?? '',
 } as const;
 ```
 
-**Rules:**
-- Never use `import.meta.env.VITE_*` directly in components — always import from `src/tokens/env.ts`.
-- All `VITE_` prefixed values are public and bundled into the client — never put secrets here.
-- In Phase 2, additional `VITE_` variables for e-commerce API endpoints are added to `.env.example` and `env.ts` only.
+**Rules (unchanged + additions):**
+
+- Never use `import.meta.env.VITE_*` directly in components — always import from `src/tokens/env.ts`
+- All `VITE_` values are public and bundled into the client — never put API secrets here
+- `VITE_ANALYTICS_ID` and `VITE_PURCHASE_URL` set in Vercel dashboard for production and preview environments
+- When `VITE_ANALYTICS_ID` is empty (local dev), `AppShell` skips GA4 script injection cleanly
+- When `VITE_PURCHASE_URL` is the placeholder `#`, the CTA fires but the fetch immediately returns a non-2xx — the error state is displayed; kit state is preserved
 
 ---

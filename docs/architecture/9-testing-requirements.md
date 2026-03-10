@@ -2,153 +2,121 @@
 
 ## Strategy
 
-Per PRD Technical Assumptions:
-- **Unit tests:** Core logic — slot calculations, size constraints, item catalog filtering. 100% branch coverage required on `slotCalculations.ts`.
-- **Component tests:** HousingUnitVisualizer, SubkitCard, ItemCard, QuantitySelector — each must include an axe accessibility assertion.
-- **Manual E2E:** Full flows tested manually in MVP. Automated E2E (Playwright) deferred to Phase 2.
-- **Accessibility:** `@axe-core/react` mounted in development. `eslint-plugin-jsx-a11y` runs in CI. Manual screen reader test (NVDA+Chrome or VoiceOver+Safari) required at each epic completion.
+Phase 1 unit and component testing strategy unchanged. Phase 2 adds:
 
-## vitest.config.ts
+- New component tests: `StarRating.test.tsx`
+- New unit tests: `checkoutService.test.ts`
+- New E2E suite: Playwright (3 flows, 2 projects)
+- New CI: GitHub Actions
+
+## Playwright Configuration
 
 ```typescript
-// vitest.config.ts
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./tests/setup.ts'],
-    coverage: {
-      provider: 'v8',
-      include: ['src/utils/**', 'src/store/**', 'src/components/**'],
-      exclude: ['src/data/**', 'src/types/**', 'src/tokens/**'],
-    },
+  testDir: './tests/e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env['CI'],
+  retries: process.env['CI'] ? 2 : 0,
+  reporter: process.env['CI'] ? 'github' : 'list',
+  use: {
+    baseURL: 'http://localhost:5173',
+    trace: 'on-first-retry',
+  },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // iPhone SE mobile project deferred to Phase 3 — MobileInterstitial is retained in Phase 2
+    // and would block all E2E flows on mobile viewport. Add mobile project in Phase 3
+    // alongside the MobileInterstitial removal and full mobile responsiveness work.
+  ],
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env['CI'],
   },
 });
 ```
 
-## Test Setup
+## GitHub Actions CI
 
-```typescript
-// tests/setup.ts
-import '@testing-library/jest-dom';
-import { configure } from '@testing-library/react';
-
-configure({ testIdAttribute: 'data-testid' });
+```yaml
+# .github/workflows/e2e.yml
+name: Playwright E2E
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
 ```
 
-## Slot Calculation Unit Tests (required coverage: 100% branches)
+Playwright runs on `push` and `pull_request` to `main`. Vitest unit tests run separately — `npm run test:run` is not part of `e2e.yml`. Add a separate `ci.yml` for Vitest if desired.
+
+## E2E Test Flows
+
+All three flows in a single `tests/e2e/kit-builder.spec.ts` file, tagged by describe block. Phase 2 runs `chromium` (Desktop Chrome) only — the iPhone SE project is deferred to Phase 3 when `MobileInterstitial` is removed. Adding it in Phase 2 would cause all three flows to fail against the interstitial screen:
+
+| Flow | Key Assertions |
+|------|----------------|
+| Full kit configuration | Select 3 subkits → configure items → reach Summary → all subkits + items visible |
+| Back-navigation state preservation | Configure 2 subkits → navigate back → both selections + sizes preserved |
+| Start Over reset | Complete config → Start Over → confirm modal → store resets → 6 empty slots |
+
+Each test clears localStorage before running (`page.evaluate(() => localStorage.clear())`) to ensure clean state.
+
+## New Component + Unit Tests
 
 ```typescript
-// tests/unit/slotCalculations.test.ts
-import { describe, it, expect } from 'vitest';
-import { calculateTotalSlots, calculateSlotState, canFitSize, isSlotsAtCapacity } from '../../src/utils/slotCalculations';
-import type { SubkitSelection } from '../../src/types';
-
-const sel = (id: string, size: 'regular' | 'large', order: number): SubkitSelection =>
-  ({ subkitId: id, categoryId: id, size, selectionOrder: order });
-
-describe('calculateTotalSlots', () => {
-  it('counts regular as 1 slot', () => expect(calculateTotalSlots([sel('power','regular',1)])).toBe(1));
-  it('counts large as 2 slots',  () => expect(calculateTotalSlots([sel('power','large',1)])).toBe(2));
-  it('handles mixed sizes',       () => expect(calculateTotalSlots([sel('a','large',1), sel('b','regular',2), sel('c','regular',3)])).toBe(4));
-  it('returns 0 for empty',       () => expect(calculateTotalSlots([])).toBe(0));
+// tests/components/StarRating.test.tsx
+describe('StarRating', () => {
+  it('renders filled layer clipped to correct percentage for a given rating');
+  it('outputs correct aria-label: "Rated 4.3 out of 5 based on 128 reviews"');
+  it('renders review count with toLocaleString formatting');
+  it('passes axe accessibility assertion');
 });
 
-describe('canFitSize', () => {
-  it('blocks large when switching would exceed 6', () => {
-    const s = [sel('a','large',1), sel('b','large',2), sel('c','regular',3), sel('d','regular',4)];
-    expect(canFitSize(s, 'c', 'large', 6)).toBe(false);
-  });
-  it('allows large when slots are available', () => {
-    expect(canFitSize([sel('a','regular',1)], 'a', 'large', 6)).toBe(true);
-  });
-  it('allows shrinking large to regular always', () => {
-    const s = [sel('a','large',1), sel('b','large',2), sel('c','regular',3)];
-    expect(canFitSize(s, 'a', 'regular', 6)).toBe(true);
-  });
-});
-
-describe('calculateSlotState', () => {
-  it('always returns exactly 6 slots', () => {
-    expect(calculateSlotState([]).length).toBe(6);
-    expect(calculateSlotState([sel('power','large',1), sel('medical','large',2), sel('hygiene','regular',3)]).length).toBe(6);
-  });
-  it('fills top-to-bottom in selection order', () => {
-    const slots = calculateSlotState([sel('power','regular',1)]);
-    expect(slots[0].status).toBe('filled');
-    expect(slots[1].status).toBe('empty');
-  });
-  it('sets isLargeStart and isLargeEnd on large blocks', () => {
-    const slots = calculateSlotState([sel('power','large',1)]);
-    expect(slots[0].isLargeStart).toBe(true);
-    expect(slots[1].isLargeEnd).toBe(true);
-    expect(slots[2].status).toBe('empty');
-  });
-  it('all slots empty when no selections', () => {
-    calculateSlotState([]).forEach((s) => expect(s.status).toBe('empty'));
-  });
-  it('does not exceed 6 slots even with overflow input', () => {
-    const over = Array.from({length:7}, (_,i) => sel(`cat${i}`,'regular',i+1));
-    const slots = calculateSlotState(over);
-    expect(slots.length).toBe(6);
-    expect(slots.every((s) => s.status === 'filled')).toBe(false); // last slot empty guard
-  });
-});
-
-describe('isSlotsAtCapacity', () => {
-  it('returns true at exactly 6 slots', () => {
-    const s = Array.from({length:6}, (_,i) => sel(`cat${i}`,'regular',i+1));
-    expect(isSlotsAtCapacity(s)).toBe(true);
-  });
-  it('returns false below 6 slots', () => {
-    expect(isSlotsAtCapacity([sel('a','regular',1)])).toBe(false);
-  });
+// tests/unit/checkoutService.test.ts (mocking fetch)
+describe('initiateCheckout', () => {
+  it('returns { success: true, redirectUrl } on 200 response with redirect URL');
+  it('returns { success: false, errorMessage } on non-2xx response');
+  it('returns { success: false, errorMessage } on network error (fetch throws)');
 });
 ```
 
-## Component Test Template
+## Updated package.json Scripts
 
-```typescript
-// tests/components/HousingUnitVisualizer.test.tsx
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import { HousingUnitVisualizer } from '../../src/components/visualizer/HousingUnitVisualizer';
-import { calculateSlotState } from '../../src/utils/slotCalculations';
-
-const emptySlots = calculateSlotState([]);
-
-describe('HousingUnitVisualizer', () => {
-  it('renders 6 slot containers', () => {
-    const { container } = render(<HousingUnitVisualizer slots={emptySlots} />);
-    expect(container.querySelectorAll('[data-testid^="slot-"]').length).toBe(6);
-  });
-  it('shows subkit name when slot is filled', () => {
-    const slots = calculateSlotState([{ subkitId: 'power', categoryId: 'power', size: 'regular', selectionOrder: 1 }]);
-    render(<HousingUnitVisualizer slots={slots} />);
-    expect(screen.getByText('Power')).toBeInTheDocument();
-  });
-  it('hides + icons in readOnly mode', () => {
-    render(<HousingUnitVisualizer slots={emptySlots} readOnly />);
-    expect(screen.queryAllByRole('img', { name: /add/i }).length).toBe(0);
-  });
-  it('uses 44px slot height in readOnly mode', () => {
-    const { container } = render(<HousingUnitVisualizer slots={emptySlots} readOnly />);
-    const firstSlot = container.querySelector('[data-testid="slot-0"]') as HTMLElement;
-    expect(firstSlot.style.height).toBe('44px');
-  });
-});
+```json
+{
+  "scripts": {
+    "dev":           "vite",
+    "build":         "tsc && vite build",
+    "preview":       "vite preview",
+    "lint":          "eslint src --ext ts,tsx",
+    "typecheck":     "tsc --noEmit",
+    "test":          "vitest",
+    "test:run":      "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e":      "playwright test"
+  }
+}
 ```
-
-## Testing Best Practices
-
-1. **`slotCalculations.ts` — 100% branch coverage is mandatory.** This is the most safety-critical code in the app; incorrect slot math produces physically invalid kit configurations.
-2. **Test behavior, not implementation.** Use `getByRole`, `getByText`, `getByLabelText` — never class names or internal state.
-3. **axe assertion on every component test file.** At minimum one `axe(container)` + `toHaveNoViolations()` per file.
-4. **No snapshot tests.** The design system evolves; snapshots break on every style change and provide no behavioral signal.
-5. **Zustand store resets between tests.** Call `useKitStore.getState().resetKit()` in `beforeEach` for any test that exercises the store.
 
 ---

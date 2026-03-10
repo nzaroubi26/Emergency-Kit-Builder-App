@@ -2,19 +2,19 @@
 
 | Category | Technology | Version | Purpose | Rationale |
 |----------|------------|---------|---------|----------|
-| Language | TypeScript | 5.x strict | Primary language | Strict mode enforces type safety across slot calculations, category colors, and state |
-| Framework | React | 18.x | UI component tree | Per PRD |
-| Build Tool | Vite | 6.x | Dev server, bundling, HMR | Fastest HMR; Tailwind v4 plugin support; static SPA output |
-| Styling | Tailwind CSS | v4.x | Utility-first + CSS variable theme | Per PRD; v4 CSS-variable-native theme maps directly to design-tokens.ts |
-| State Management | Zustand | 5.x | Global kit configuration state | Cross-screen state without Provider nesting; Phase 2 localStorage middleware is additive |
-| Routing | React Router | 6.4+ Data Router | Client-side routing, navigation guards | Loader-based guards; handles `/configure/:subkitId` |
+| Language | TypeScript | 5.x strict | Primary language | Unchanged from Phase 1 |
+| Framework | React | 18.x | UI component tree | Unchanged from Phase 1 |
+| Build Tool | Vite | 6.x | Dev server, bundling, HMR | Unchanged from Phase 1 |
+| Styling | Tailwind CSS | v4.x | Utility-first + CSS variable theme | Unchanged from Phase 1 |
+| State Management | Zustand | 5.x + persist | Global kit state + localStorage | `persist` middleware wraps existing `create()` — one file, zero consumer changes |
+| Routing | React Router | 6.4+ | Client-side routing + navigation guards | `/` cover page; `/builder` kit entry |
 | Icons | lucide-react | latest | Category + UI icons | Named imports only — mandatory for tree-shaking |
-| Testing | Vitest | 2.x | Unit and component tests | Native Vite integration; Jest-compatible API |
-| Testing DOM | React Testing Library | 16.x | Component interaction tests | Tests user-facing behavior |
-| Testing a11y | @axe-core/react | 4.x | Automated a11y checks in dev | Per UX spec requirement |
-| Linting a11y | eslint-plugin-jsx-a11y | 6.x | Static ARIA enforcement | Runs in CI per spec |
-| Linting | ESLint + @typescript-eslint | 8.x | Code quality | |
-| Formatting | Prettier | 3.x | Code formatting | |
-| Deployment | Vercel | — | Static SPA hosting | Zero-config Vite detection; React Router client-side routing handled natively (no `_redirects` file needed); preview deployments per branch; env vars set in dashboard |
+| Testing (unit) | Vitest + RTL + axe-core/react | 2.x / 16.x / 4.x | Unit and component tests | Unchanged from Phase 1 |
+| Testing (E2E) | Playwright | latest | Automated end-to-end suite | Three critical flows; GitHub Actions CI |
+| Analytics | Google Analytics 4 | — | User behavior event tracking | Non-blocking; e-commerce event support; `VITE_ANALYTICS_ID` env var |
+| Linting | ESLint + @typescript-eslint + eslint-plugin-jsx-a11y | 8.x / 6.x | Code quality + a11y | Unchanged from Phase 1 |
+| Formatting | Prettier | 3.x | Code formatting | Unchanged from Phase 1 |
+| Deployment | Vercel | — | Static SPA hosting | Unchanged from Phase 1 |
+| CI | GitHub Actions | — | Playwright E2E runner | New in Phase 2 |
 
 ---

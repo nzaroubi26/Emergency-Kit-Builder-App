@@ -2,78 +2,96 @@
 
 ```
 emergency-prep-kit/
+├── .github/
+│   └── workflows/
+│       └── e2e.yml                          # GitHub Actions — Playwright CI runner
 ├── public/
 │   └── favicon.ico
 ├── src/
-│   ├── main.tsx                         # Entry — React.StrictMode + RouterProvider
-│   ├── App.tsx                           # RouterProvider root
+│   ├── main.tsx
+│   ├── App.tsx
 │   ├── tokens/
-│   │   └── design-tokens.ts             # Colors, motion — single source of truth from UX spec
+│   │   ├── design-tokens.ts
+│   │   └── env.ts                           # VITE_PURCHASE_URL + VITE_ANALYTICS_ID
 │   ├── styles/
-│   │   ├── globals.css                   # Tailwind v4 @import, @theme block, CSS custom properties
-│   │   └── print.css                     # @media print — imported by SummaryScreen only
+│   │   ├── globals.css
+│   │   └── print.css
 │   ├── types/
-│   │   ├── kit.types.ts                  # KitCategory, KitItem, SubkitSelection, ItemSelection
-│   │   ├── visualizer.types.ts           # SlotState, HousingUnitVisualizerProps
-│   │   └── index.ts                      # Barrel export
+│   │   ├── kit.types.ts                     # KitItem extended: rating + reviewCount + weightGrams + volumeIn3 (Phase 2.5)
+│   │   ├── visualizer.types.ts
+│   │   └── index.ts
 │   ├── data/
-│   │   ├── kitItems.ts                   # All subkit categories + items (corrected per spec)
-│   │   └── index.ts                      # Barrel export
+│   │   ├── kitItems.ts                      # All 28 items: rating + reviewCount + weightGrams + volumeIn3 populated
+│   │   ├── itemImages.ts
+│   │   └── index.ts
 │   ├── utils/
-│   │   ├── slotCalculations.ts           # Pure functions: calculateSlotState, calculateTotalSlots, canFitSize
-│   │   └── categoryUtils.ts              # getCategoryById, getCategoryColor, getCategoryIcon
+│   │   ├── slotCalculations.ts              # Extended (Phase 2.5) — calculateSubkitWeightLbs + calculateSubkitVolumePct appended
+│   │   ├── categoryUtils.ts
+│   │   └── analytics.ts                     # NEW — GA4 wrapper
+│   ├── services/
+│   │   └── checkoutService.ts               # NEW — cart serialization + fetch POST
 │   ├── store/
-│   │   └── kitStore.ts                   # Zustand store — all kit configuration state + actions
+│   │   └── kitStore.ts                      # persist middleware added
 │   ├── router/
-│   │   ├── index.tsx                     # createBrowserRouter — routes + loader guards
-│   │   └── guards.ts                     # Loader functions for navigation guard logic
+│   │   ├── index.tsx                        # / → CoverScreen; /builder → SubkitSelectionScreen
+│   │   └── guards.ts                        # All redirects updated to /builder
 │   ├── components/
+│   │   ├── cover/
+│   │   │   └── CoverScreen.tsx              # NEW — landing page at /
 │   │   ├── layout/
-│   │   │   ├── AppShell.tsx              # Outlet wrapper — header + mobile interstitial
-│   │   │   ├── AppHeader.tsx             # App name + StepProgressIndicator
-│   │   │   ├── StepProgressIndicator.tsx # Step 1 / 2 / 3 — informational, not clickable
-│   │   │   └── MobileInterstitial.tsx    # Rendered below 768px — not a route
+│   │   │   ├── AppShell.tsx                 # GA4 script injection; MobileInterstitial retained (Phase 3)
+│   │   │   ├── AppHeader.tsx
+│   │   │   └── StepProgressIndicator.tsx
+│   │   │   ├── MobileInterstitial.tsx       # Unchanged — deferred to Phase 3
 │   │   ├── ui/
-│   │   │   ├── PrimaryButton.tsx         # brand-primary CTA; aria-disabled when inactive
-│   │   │   ├── SecondaryButton.tsx       # Neutral secondary actions
-│   │   │   ├── ConfirmationModal.tsx     # Focus-trapped dialog; Escape = cancel only
-│   │   │   └── ImageWithFallback.tsx     # Category tint bg + icon fallback (Phase 2: real images)
+│   │   │   ├── PrimaryButton.tsx
+│   │   │   ├── SecondaryButton.tsx
+│   │   │   ├── ConfirmationModal.tsx
+│   │   │   ├── ImageWithFallback.tsx
+│   │   │   └── StarRating.tsx               # NEW — CSS width-clip stars; aria-label
 │   │   ├── visualizer/
-│   │   │   ├── HousingUnitVisualizer.tsx  # Fully props-driven, stateless internally
-│   │   │   ├── VisualizerSlot.tsx         # Single slot — all 5 visual states
-│   │   │   └── SlotFullIndicator.tsx      # Amber inline indicator below visualizer
+│   │   │   ├── HousingUnitVisualizer.tsx    # Unchanged interface; onSlotClick now active; + exterior shell (Phase 2.5)
+│   │   │   ├── VisualizerSlot.tsx           # cursor-pointer + hover:brightness-95 on filled
+│   │   │   └── SlotFullIndicator.tsx
 │   │   ├── subkit-selection/
-│   │   │   ├── SubkitSelectionScreen.tsx  # Screen root — composes S1 components
-│   │   │   ├── SubkitCard.tsx             # Category card — default/selected/disabled
-│   │   │   └── SizeToggle.tsx             # [Regular][Large] inline toggle; slides in on selection
+│   │   │   ├── SubkitSelectionScreen.tsx    # Passes onSlotClick handler
+│   │   │   ├── SubkitCard.tsx
+│   │   │   └── SizeToggle.tsx
 │   │   ├── item-config/
-│   │   │   ├── ItemConfigScreen.tsx       # Standard subkit config screen root
-│   │   │   ├── CustomSubkitScreen.tsx     # Custom subkit all-category browser
-│   │   │   ├── ItemCard.tsx               # Image + toggle + quantity bar
-│   │   │   ├── QuantitySelector.tsx       # [−] [n] [+] min 1, max 10
-│   │   │   ├── EmptyContainerOption.tsx   # Checkbox — dims item grid on selection
-│   │   │   ├── CategoryGroupHeader.tsx    # Group label in Custom browser
-│   │   │   └── SubkitProgressIndicator.tsx  # Progress bar + 'Subkit N of M' label
+│   │   │   ├── ItemConfigScreen.tsx         # + Fill my kit for me checkbox; + SubkitStatsStrip (Phase 2.5)
+│   │   │   ├── CustomSubkitScreen.tsx       # + Fill my kit for me checkbox; + SubkitStatsStrip (Phase 2.5)
+│   │   │   ├── SubkitStatsStrip.tsx         # NEW (Phase 2.5) — weight + volume strip; no internal state
+│   │   │   ├── ItemCard.tsx                 # + StarRating below name/description
+│   │   │   ├── QuantitySelector.tsx
+│   │   │   ├── EmptyContainerOption.tsx
+│   │   │   ├── CategoryGroupHeader.tsx
+│   │   │   └── SubkitProgressIndicator.tsx
 │   │   └── summary/
-│   │       ├── SummaryScreen.tsx          # Screen root — imports print.css
-│   │       └── SubkitSummarySection.tsx   # Per-subkit card: color bar + items + empty badge
+│   │       ├── SummaryScreen.tsx            # CTA → initiateCheckout; loading + error states; + weight/volume stats (Phase 2.5)
+│   │       └── SubkitSummarySection.tsx     # No StarRating rendered here
 │   └── hooks/
-│       ├── useKitStore.ts                 # Typed Zustand selector hooks
-│       └── useResponsive.ts              # useMediaQuery for MobileInterstitial threshold
+│       ├── useKitStore.ts
+│       └── useResponsive.ts             # Unchanged — deferred to Phase 3
 ├── tests/
 │   ├── setup.ts
 │   ├── unit/
-│   │   └── slotCalculations.test.ts
-│   └── components/
-│       ├── HousingUnitVisualizer.test.tsx
-│       ├── SubkitCard.test.tsx
-│       ├── ItemCard.test.tsx
-│       └── QuantitySelector.test.tsx
+│   │   ├── slotCalculations.test.ts         # Extended (Phase 2.5) — 8 new cases appended; existing cases untouched
+│   │   └── checkoutService.test.ts          # NEW — mocked fetch: success, network fail, non-2xx
+│   ├── components/
+│   │   ├── HousingUnitVisualizer.test.tsx
+│   │   ├── SubkitCard.test.tsx
+│   │   ├── ItemCard.test.tsx
+│   │   ├── QuantitySelector.test.tsx
+│   │   ├── StarRating.test.tsx              # NEW — star fill, aria-label, null-safe
+│   │   └── SubkitStatsStrip.test.tsx        # NEW (Phase 2.5) — 6 test cases per Story 9.3 AC10
+│   └── e2e/
+│       └── kit-builder.spec.ts              # NEW — three Playwright flows
+├── playwright.config.ts                     # NEW
 ├── index.html
 ├── vite.config.ts
 ├── vitest.config.ts
 ├── tailwind.config.ts
-├── tsconfig.json                          # strict: true
+├── tsconfig.json
 ├── .eslintrc.cjs
 ├── .prettierrc
 └── package.json

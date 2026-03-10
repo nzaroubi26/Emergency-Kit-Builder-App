@@ -1,117 +1,77 @@
 # 11. Frontend Developer Standards
 
-## Critical Rules — Dev Agent Must Follow
+## All Phase 1 Critical Rules Apply
 
-These rules exist because violations here produce bugs that are invisible at compile time but break the physical kit constraint logic at runtime.
+All 10 critical rules from Phase 1 apply to all Phase 2 code without exception. Phase 2 adds four additional rules:
 
 | # | Rule | Why |
 |---|------|-----|
-| 1 | **Never store slot state in Zustand.** Slot state is always computed via `calculateSlotState()`. Storing it creates sync bugs. | NFR2 + slot constraint correctness |
-| 2 | **Never call `calculateSlotState()` directly in components.** Always use `useSlotState()` from `src/hooks/useKitStore.ts`. | Prevents duplicated computation and ensures consistency |
-| 3 | **Dynamic category colors must use inline styles.** `style={{ backgroundColor: category.colorBase }}` — never template literal Tailwind classes. | Tailwind purges unused dynamic classes at build time |
-| 4 | **All animations use `transform` and `opacity` only.** Animating `width`, `height`, or positional properties breaks the 100ms slot update NFR. | NFR2 |
-| 5 | **All interactive elements must have an accessible label.** Use `aria-label`, `aria-labelledby`, or visible associated `<label>`. The axe test will catch violations. | WCAG 2.1 AA |
-| 6 | **The Configure Items CTA uses `aria-disabled` + `aria-describedby`, not the `disabled` attribute.** Keyboard users must be able to reach it and read the minimum message. | UX spec Section 7 |
-| 7 | **Named imports only from `lucide-react`.** Never `import * as Icons from 'lucide-react'`. | Bundle size — prevents importing 1000+ icons |
-| 8 | **`QuantitySelector` container always reserves its layout space.** Only `opacity` and `pointer-events` change. Never conditionally render or hide with `display:none`. | CLS prevention — UX spec Section 10 |
-| 9 | **`EmptyContainerOption` is rendered on both `ItemConfigScreen` and `CustomSubkitScreen`.** The Custom subkit supports the empty container option identically to standard subkits per PRD FR9. Behavior: deselects all Custom items, dims item grid, displays inline confirmation in Custom category color (`#3730A3`), reflected on Summary Page. | PRD FR9 scope |
-| 10 | **The `HousingUnitVisualizer` receives no store references.** It takes only `slots: SlotState[]`, `readOnly?`, and `onSlotClick?`. All derivation happens in the parent. | NFR6 — self-contained extensible module |
+| 11 | **Never call `window.gtag` or any analytics script API directly in components.** Always use `Analytics.*` from `src/utils/analytics.ts`. | Testability; silent failure guarantee; single call-site pattern |
+| 12 | **`Analytics.ctaClicked()` must fire before `initiateCheckout()` is called.** The analytics event is not contingent on API success. | PRD FR story 8.2 AC7 |
+| 13 | **`isAllFilled` is derived state — never store it in Zustand.** Compute from `itemSelections` in the component. | Prevents sync bugs between derived and stored state |
+| 14 | **`StarRating` must not render in `SubkitSummarySection`.** Star ratings appear only during item selection screens — not on the Summary Page. | PRD FR11 |
 
-## Quick Reference
+## Key Import Patterns — Phase 2 Additions
+
+```typescript
+// Analytics — always via this module, never window.gtag directly
+import { Analytics } from '../utils/analytics';
+
+// Checkout
+import { initiateCheckout } from '../services/checkoutService';
+import type { CheckoutPayload, CheckoutResult } from '../services/checkoutService';
+
+// Star rating
+import { StarRating } from '../components/ui/StarRating';
+
+// Env tokens
+import { ENV } from '../tokens/env';
+// ENV.purchaseUrl  — checkout POST endpoint
+// ENV.analyticsId  — GA4 Measurement ID
+```
+
+## Focus Management and ARIA — Phase 2 Additions
+
+- `CoverScreen` heading gets `ref` + `tabIndex={-1}` + `useEffect focus()` per the Phase 1 screen transition pattern
+- `StarRating` wrapper `div` carries the full `aria-label`; all star SVGs are `aria-hidden="true"`
+- Checkout error `div` uses `role="alert"` — screen readers announce it automatically on appearance
+- "Fill my kit for me" checkbox uses a visible `<label>` associated via `htmlFor` — no `aria-label` override needed
+
+## Phase 2.5 Coding Standards
+
+All 14 critical rules (Rules 1–14, Section 11) apply to all Phase 2.5 code without exception. No new rules are introduced. The following reminders apply specifically to Phase 2.5 implementation:
+
+- **Rule 8 (dynamic colors via inline style):** The `SubkitStatsStrip` volume bar fill color uses `style={{ backgroundColor: categoryColor }}`. Never use Tailwind arbitrary values for category colors.
+- **Rule 13 (derived state not stored):** `weightLbs` and `volumePct` are always computed inline in the parent using `calculateSubkitWeightLbs` / `calculateSubkitVolumePct`. They are never stored in Zustand and never lifted into component state.
+- **Rule 14 (no StarRating in SubkitSummarySection):** Unchanged — Phase 2.5 adds weight/volume stats to `SubkitSummarySection` heading rows but does not add `StarRating`.
+- **FR13 (no warnings):** No color changes, no icons, no text changes at any weight or volume value — including values above 100% fill. The word "informational" is absolute. Do not add any conditional rendering based on weight or volume thresholds.
+
+## Phase 2.5 Import Patterns
+
+```typescript
+// Weight and volume calculation functions
+import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../utils/slotCalculations';
+
+// SubkitStatsStrip — item-config screens only
+import { SubkitStatsStrip } from './SubkitStatsStrip';
+
+// Container capacities — use these constants, never magic numbers
+const REGULAR_CAPACITY_IN3 = 1728;
+const LARGE_CAPACITY_IN3 = 3456;
+```
+
+## Quick Reference — All Commands
 
 ```bash
-# Development
-npm run dev          # Vite dev server — http://localhost:5173
-npm run build        # Production build to dist/
-npm run preview      # Preview production build locally
-
-# Quality
-npm run lint         # ESLint + jsx-a11y
-npm run typecheck    # tsc --noEmit
-
-# Testing
-npm run test         # Vitest — watch mode
-npm run test:run     # Vitest — single run (CI)
+npm run dev            # Vite dev server — http://localhost:5173
+npm run build          # Production build to dist/
+npm run preview        # Preview production build locally
+npm run lint           # ESLint + jsx-a11y
+npm run typecheck      # tsc --noEmit
+npm run test           # Vitest — watch mode
+npm run test:run       # Vitest — single run (CI)
 npm run test:coverage  # Coverage report
+npm run test:e2e       # Playwright E2E (starts dev server automatically)
 ```
-
-## Key Import Patterns
-
-```typescript
-// Types
-import type { KitCategory, KitItem, SubkitSelection } from '../types';
-import type { SlotState, HousingUnitVisualizerProps } from '../types';
-
-// Data
-import { CATEGORIES, ITEMS, ITEMS_BY_CATEGORY, STANDARD_CATEGORY_IDS } from '../data';
-
-// Store
-import { useKitStore } from '../store/kitStore';
-import { useSlotState, useIsAtCapacity, useCanProceedToConfig } from '../hooks/useKitStore';
-
-// Slot utils — only in tests and the store; never import directly into components
-import { calculateSlotState, canFitSize } from '../utils/slotCalculations';
-
-// Icons — named imports only
-import { Zap, Radio, HeartPulse, Settings2 } from 'lucide-react';
-
-// Env
-import { ENV } from '../tokens/env';
-```
-
-## Focus Management on Screen Transitions
-
-Per UX spec Section 7, focus must move to the main heading on every screen change:
-
-```typescript
-// Pattern to use in every screen component
-import { useEffect, useRef } from 'react';
-
-export const ItemConfigScreen: FC = () => {
-  const headingRef = useRef<HTMLHeadingElement>(null);
-
-  useEffect(() => {
-    headingRef.current?.focus();
-  }, []);  // Runs on mount — each screen mounts fresh on navigation
-
-  return (
-    <main>
-      <h1 ref={headingRef} tabIndex={-1} className="text-[var(--text-h1)] font-bold text-[var(--color-neutral-900)] outline-none">
-        Configure Your Power Subkit
-      </h1>
-      {/* ... */}
-    </main>
-  );
-};
-```
-
-## ARIA Live Region Setup
-
-A single `aria-live` region for polite announcements and one for assertive announcements should be mounted in `AppShell` and populated via a shared announcement utility — not duplicated per component:
-
-```typescript
-// src/utils/announce.ts
-let politeEl: HTMLElement | null = null;
-let assertiveEl: HTMLElement | null = null;
-
-export function initAnnouncer(polite: HTMLElement, assertive: HTMLElement) {
-  politeEl = polite;
-  assertiveEl = assertive;
-}
-
-export function announcePolite(message: string) {
-  if (!politeEl) return;
-  politeEl.textContent = '';
-  requestAnimationFrame(() => { if (politeEl) politeEl.textContent = message; });
-}
-
-export function announceAssertive(message: string) {
-  if (!assertiveEl) return;
-  assertiveEl.textContent = '';
-  requestAnimationFrame(() => { if (assertiveEl) assertiveEl.textContent = message; });
-}
-```
-
-Call `announcePolite` / `announceAssertive` from store action side-effects or component event handlers per the ARIA announcements table in UX spec Section 7.
 
 ---

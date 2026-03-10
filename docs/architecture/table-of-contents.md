@@ -11,6 +11,6 @@
 9. Testing Requirements
 10. Environment Configuration
 11. Frontend Developer Standards
-12. Phase 2 Extension Points
+12. Phase 3+ Roadmap
 
 ---

@@ -1,162 +1,72 @@
 # 8. Styling Guidelines
 
-## Approach
+Unchanged from Phase 1. All Phase 2 components follow the identical Tailwind v4 + CSS custom properties pipeline, dynamic category colors via inline styles, and GPU-composited animation rules.
 
-**Tailwind CSS v4 + CSS Custom Properties.** All design tokens from `design-tokens.ts` are mirrored as CSS custom properties in the `@theme` block in `globals.css`. This creates one authoritative styling pipeline:
+## StarRating Styling Notes
 
-```
-design-tokens.ts  →  globals.css @theme  →  Tailwind utility classes in components
-```
+- Filled stars use `var(--color-brand-accent)` (#22C55E) — consistent with existing brand palette
+- Empty stars use `var(--color-neutral-200)`
+- Star SVG size: `w-3.5 h-3.5` — sized to sit comfortably below item name/description without crowding the toggle row
+- The `aria-label` on the wrapper `div` conveys the full rating to screen readers; the star SVGs are `aria-hidden`
 
-**Dynamic category colors** (visualizer fills, card borders, progress bar fills) must use **inline styles** — Tailwind cannot generate classes for runtime hex values:
+## Cover Page Styling
 
-```tsx
-// Correct — dynamic color as inline style
-<div style={{ backgroundColor: category.colorBase }} className="h-10 rounded-[var(--radius-md)]" />
+`CoverScreen` uses brand tokens only. It is a simple static full-viewport screen built mobile-ready from day one — no breakpoint changes are required in Phase 2 for any other screen.
 
-// Wrong — Tailwind cannot generate this at runtime
-<div className={`bg-[${category.colorBase}]`} />
-```
+- Background: `var(--color-brand-primary)` `#1F4D35` — full viewport (not neutral-50; the cover page is a branded full-bleed screen)
+- Headline: white (`#FFFFFF`), `font-bold`, large type scale (`text-display` 36px)
+- Value proposition: white at `opacity-90`, `text-body-lg` (16px)
+- CTA button: **inverted variant** — white background with `--color-brand-primary` text. The standard `PrimaryButton` (dark green fill, white text) would be near-invisible against the dark green background. Use `className="bg-white text-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-light)]"` on the `PrimaryButton` or pass an `inverted` prop if one is added. Min height 44px per NFR3.
+- Accent elements: `var(--color-brand-accent)` sparingly (e.g. thin horizontal rule or headline underline)
 
-**All static structural UI** (layout, spacing, neutral colors, typography sizing) uses Tailwind utility classes.
+## Mobile Responsiveness — Breakpoint Strategy
 
-## globals.css
+**Phase 2 retains the Phase 1 desktop-first strategy.** Full mobile responsiveness is deferred to Phase 3 alongside Bazaarvoice. `MobileInterstitial.tsx` and `useResponsive.ts` remain in place and are unchanged.
 
-```css
-/* src/styles/globals.css */
-@import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+| Breakpoint | Min Width | Max Width | Usage |
+|-----------|-----------|-----------|-------|
+| desktop-lg | 1280px | — | `2xl:` |
+| desktop | 1024px | 1279px | `lg:` |
+| tablet | 768px | 1023px | `md:` |
+| tablet-sm | 640px | 767px | `sm:` |
+| mobile | 0px | 639px | MobileInterstitial — graceful degradation only |
 
-@theme {
-  /* Font */
-  --font-sans: 'Inter', system-ui, sans-serif;
+**Phase 2 breakpoint behaviour:** No new breakpoint values or mobile layout classes are introduced in Phase 2. Users below 768px continue to see the `MobileInterstitial` screen. All Phase 2 layout work targets the 768px–1920px working range. The `CoverScreen` is an exception — it is built mobile-ready from day one as it is a simple static full-viewport screen with no complex layout, but no other screens receive mobile layout changes in Phase 2.
 
-  /* Brand */
-  --color-brand-primary:       #1F4D35;
-  --color-brand-primary-hover: #163828;
-  --color-brand-primary-light: #E8F5EE;
-  --color-brand-accent:        #22C55E;
+**Phase 3 mobile work (deferred):** `MobileInterstitial` removal, mobile layout variants for all five screens, WCAG 2.1 AA touch target enforcement (44×44px), and single-column grid on mobile. See Phase 3+ Roadmap.
 
-  /* Neutrals */
-  --color-neutral-white: #FFFFFF;
-  --color-neutral-50:    #F8F9FA;
-  --color-neutral-100:   #F3F4F6;
-  --color-neutral-200:   #E5E7EB;
-  --color-neutral-300:   #D1D5DB;
-  --color-neutral-400:   #9CA3AF;
-  --color-neutral-500:   #6B7280;
-  --color-neutral-700:   #374151;
-  --color-neutral-900:   #111827;
+## SummaryScreen Checkout States
 
-  /* Semantic */
-  --color-status-success: #16A34A;
-  --color-status-warning: #D97706;
-  --color-status-error:   #DC2626;
-  --color-status-info:    #2563EB;
-
-  /* Border radius */
-  --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   16px;
-  --radius-full: 9999px;
-
-  /* Elevation */
-  --shadow-1: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-2: 0 4px 6px rgba(0,0,0,0.07);
-  --shadow-3: 0 20px 25px rgba(0,0,0,0.12);
-
-  /* Motion durations */
-  --duration-instant:  0ms;
-  --duration-fast:     130ms;
-  --duration-default:  150ms;
-  --duration-moderate: 200ms;
-  --duration-standard: 220ms;
-  --duration-screen:   240ms;
-  --duration-reward:   360ms;
-
-  /* Motion easings */
-  --ease-standard:   cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
-  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
-  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Global base */
-:root {
-  font-family: var(--font-sans);
-  background-color: var(--color-neutral-50);
-  color: var(--color-neutral-700);
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Focus indicators — per UX spec Section 7 */
-:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-.subkit-card:focus-visible {
-  outline: 3px solid var(--color-brand-primary);
-  outline-offset: 0;
-}
-:focus:not(:focus-visible) { outline: none; }
-
-/* Reduced motion — hard requirement from UX spec Section 9 */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
-
-## print.css
-
-Imported **only** in `SummaryScreen.tsx` — not global.
-
-```css
-/* src/styles/print.css */
-@media print {
-  header,
-  .step-progress-indicator,
-  .btn-get-my-kit,
-  .btn-edit,
-  .btn-print,
-  .btn-start-over { display: none !important; }
-
-  body { background: white; font-size: 12pt; color: #000; }
-
-  .summary-subkit-section { page-break-inside: avoid; }
-
-  /* No + icons in print — empty slots render as clean boxes */
-  .visualizer-slot-empty::after { content: none; }
-  .visualizer-slot-empty {
-    background-color: #f8f9fa !important;
-    border: 1px solid #e5e7eb !important;
-  }
-}
-```
-
-## Animation Rules
-
-All animations use **`transform` and `opacity` only** — GPU-composited, zero layout reflow. This is the hard architectural constraint behind NFR2 (slot updates < 100ms).
+Two new visual states added to `SummaryScreen` — both use existing design tokens:
 
 ```tsx
-// Correct — GPU-composited properties only
-style={{ opacity: filled ? 1 : 0, transition: `opacity var(--duration-standard) var(--ease-standard)` }}
-style={{ transform: 'translateX(0)', transition: `transform var(--duration-screen) var(--ease-standard)` }}
+{/* Loading state — CTA disabled during API call */}
+<PrimaryButton
+  disabled
+  aria-disabled="true"
+  className="opacity-70 cursor-not-allowed"
+>
+  Processing...
+</PrimaryButton>
 
-// Never animate these — they cause layout reflow:
-// width, height, top, left, right, bottom, padding, margin
+{/* Error state — dismissible, below CTA */}
+{checkoutError && (
+  <div
+    role="alert"
+    className="mt-3 flex items-start gap-2 rounded-[var(--radius-md)] bg-red-50 border border-red-200 p-3 text-sm text-[var(--color-status-error)]"
+  >
+    <span className="flex-1">{checkoutError}</span>
+    <button
+      onClick={() => setCheckoutError(null)}
+      aria-label="Dismiss error"
+      className="shrink-0 text-[var(--color-neutral-400)] hover:text-[var(--color-neutral-700)]"
+    >
+      <X size={16} />
+    </button>
+  </div>
+)}
 ```
 
-**Slot fill animation detail** (Animation #1 from UX spec):
-- The slot `div` transitions `background-color` over 220ms
-- The name `span` inside delays its `opacity` transition by 80ms
-- These are two separate CSS transitions on two separate elements — not a single combined transition
-
-**Large block behavior** (Animation #9):
-- Both rows (`isLargeStart` and `isLargeEnd`) receive the same `background-color` transition simultaneously
-- The internal divider between them transitions `opacity` to 0 — both rows visually merge into one continuous block
+Kit state is never cleared on checkout failure — `checkoutError` lives in local component state only.
 
 ---
