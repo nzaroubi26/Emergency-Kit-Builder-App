@@ -36,7 +36,7 @@ src/
 │   ├── itemImages.ts
 │   └── index.ts                # Barrel re-export
 ├── utils/
-│   ├── slotCalculations.ts     # calculateTotalSlots, canFitSize, calculateSlotState, isSlotsAtCapacity
+│   ├── slotCalculations.ts     # calculateTotalSlots, canFitSize, calculateSlotState, isSlotsAtCapacity, calculateSubkitWeightLbs, calculateSubkitVolumePct
 │   ├── categoryUtils.ts        # getCategoryById, getCategoryColor, getCategoryIcon
 │   ├── announce.ts             # ARIA live region announcer
 │   └── analytics.ts            # GA4 wrapper — Analytics.* typed helpers
@@ -51,9 +51,9 @@ src/
 │   ├── cover/                  # CoverScreen (landing page at /)
 │   ├── layout/                 # AppShell (+ GA4 injection), AppHeader, StepProgressIndicator, MobileInterstitial
 │   ├── ui/                     # PrimaryButton, SecondaryButton, ConfirmationModal, ImageWithFallback, StarRating
-│   ├── visualizer/             # HousingUnitVisualizer, VisualizerSlot (clickable slots), SlotFullIndicator
+│   ├── visualizer/             # HousingUnitVisualizer (+ outer frame, handle tab, wheel guards), VisualizerSlot (clickable slots), SlotFullIndicator
 │   ├── subkit-selection/       # SubkitSelectionScreen (+ onSlotClick), SubkitCard, SizeToggle
-│   ├── item-config/            # ItemConfigScreen (+ Fill my kit), CustomSubkitScreen (+ Fill my kit), ItemCard (+ StarRating), QuantitySelector
+│   ├── item-config/            # ItemConfigScreen (+ Fill my kit), CustomSubkitScreen (+ Fill my kit), ItemCard (+ StarRating), QuantitySelector, SubkitStatsStrip
 │   └── summary/                # SummaryScreen (+ checkout integration), SubkitSummarySection
 └── hooks/                      # useKitStore, useResponsive
 tests/
