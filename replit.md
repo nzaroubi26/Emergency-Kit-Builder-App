@@ -116,7 +116,7 @@ tests/
 
 ### Phase 2.5 (In Progress)
 - Epic 9: Kit Weight & Volume Tracking (Stories 9.1 → 9.2 → 9.3 → 9.4, sequential dependency)
-  - Story 9.1 (KitItem Data Extension): Draft
+  - Story 9.1 (KitItem Data Extension): Done
   - Story 9.2 (Calculation Functions): Draft
   - Story 9.3 (SubkitStatsStrip Component): Draft
   - Story 9.4 (Summary Page Stats Readout): Draft

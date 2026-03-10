@@ -17,6 +17,8 @@ export interface KitItem {
   description: string;
   rating: number | null;
   reviewCount: number | null;
+  weightGrams: number | null;
+  volumeIn3: number | null;
   productId: string | null;
   pricePlaceholder: number | null;
   imageSrc: string | null;
