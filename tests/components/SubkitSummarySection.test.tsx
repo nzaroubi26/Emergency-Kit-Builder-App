@@ -58,6 +58,7 @@ const defaultProps = {
   isEmpty: false,
   weightLbs: 2.4,
   volumePct: 48,
+  subtotal: 40,
 };
 
 describe('SubkitSummarySection price display', () => {
@@ -88,7 +89,7 @@ describe('SubkitSummarySection price display', () => {
         items={[{ item: mockItemNoPrice, quantity: 1 }]}
       />
     );
-    expect(screen.queryByText(/\$/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\$(?!40\.00)/)).not.toBeInTheDocument();
   });
 
   it('has no accessibility violations with prices displayed', async () => {
@@ -115,5 +116,53 @@ describe('SubkitSummarySection price display', () => {
     expect(screen.getByText('Solar Panel')).toBeInTheDocument();
     expect(screen.getByText('×2')).toBeInTheDocument();
     expect(screen.getByText('$29.99 × 2 = $59.98')).toBeInTheDocument();
+  });
+});
+
+describe('SubkitSummarySection subtotal display', () => {
+  it('renders subtotal with correct formatted value ($40.00)', () => {
+    render(
+      <SubkitSummarySection
+        {...defaultProps}
+        subtotal={40}
+        items={[{ item: mockItemWithPrice, quantity: 1 }]}
+      />
+    );
+    expect(screen.getByText('Subtotal: $40.00')).toBeInTheDocument();
+  });
+
+  it('renders subtotal with item total ($69.99)', () => {
+    render(
+      <SubkitSummarySection
+        {...defaultProps}
+        subtotal={69.99}
+        items={[{ item: mockItemWithPrice, quantity: 1 }]}
+      />
+    );
+    expect(screen.getByText('Subtotal: $69.99')).toBeInTheDocument();
+  });
+
+  it('subtotal element has text-right class', () => {
+    render(
+      <SubkitSummarySection
+        {...defaultProps}
+        subtotal={40}
+        items={[{ item: mockItemWithPrice, quantity: 1 }]}
+      />
+    );
+    const subtotalElement = screen.getByText('Subtotal: $40.00');
+    expect(subtotalElement).toHaveClass('text-right');
+  });
+
+  it('has no accessibility violations with subtotal displayed', async () => {
+    const { container } = render(
+      <SubkitSummarySection
+        {...defaultProps}
+        subtotal={40}
+        items={[{ item: mockItemWithPrice, quantity: 1 }]}
+      />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

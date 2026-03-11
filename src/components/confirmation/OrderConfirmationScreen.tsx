@@ -4,7 +4,7 @@ import { useKitStore } from '../../store/kitStore';
 import { CATEGORIES, ITEMS, ITEMS_BY_CATEGORY } from '../../data';
 import { SubkitSummarySection } from '../summary/SubkitSummarySection';
 import { SecondaryButton } from '../ui/SecondaryButton';
-import { calculateCartGrandTotal } from '../../utils/cartCalculations';
+import { calculateCartGrandTotal, calculateSubkitCartTotal } from '../../utils/cartCalculations';
 import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../../utils/slotCalculations';
 
 const REGULAR_CAPACITY_IN3 = 1728;
@@ -39,7 +39,8 @@ export const OrderConfirmationScreen: FC = () => {
     const capacityIn3 = subkit.size === 'large' ? LARGE_CAPACITY_IN3 : REGULAR_CAPACITY_IN3;
     const weightLbs = calculateSubkitWeightLbs(categoryItems, itemSelections, subkit.subkitId);
     const volumePct = calculateSubkitVolumePct(categoryItems, itemSelections, subkit.subkitId, capacityIn3);
-    return { subkit, category, subkitItems, isEmpty, weightLbs, volumePct };
+    const subtotal = calculateSubkitCartTotal(subkit, itemSelections, ITEMS);
+    return { subkit, category, subkitItems, isEmpty, weightLbs, volumePct, subtotal };
   }).filter((entry): entry is NonNullable<typeof entry> => entry !== null);
 
   const handleStartOver = () => {
@@ -56,6 +57,7 @@ export const OrderConfirmationScreen: FC = () => {
       isEmpty={d.isEmpty}
       weightLbs={d.weightLbs}
       volumePct={d.volumePct}
+      subtotal={d.subtotal}
     />
   ));
 

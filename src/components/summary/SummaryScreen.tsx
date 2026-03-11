@@ -4,6 +4,7 @@ import { useKitStore } from '../../store/kitStore';
 import { useSlotState, useTotalSlotsUsed } from '../../hooks/useKitStore';
 import { CATEGORIES, ITEMS, ITEMS_BY_CATEGORY } from '../../data';
 import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../../utils/slotCalculations';
+import { calculateSubkitCartTotal } from '../../utils/cartCalculations';
 import { HousingUnitVisualizer } from '../visualizer/HousingUnitVisualizer';
 import { SubkitSummarySection } from './SubkitSummarySection';
 import { PrimaryButton } from '../ui/PrimaryButton';
@@ -79,7 +80,8 @@ export const SummaryScreen: FC<SummaryScreenProps> = () => {
     const weightLbs = calculateSubkitWeightLbs(categoryItems, itemSelections, subkit.subkitId);
     const volumePct = calculateSubkitVolumePct(categoryItems, itemSelections, subkit.subkitId, capacityIn3);
 
-    return { subkit, category, subkitItems, isEmpty, weightLbs, volumePct };
+    const subtotal = calculateSubkitCartTotal(subkit, itemSelections, ITEMS);
+    return { subkit, category, subkitItems, isEmpty, weightLbs, volumePct, subtotal };
   }).filter((entry): entry is NonNullable<typeof entry> => entry !== null);
 
   const totalKitWeightLbs = subkitData.reduce((sum, d) => sum + d.weightLbs, 0);
@@ -94,6 +96,7 @@ export const SummaryScreen: FC<SummaryScreenProps> = () => {
       isEmpty={d.isEmpty}
       weightLbs={d.weightLbs}
       volumePct={d.volumePct}
+      subtotal={d.subtotal}
     />
   ));
 

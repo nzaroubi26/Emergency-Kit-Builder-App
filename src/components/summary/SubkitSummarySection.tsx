@@ -12,6 +12,7 @@ interface SubkitSummarySectionProps {
   isEmpty: boolean;
   weightLbs: number;
   volumePct: number;
+  subtotal: number;
 }
 
 export const SubkitSummarySection: FC<SubkitSummarySectionProps> = ({
@@ -21,9 +22,11 @@ export const SubkitSummarySection: FC<SubkitSummarySectionProps> = ({
   isEmpty,
   weightLbs,
   volumePct,
+  subtotal,
 }) => {
   const IconComponent = resolveIcon(category.icon);
   const sizeLabel = subkit.size === 'large' ? 'Large' : 'Regular';
+  const formattedSubtotal = `Subtotal: $${subtotal.toFixed(2)}`;
 
   const itemList = items.map(({ item, quantity }) => {
     const priceDisplay = item.pricePlaceholder != null
@@ -110,6 +113,7 @@ export const SubkitSummarySection: FC<SubkitSummarySectionProps> = ({
         ) : (
           <p className="text-sm text-[var(--color-neutral-400)]">No items configured</p>
         )}
+        <p className="mt-2 text-right text-xs font-normal text-[var(--color-neutral-400)]">{formattedSubtotal}</p>
       </div>
     </div>
   );
