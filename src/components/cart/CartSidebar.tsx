@@ -37,7 +37,9 @@ export const CartSidebar: FC<CartSidebarProps> = ({ isOpen, onClose }) => {
     (a, b) => a.selectionOrder - b.selectionOrder
   );
 
-  const showEmptyState = sortedSubkits.length === 0;
+  const hasIncludedItems = Object.values(itemSelections).some(sel => sel.included);
+  const showEmptyState = sortedSubkits.length === 0 ||
+    (!hasIncludedItems && sortedSubkits.every(s => emptyContainers.includes(s.subkitId)));
 
   const grandTotal = calculateCartGrandTotal(
     selectedSubkits,

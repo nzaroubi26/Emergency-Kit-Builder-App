@@ -206,13 +206,37 @@ describe('CartSidebar', () => {
       ...defaultMockState,
       selectedSubkits: [
         { subkitId: 'power', categoryId: 'power', size: 'regular', selectionOrder: 1 },
+        { subkitId: 'lighting', categoryId: 'lighting', size: 'large', selectionOrder: 2 },
       ],
       emptyContainers: ['power'],
+      itemSelections: {
+        'lighting::light-matches': {
+          itemId: 'light-matches',
+          subkitId: 'lighting',
+          quantity: 1,
+          included: true,
+        },
+      },
     } as ReturnType<typeof useKitStore>);
     render(<CartSidebar isOpen={true} onClose={vi.fn()} />);
     expect(screen.getByText(/◈ Empty container/)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/Decrease quantity/)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(/Increase quantity/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Decrease quantity of Portable Power Station/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Increase quantity of Portable Power Station/)).not.toBeInTheDocument();
+  });
+
+  it('renders empty state when all selected subkits are empty containers with no included items', () => {
+    vi.mocked(useKitStore).mockReturnValue({
+      ...defaultMockState,
+      selectedSubkits: [
+        { subkitId: 'power', categoryId: 'power', size: 'regular', selectionOrder: 1 },
+      ],
+      emptyContainers: ['power'],
+      itemSelections: {},
+    } as ReturnType<typeof useKitStore>);
+    render(<CartSidebar isOpen={true} onClose={vi.fn()} />);
+    expect(screen.getByText(/your kit is empty/i)).toBeInTheDocument();
+    expect(screen.queryByText('Subtotal')).not.toBeInTheDocument();
+    expect(screen.queryByText(/◈ Empty container/)).not.toBeInTheDocument();
   });
 
   it('has no accessibility violations with populated cart content', async () => {
