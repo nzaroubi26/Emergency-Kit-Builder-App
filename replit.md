@@ -49,7 +49,8 @@ src/
 │   └── guards.ts               # Loader-based navigation guards (redirect to /builder)
 ├── components/
 │   ├── cover/                  # CoverScreen (landing page at /)
-│   ├── layout/                 # AppShell (+ GA4 injection), AppHeader, StepProgressIndicator, MobileInterstitial
+│   ├── cart/                    # CartSidebar (sliding right-side panel shell)
+│   ├── layout/                 # AppShell (+ GA4 injection + cart state), AppHeader (+ cart icon/badge), StepProgressIndicator, MobileInterstitial
 │   ├── ui/                     # PrimaryButton, SecondaryButton, ConfirmationModal, ImageWithFallback, StarRating
 │   ├── visualizer/             # HousingUnitVisualizer (+ outer frame, handle tab, wheel guards), VisualizerSlot (clickable slots), SlotFullIndicator
 │   ├── subkit-selection/       # SubkitSelectionScreen (+ onSlotClick), SubkitCard, SizeToggle
@@ -126,6 +127,7 @@ tests/
 ### Phase 3 (In Progress)
 - Epic 11: Cart & Checkout MVP
   - Story 11.1 (Item Pricing Data + Cart Calculation Pure Functions): Done
+  - Story 11.2 (Cart Icon in AppHeader + CartSidebar Shell + AppShell Wiring): Done
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Purchase API endpoint for checkout (default: `#`)
