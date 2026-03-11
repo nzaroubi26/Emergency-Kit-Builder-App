@@ -210,6 +210,7 @@ export const ItemConfigScreen: FC<ItemConfigScreenProps> = () => {
         <EmptyContainerOption
           checked={isEmpty}
           categoryColor={category.colorBase}
+          containerSize={currentSubkit?.size ?? 'regular'}
           onChange={() => toggleEmptyContainer(subkitId)}
         />
         <div

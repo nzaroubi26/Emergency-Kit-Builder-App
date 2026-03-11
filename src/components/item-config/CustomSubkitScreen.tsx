@@ -239,6 +239,7 @@ export const CustomSubkitScreen: FC<CustomSubkitScreenProps> = () => {
         <EmptyContainerOption
           checked={isEmpty}
           categoryColor={category.colorBase}
+          containerSize={customSubkit?.size ?? 'regular'}
           onChange={() => toggleEmptyContainer(SUBKIT_ID)}
         />
         <div

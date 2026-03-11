@@ -1,14 +1,18 @@
 import { type FC, type ChangeEvent } from 'react';
+import type { SubkitSize } from '../../types';
+import { CONTAINER_PRICES } from '../../utils/cartCalculations';
 
 interface EmptyContainerOptionProps {
   checked: boolean;
   categoryColor: string;
+  containerSize: SubkitSize;
   onChange: () => void;
 }
 
 export const EmptyContainerOption: FC<EmptyContainerOptionProps> = ({
   checked,
   categoryColor,
+  containerSize,
   onChange,
 }) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -19,6 +23,8 @@ export const EmptyContainerOption: FC<EmptyContainerOptionProps> = ({
   const checkboxAccentStyle: React.CSSProperties = checked
     ? { accentColor: categoryColor }
     : {};
+
+  const formattedPrice = '$' + CONTAINER_PRICES[containerSize].toFixed(2);
 
   const confirmationContent = checked
     ? (
@@ -41,6 +47,9 @@ export const EmptyContainerOption: FC<EmptyContainerOptionProps> = ({
         />
         <span className="text-sm text-[var(--color-neutral-700)]">
           Send an empty container
+          <span className="block text-xs font-normal text-[var(--color-neutral-500)]">
+            {formattedPrice}
+          </span>
         </span>
       </label>
       {confirmationContent}
