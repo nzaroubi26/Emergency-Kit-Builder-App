@@ -1,7 +1,8 @@
 import { type FC, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { CATEGORIES, ITEMS_BY_CATEGORY } from '../../data';
+import { CATEGORIES, ITEMS, ITEMS_BY_CATEGORY } from '../../data';
+import { calculateSubkitCartTotal } from '../../utils/cartCalculations';
 import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../../utils/slotCalculations';
 import { useKitStore } from '../../store/kitStore';
 import { useIsEmptyContainer } from '../../hooks/useKitStore';
@@ -152,6 +153,7 @@ export const ItemConfigScreen: FC<ItemConfigScreenProps> = () => {
   const capacityIn3 = currentSubkit?.size === 'large' ? LARGE_CAPACITY_IN3 : REGULAR_CAPACITY_IN3;
   const weightLbs = calculateSubkitWeightLbs(items, itemSelections, subkitId);
   const volumePct = calculateSubkitVolumePct(items, itemSelections, subkitId, capacityIn3);
+  const subkitSubtotal = currentSubkit ? calculateSubkitCartTotal(currentSubkit, itemSelections, ITEMS) : 0;
 
   const headingColor: React.CSSProperties = {
     borderLeftColor: category.colorBase,
@@ -251,6 +253,11 @@ export const ItemConfigScreen: FC<ItemConfigScreenProps> = () => {
         }}
       >
         {itemCards}
+      </div>
+      <div className="mt-4 text-right">
+        <span className="text-xs font-normal text-[var(--color-neutral-500)]">
+          Subkit Subtotal: ${subkitSubtotal.toFixed(2)}
+        </span>
       </div>
       <div className="mt-8 flex flex-col items-center gap-3">
         <PrimaryButton onClick={handleNext}>

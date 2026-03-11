@@ -1,7 +1,8 @@
 import { type FC, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { CATEGORIES, ITEMS_BY_CATEGORY, STANDARD_CATEGORY_IDS } from '../../data';
+import { CATEGORIES, ITEMS, ITEMS_BY_CATEGORY, STANDARD_CATEGORY_IDS } from '../../data';
+import { calculateSubkitCartTotal } from '../../utils/cartCalculations';
 import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../../utils/slotCalculations';
 import { useKitStore } from '../../store/kitStore';
 import { useIsEmptyContainer } from '../../hooks/useKitStore';
@@ -154,6 +155,7 @@ export const CustomSubkitScreen: FC<CustomSubkitScreenProps> = () => {
   const capacityIn3 = customSubkit?.size === 'large' ? LARGE_CAPACITY_IN3 : REGULAR_CAPACITY_IN3;
   const weightLbs = calculateSubkitWeightLbs(allItems, itemSelections, SUBKIT_ID);
   const volumePct = calculateSubkitVolumePct(allItems, itemSelections, SUBKIT_ID, capacityIn3);
+  const subkitSubtotal = customSubkit ? calculateSubkitCartTotal(customSubkit, itemSelections, ITEMS) : 0;
 
   const jumpNav = STANDARD_CATEGORY_IDS.map((catId) => {
     const cat = CATEGORIES[catId];
@@ -283,6 +285,11 @@ export const CustomSubkitScreen: FC<CustomSubkitScreenProps> = () => {
         }}
       >
         {categoryGroups}
+      </div>
+      <div className="mt-4 text-right">
+        <span className="text-xs font-normal text-[var(--color-neutral-500)]">
+          Subkit Subtotal: ${subkitSubtotal.toFixed(2)}
+        </span>
       </div>
       <div className="mt-8 flex flex-col items-center gap-3">
         <PrimaryButton onClick={handleNext}>

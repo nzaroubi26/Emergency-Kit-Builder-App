@@ -135,6 +135,7 @@ tests/
   - Story 12.1 (Item Price Display on ItemCard): Done
   - Story 12.2 (Container Price Display on EmptyContainerOption): Done
   - Story 12.3 (Item Prices and Line Totals on SubkitSummarySection): Done
+  - Story 12.4 (Subkit Subtotal on Item Configuration Screens): Done
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Purchase API endpoint for checkout (default: `#`)
