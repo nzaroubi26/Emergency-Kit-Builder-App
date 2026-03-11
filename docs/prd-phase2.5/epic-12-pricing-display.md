@@ -57,7 +57,7 @@ A subkit subtotal line is displayed at the bottom of each `SubkitSummarySection`
 | 12.1 | Item Price Display on ItemCard | Done |
 | 12.2 | Empty Container Price at Checkbox | Done |
 | 12.3 | Item Prices and Line Totals on SubkitSummarySection | Done |
-| 12.4 | Subkit Subtotal on Item Configuration Screen | Draft |
+| 12.4 | Subkit Subtotal on Item Configuration Screen | Done |
 | 12.5 | Subkit Subtotal on Summary/Review Kit Page | Draft |
 
 ---
