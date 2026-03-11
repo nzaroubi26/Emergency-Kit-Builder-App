@@ -23,7 +23,7 @@
 
 - **FR17:** Each `ItemCard` on the Item Configuration screens shall display the item's per-unit price (`$XX.XX` format) below the star rating (or below the description if no rating exists). Items with `null` `pricePlaceholder` shall render no price element. The price is read from `item.pricePlaceholder` — no new component prop required.
 - **FR18:** The `EmptyContainerOption` component shall display the container price inline with the checkbox label. The price shall match the subkit's selected size: `$40.00` for Regular, `$60.00` for Large, sourced from `CONTAINER_PRICES` in `cartCalculations.ts`.
-- **FR19:** Each item row in `SubkitSummarySection` on the Summary/Review Kit page shall display the per-unit price and line total alongside the existing quantity badge. Format: `$XX.XX` for qty 1, or `$XX.XX × N = $YY.YY` for qty > 1. Items with `null` `pricePlaceholder` shall display no price information. Line totals computed via `calculateItemLineTotal`.
+- **FR19:** Each item row in `SubkitSummarySection` on the Summary/Review Kit page shall display the per-unit price and line total alongside the existing quantity badge. Format: `$XX.XX each` for qty 1, or `$XX.XX × N = $YY.YY` for qty > 1. Items with `null` `pricePlaceholder` shall display no price information. Line totals computed via `calculateItemLineTotal`.
 - **FR20:** All pricing displays are informational and use existing data — no new Zustand store fields, no new type fields, no new API calls.
 
 ## Non-Functional Requirements
