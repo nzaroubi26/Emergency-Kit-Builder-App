@@ -2,7 +2,7 @@
 
 **Prepared by:** Sarah, Product Owner
 **Date:** 2026-03-11
-**Version:** 1.1 (Updated — Features 4–5 and Stories 12.4–12.5 added)
+**Version:** 1.2 (Closed — All 5 stories complete, epic fully delivered)
 **Phase:** 2.7 Brownfield Enhancement
 **Depends on:** Epic 11 (all stories complete — pricing data and cart calculations already exist)
 
@@ -58,7 +58,7 @@ A subkit subtotal line is displayed at the bottom of each `SubkitSummarySection`
 | 12.2 | Empty Container Price at Checkbox | Done |
 | 12.3 | Item Prices and Line Totals on SubkitSummarySection | Done |
 | 12.4 | Subkit Subtotal on Item Configuration Screen | Done |
-| 12.5 | Subkit Subtotal on Summary/Review Kit Page | Draft |
+| 12.5 | Subkit Subtotal on Summary/Review Kit Page | Done |
 
 ---
 
@@ -81,22 +81,22 @@ A subkit subtotal line is displayed at the bottom of each `SubkitSummarySection`
 | `EmptyContainerOption` — new price prop | Low | Additive prop; parent already knows subkit size; `CONTAINER_PRICES` is a simple constant import |
 | `SubkitSummarySection.tsx` — price display in item rows | Low | Additive JSX per item; `item.pricePlaceholder` already available from the `items` prop; `calculateItemLineTotal` is a pure function import |
 | `ItemConfigScreen.tsx` / `CustomSubkitScreen.tsx` — subkit subtotal indicator | Low | Additive JSX at bottom of screen; `calculateSubkitCartTotal` is a pure function import; reads existing store state; no new props or store fields |
-| `SubkitSummarySection.tsx` — subkit subtotal line | Low | Additive JSX below item list; `calculateSubkitCartTotal` is a pure function import; no prop interface change needed (subkit data already available) |
+| `SubkitSummarySection.tsx` — subkit subtotal line | Low | Additive JSX below item list; required `subtotal: number` prop added to `SubkitSummarySectionProps` and wired by parent screens (`SummaryScreen`, `OrderConfirmationScreen`); TypeScript enforces all callsites pass the new prop |
 
 ---
 
 ## Definition of Done
 
 - [x] All stories 12.1–12.3 completed with all acceptance criteria verified
-- [ ] All stories 12.4–12.5 completed with all acceptance criteria verified
-- [ ] `npm run typecheck` passes
-- [ ] `npm run test:run` passes — all new and existing Vitest tests green
-- [ ] `npm run lint` passes
+- [x] All stories 12.4–12.5 completed with all acceptance criteria verified
+- [x] `npm run typecheck` passes
+- [x] `npm run test:run` passes — all new and existing Vitest tests green
+- [x] `npm run lint` passes
 - [x] Item prices visible on Item Configuration screens below star ratings
 - [x] Empty container price visible at the checkbox, matching selected subkit size
 - [x] Summary page item rows show prices and line totals alongside quantities
-- [ ] Subkit subtotal indicator visible on Item Configuration screens, updating live as items/containers change
-- [ ] Subkit subtotal line visible at the bottom of each SubkitSummarySection on Summary and Order Confirmation screens
-- [ ] No regression in any Phase 2, Phase 2.5, or Phase 2.6 feature
+- [x] Subkit subtotal indicator visible on Item Configuration screens, updating live as items/containers change
+- [x] Subkit subtotal line visible at the bottom of each SubkitSummarySection on Summary and Order Confirmation screens
+- [x] No regression in any Phase 2, Phase 2.5, or Phase 2.6 feature
 
 ---
