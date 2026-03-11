@@ -1,0 +1,39 @@
+schema: 1
+story: '12.4'
+story_title: 'Subkit Subtotal on Item Configuration Screen'
+gate: PASS
+status_reason: 'All 11 acceptance criteria met. Clean, minimal implementation reusing existing calculateSubkitCartTotal utility. 8 tests cover all 5 required test cases. No changes to protected files. Typecheck, lint, and all 280 tests pass.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-03-11T17:32:00Z'
+
+top_issues: []
+waiver: { active: false }
+
+quality_score: 100
+expires: '2026-03-25T17:32:00Z'
+
+evidence:
+  tests_reviewed: 8
+  risks_identified: 0
+  diff_lines: 136
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Purely presentational change — reads existing store data, no user input or API calls.'
+  performance:
+    status: PASS
+    notes: 'Lightweight pure function on small dataset (max 28 items). No unnecessary re-computations.'
+  reliability:
+    status: PASS
+    notes: 'Graceful fallback to 0 when currentSubkit/customSubkit is undefined. Unconditional rendering ensures indicator is always visible.'
+  maintainability:
+    status: PASS
+    notes: 'Follows existing patterns exactly. Both screens use identical subtotal markup. Uses shared utility function — no inline reimplementation.'
+
+recommendations:
+  immediate: []
+  future: []
