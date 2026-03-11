@@ -1,0 +1,48 @@
+schema: 1
+story: "12.1"
+story_title: "Item Price Display on ItemCard"
+gate: PASS
+status_reason: "Clean, minimal implementation. All 8 ACs met, 4 new tests passing, no regressions across 265 tests, typecheck clean, no new lint errors. No security, performance, or reliability concerns."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-03-11T16:10:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 100
+
+evidence:
+  tests_reviewed: 15
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Static display of pre-existing numeric field. No user input, no external data, no state mutations."
+  performance:
+    status: PASS
+    notes: "Negligible toFixed(2) computation. No new re-renders or effects."
+  reliability:
+    status: PASS
+    notes: "Null guard prevents runtime errors. Conditional rendering collapses cleanly."
+  maintainability:
+    status: PASS
+    notes: "Follows existing coding standards. Minimal, well-scoped change. No new abstractions needed."
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor: []
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Add missing KitItem fields (rating, reviewCount, weightGrams, volumeIn3) to existing mockItem in test file"
+      refs: ["tests/components/ItemCard.test.tsx:20-28"]
+    - action: "Consider DOM-order assertion in 'renders price below star rating' test for stronger structural verification"
+      refs: ["tests/components/ItemCard.test.tsx:132-136"]
