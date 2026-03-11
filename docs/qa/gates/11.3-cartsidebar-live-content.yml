@@ -1,0 +1,54 @@
+schema: 1
+story: "11.3"
+story_title: "CartSidebar Live Content"
+gate: CONCERNS
+status_reason: "AC1 empty state condition is incomplete — only checks for empty selectedSubkits, not the 'all subkits are empty-container' case specified in the acceptance criteria."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-03-11T02:55:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "CONCERN-001"
+    severity: medium
+    finding: "AC1 specifies empty state when selectedSubkits is empty OR all subkits are empty-container. Implementation only checks sortedSubkits.length === 0."
+    suggested_action: "Update showEmptyState logic to also check if all subkits are in emptyContainers with no included items. Add corresponding test case."
+    suggested_owner: dev
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 1, low: 0 }
+  recommendations:
+    must_fix:
+      - "Fix showEmptyState condition to cover all-empty-container case (AC1)"
+    monitor: []
+
+quality_score: 90
+
+evidence:
+  tests_reviewed: 15
+  risks_identified: 1
+  trace:
+    ac_covered: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    ac_gaps: [1]
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Read-only display component with no direct user input handling beyond store actions"
+  performance:
+    status: PASS
+    notes: "Lightweight lookups, small data sets, no heavy computation in render"
+  reliability:
+    status: PASS
+    notes: "Proper null checks on item lookup, fallback values for colors"
+  maintainability:
+    status: PASS
+    notes: "Clean structure, proper separation of data derivation from JSX, well-organized tests"
+
+recommendations:
+  immediate:
+    - action: "Fix showEmptyState to include all-empty-container check per AC1"
+      refs: ["src/components/cart/CartSidebar.tsx:40"]
+    - action: "Add test: all subkits are empty containers → renders empty state message"
+      refs: ["tests/components/CartSidebar.test.tsx"]
+  future: []
