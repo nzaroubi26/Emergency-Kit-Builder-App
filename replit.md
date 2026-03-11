@@ -125,7 +125,7 @@ tests/
 - Epic 10: Visualizer Exterior Redesign (parallel with Epic 9 after 9.1)
   - Story 10.1 (Outer Frame, Handle Tab, Wheel Guards): Done
 
-### Phase 3 (In Progress)
+### Phase 3 (Complete)
 - Epic 11: Cart & Checkout MVP
   - Story 11.1 (Item Pricing Data + Cart Calculation Pure Functions): Done
   - Story 11.2 (Cart Icon in AppHeader + CartSidebar Shell + AppShell Wiring): Done
