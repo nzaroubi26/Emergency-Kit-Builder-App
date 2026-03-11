@@ -21,3 +21,8 @@ export function summaryGuard() {
   if (selectedSubkits.length < 3) return redirect('/builder');
   return null;
 }
+
+export function confirmationGuard() {
+  const { selectedSubkits } = useKitStore.getState();
+  return selectedSubkits.length > 0 ? null : redirect('/builder');
+}

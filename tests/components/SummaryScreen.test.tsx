@@ -15,6 +15,7 @@ async function renderSummary() {
     [
       { path: '/builder', element: <SubkitSelectionScreen /> },
       { path: '/summary', element: <SummaryScreen />, loader: summaryGuard },
+      { path: '/confirmation', element: <div>Confirmation</div> },
     ],
     { initialEntries: ['/summary'] }
   );
@@ -100,11 +101,11 @@ describe('SummaryScreen — Story 5.3: CTA and Purchase Intent', () => {
     expect(screen.getByRole('button', { name: 'Get My Kit' })).toBeInTheDocument();
   });
 
-  it('shows loading state on Get My Kit click', async () => {
+  it('Get My Kit navigates to /confirmation', async () => {
     await renderSummary();
     fireEvent.click(screen.getByRole('button', { name: 'Get My Kit' }));
     await waitFor(() => {
-      expect(screen.getByText('Processing...')).toBeInTheDocument();
+      expect(screen.getByText('Confirmation')).toBeInTheDocument();
     });
   });
 

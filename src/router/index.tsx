@@ -5,7 +5,8 @@ import { SubkitSelectionScreen } from '../components/subkit-selection/SubkitSele
 import { ItemConfigScreen } from '../components/item-config/ItemConfigScreen';
 import { CustomSubkitScreen } from '../components/item-config/CustomSubkitScreen';
 import { SummaryScreen } from '../components/summary/SummaryScreen';
-import { subkitConfigGuard, customConfigGuard, summaryGuard } from './guards';
+import { OrderConfirmationScreen } from '../components/confirmation/OrderConfirmationScreen';
+import { subkitConfigGuard, customConfigGuard, summaryGuard, confirmationGuard } from './guards';
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,11 @@ export const router = createBrowserRouter([
         path: '/summary',
         element: <SummaryScreen />,
         loader: summaryGuard,
+      },
+      {
+        path: '/confirmation',
+        element: <OrderConfirmationScreen />,
+        loader: confirmationGuard,
       },
       {
         path: '*',

@@ -55,7 +55,8 @@ src/
 │   ├── visualizer/             # HousingUnitVisualizer (+ outer frame, handle tab, wheel guards), VisualizerSlot (clickable slots), SlotFullIndicator
 │   ├── subkit-selection/       # SubkitSelectionScreen (+ onSlotClick), SubkitCard, SizeToggle
 │   ├── item-config/            # ItemConfigScreen (+ Fill my kit), CustomSubkitScreen (+ Fill my kit), ItemCard (+ StarRating), QuantitySelector, SubkitStatsStrip
-│   └── summary/                # SummaryScreen (+ checkout integration), SubkitSummarySection
+│   ├── confirmation/            # OrderConfirmationScreen (order summary + start over)
+│   └── summary/                # SummaryScreen (CTA navigates to /confirmation), SubkitSummarySection
 └── hooks/                      # useKitStore, useResponsive
 tests/
 ├── setup.ts                    # @testing-library/jest-dom + config
@@ -129,6 +130,7 @@ tests/
   - Story 11.1 (Item Pricing Data + Cart Calculation Pure Functions): Done
   - Story 11.2 (Cart Icon in AppHeader + CartSidebar Shell + AppShell Wiring): Done
   - Story 11.3 (CartSidebar Live Content): Done
+  - Story 11.4 (SummaryScreen CTA + Confirmation + OrderConfirmationScreen + Route Guard): Done
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Purchase API endpoint for checkout (default: `#`)
@@ -140,3 +142,4 @@ tests/
 - `/configure/:subkitId` — Item Configuration Screen
 - `/configure/custom` — Custom Subkit Browser
 - `/summary` — Summary Page (review + checkout)
+- `/confirmation` — Order Confirmation Screen (order summary + start over)
