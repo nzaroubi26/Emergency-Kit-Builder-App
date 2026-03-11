@@ -128,6 +128,7 @@ tests/
 - Epic 11: Cart & Checkout MVP
   - Story 11.1 (Item Pricing Data + Cart Calculation Pure Functions): Done
   - Story 11.2 (Cart Icon in AppHeader + CartSidebar Shell + AppShell Wiring): Done
+  - Story 11.3 (CartSidebar Live Content): Done
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Purchase API endpoint for checkout (default: `#`)
