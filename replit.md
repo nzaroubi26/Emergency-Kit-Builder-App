@@ -131,6 +131,10 @@ tests/
   - Story 11.2 (Cart Icon in AppHeader + CartSidebar Shell + AppShell Wiring): Done
   - Story 11.3 (CartSidebar Live Content): Done
   - Story 11.4 (SummaryScreen CTA + Confirmation + OrderConfirmationScreen + Route Guard): Done
+- Epic 12: Inline Pricing Display
+  - Story 12.1 (Item Price Display on ItemCard): Done
+  - Story 12.2 (Container Price Display on EmptyContainerOption): Done
+  - Story 12.3 (Item Prices and Line Totals on SubkitSummarySection): Done
 
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Purchase API endpoint for checkout (default: `#`)

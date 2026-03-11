@@ -1,6 +1,7 @@
 import { type FC } from 'react';
 import { Package } from 'lucide-react';
 import { resolveIcon } from '../../utils/iconResolver';
+import { calculateItemLineTotal } from '../../utils/cartCalculations';
 import type { SubkitSelection } from '../../types';
 import type { KitCategory, KitItem } from '../../types';
 
@@ -24,17 +25,32 @@ export const SubkitSummarySection: FC<SubkitSummarySectionProps> = ({
   const IconComponent = resolveIcon(category.icon);
   const sizeLabel = subkit.size === 'large' ? 'Large' : 'Regular';
 
-  const itemList = items.map(({ item, quantity }) => (
-    <li key={item.id} className="flex items-center justify-between py-1.5">
-      <span className="text-sm text-[var(--color-neutral-700)]">{item.name}</span>
-      <span
-        className="ml-2 min-w-[2rem] rounded-full px-2 py-0.5 text-center text-xs font-medium"
-        style={{ backgroundColor: category.colorTint, color: category.colorBase }}
-      >
-        ×{quantity}
-      </span>
-    </li>
-  ));
+  const itemList = items.map(({ item, quantity }) => {
+    const priceDisplay = item.pricePlaceholder != null
+      ? quantity > 1
+        ? `$${item.pricePlaceholder.toFixed(2)} × ${quantity} = $${calculateItemLineTotal(item.pricePlaceholder, quantity).toFixed(2)}`
+        : `$${item.pricePlaceholder.toFixed(2)} each`
+      : null;
+
+    return (
+      <li key={item.id} className="flex items-center justify-between py-1.5">
+        <span className="text-sm text-[var(--color-neutral-700)]">{item.name}</span>
+        <div className="ml-2 flex items-center gap-2">
+          <span
+            className="min-w-[2rem] rounded-full px-2 py-0.5 text-center text-xs font-medium"
+            style={{ backgroundColor: category.colorTint, color: category.colorBase }}
+          >
+            ×{quantity}
+          </span>
+          {priceDisplay && (
+            <span className="text-xs font-normal text-[var(--color-neutral-400)]">
+              {priceDisplay}
+            </span>
+          )}
+        </div>
+      </li>
+    );
+  });
 
   return (
     <div
