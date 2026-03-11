@@ -123,6 +123,10 @@ tests/
 - Epic 10: Visualizer Exterior Redesign (parallel with Epic 9 after 9.1)
   - Story 10.1 (Outer Frame, Handle Tab, Wheel Guards): Done
 
+### Phase 3 (In Progress)
+- Epic 11: Cart & Checkout MVP
+  - Story 11.1 (Item Pricing Data + Cart Calculation Pure Functions): Done
+
 ## Environment Variables
 - `VITE_PURCHASE_URL` — Purchase API endpoint for checkout (default: `#`)
 - `VITE_ANALYTICS_ID` — Google Analytics 4 measurement ID (optional)

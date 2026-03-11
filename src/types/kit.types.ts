@@ -35,4 +35,5 @@ export interface ItemSelection {
   itemId: string;
   subkitId: string;
   quantity: number;
+  included: boolean;
 }

@@ -12,9 +12,9 @@ const mockSubkits: SubkitSelection[] = [
 ];
 
 const mockItemSelections: Record<string, ItemSelection> = {
-  'item-a': { itemId: 'item-a', subkitId: 'sub-1', quantity: 2 },
-  'item-b': { itemId: 'item-b', subkitId: 'sub-1', quantity: 1 },
-  'item-c': { itemId: 'item-c', subkitId: 'sub-2', quantity: 3 },
+  'item-a': { itemId: 'item-a', subkitId: 'sub-1', quantity: 2, included: true },
+  'item-b': { itemId: 'item-b', subkitId: 'sub-1', quantity: 1, included: true },
+  'item-c': { itemId: 'item-c', subkitId: 'sub-2', quantity: 3, included: true },
 };
 
 describe('initiateCheckout', () => {

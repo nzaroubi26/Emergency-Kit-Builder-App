@@ -77,7 +77,7 @@ export const useKitStore = create<KitStore>()(persist((set, get) => ({
       const { [key]: _, ...rest } = itemSelections;
       set({ itemSelections: rest });
     } else {
-      set({ itemSelections: { ...itemSelections, [key]: { itemId, subkitId, quantity: 1 } } });
+      set({ itemSelections: { ...itemSelections, [key]: { itemId, subkitId, quantity: 1, included: true } } });
     }
   },
 
@@ -102,4 +102,21 @@ export const useKitStore = create<KitStore>()(persist((set, get) => ({
 
   setCurrentConfigIndex: (index) => set({ currentConfigIndex: index }),
   resetKit: () => set({ ...initial }),
-}), { name: 'emergency-kit-v1' }));
+}), {
+  name: 'emergency-kit-v1',
+  version: 1,
+  migrate: (persisted, version) => {
+    const state = persisted as Record<string, unknown>;
+    if (version === 0) {
+      const selections = state.itemSelections as Record<string, ItemSelection> | undefined;
+      if (selections) {
+        const migrated: Record<string, ItemSelection> = {};
+        for (const [key, sel] of Object.entries(selections)) {
+          migrated[key] = { ...sel, included: sel.included ?? true };
+        }
+        state.itemSelections = migrated;
+      }
+    }
+    return state as unknown as KitStore;
+  },
+}));
