@@ -57,6 +57,10 @@ export const ItemCard: FC<ItemCardProps> = ({
     transition: 'opacity 200ms var(--ease-standard)',
   };
 
+  const formattedPrice = item.pricePlaceholder != null
+    ? `$${item.pricePlaceholder.toFixed(2)}`
+    : null;
+
   const ariaLabel = included
     ? `${item.name}, included`
     : `${item.name}, excluded`;
@@ -88,6 +92,11 @@ export const ItemCard: FC<ItemCardProps> = ({
           <p className="text-xs text-[var(--color-neutral-500)]">{item.description}</p>
           {item.rating != null && item.reviewCount != null && (
             <StarRating rating={item.rating} reviewCount={item.reviewCount} />
+          )}
+          {formattedPrice && (
+            <span className="text-xs font-normal text-[var(--color-neutral-500)]">
+              {formattedPrice}
+            </span>
           )}
         </div>
       </div>

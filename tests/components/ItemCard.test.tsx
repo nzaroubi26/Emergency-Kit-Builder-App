@@ -27,6 +27,20 @@ const mockItem: KitItem = {
   imageSrc: null,
 };
 
+const mockItemWithPrice: KitItem = {
+  id: 'solar-panel',
+  categoryId: 'power',
+  name: 'Solar Panel',
+  description: 'Portable solar charger',
+  rating: 4.5,
+  reviewCount: 128,
+  weightGrams: 2500,
+  volumeIn3: 200,
+  productId: null,
+  pricePlaceholder: 29.99,
+  imageSrc: null,
+};
+
 const defaultCardProps = {
   item: mockItem,
   category: mockCategory,
@@ -101,6 +115,28 @@ describe('ItemCard', () => {
 
   it('has no accessibility violations when included', async () => {
     const { container } = render(<ItemCard {...defaultCardProps} included={true} />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it('renders price for item with non-null pricePlaceholder', () => {
+    render(<ItemCard {...defaultCardProps} item={mockItemWithPrice} />);
+    expect(screen.getByText('$29.99')).toBeInTheDocument();
+  });
+
+  it('does not render price for item with null pricePlaceholder', () => {
+    render(<ItemCard {...defaultCardProps} />);
+    expect(screen.queryByText(/^\$/)).toBeNull();
+  });
+
+  it('renders price below star rating when rating exists', () => {
+    render(<ItemCard {...defaultCardProps} item={mockItemWithPrice} />);
+    expect(screen.getByText(/128 reviews/)).toBeInTheDocument();
+    expect(screen.getByText('$29.99')).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations with price displayed', async () => {
+    const { container } = render(<ItemCard {...defaultCardProps} item={mockItemWithPrice} />);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
