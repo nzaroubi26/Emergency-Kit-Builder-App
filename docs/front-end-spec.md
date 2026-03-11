@@ -1,7 +1,7 @@
 # Emergency Prep Kit Builder — UI/UX Specification
 
-**Document version:** 1.2 | **Date:** 2026-03-09 | **Author:** Sally, UX Expert
-**Status:** Complete — awaiting Figma asset links and physical product drawing
+**Document version:** 1.3 | **Date:** 2026-03-11 | **Author:** Sally, UX Expert
+**Status:** Complete — Phase 2.7 pricing display additions (Epic 12) added by Sarah, PO
 
 ---
 
@@ -39,6 +39,7 @@
 | 12 | Weight display (Phase 2.5) | Informational only — `~X.X lbs` per subkit on SubkitStatsStrip on ItemConfig; total `~X.X lbs total` on Summary. No warnings, no thresholds, no color changes at any weight level. |
 | 13 | Volume display (Phase 2.5) | Live `% filled` progress bar per subkit on SubkitStatsStrip; compact inline `XX% filled` badge per subkit on Summary. Container capacities: Regular = 1,728 in³, Large = 3,456 in³ (from Phase 1 PRD Story 1.2). No overflow warnings — purely informational. Bar fill clamped to 100% width for display; label shows true computed integer value. |
 | 14 | Visualizer exterior redesign (Phase 2.5) | Visual shell only — `neutral-400` outer frame (`rounded-xl`, `p-3`/`pb-2`) wrapping slot grid; hollow `border-neutral-400` handle tab (80×24px) as sibling div above frame with negative margin overlap; `neutral-600` wheel guards (24×48px, `rounded-sm`) absolutely positioned outside frame via negative offsets. Zero changes to `HousingUnitVisualizer` props interface or `SlotState` data model. |
+| 15 | Inline pricing display (Phase 2.7) | Per-item price (`$XX.XX`) shown on ItemCard below star ratings on Item Configuration screens. Empty container price shown at checkbox matching subkit size (`$40`/`$60`). Summary page item rows show per-unit price + line total alongside quantity. All sourced from existing `pricePlaceholder` data and `CONTAINER_PRICES` constant. No new store fields. |
 
 ---
 
@@ -441,13 +442,15 @@ The `HousingUnitVisualizer` receives a new outer visual shell wrapping the exist
 │  ├───────────────┤ ├───────────────┤ ├───────────────┤ │
 │  │ ⚡ Solar Panel│ │ ⚡ Power Stn  │ │ ⚡ Cables     │ │
 │  │   Foldable... │ │   Lithium...  │ │   USB-C...    │ │
+│  │   ★★★★☆ (42)  │ │   ★★★★★ (18)  │ │   ★★★☆☆ (7)  │ │
+│  │   $79.99      │ │   $149.99     │ │   $19.99      │ │
 │  ├───────────────┤ └───────────────┘ └───────────────┘ │
 │  │   [−]  2  [+] │  ← included card; qty bar at bottom │
 │  └───────────────┘                                      │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐ │
 │  │ □  I already own these — send me an empty          │ │
-│  │    container instead                               │ │
+│  │    container instead            Container: $40.00  │ │
 │  └────────────────────────────────────────────────────┘ │
 │                                                          │
 │  [← Back to Subkit Selection]      [Next Subkit →]      │
@@ -465,9 +468,11 @@ The `HousingUnitVisualizer` receives a new outer visual shell wrapping the exist
 | Selection indicator excluded | neutral-300 hollow circle top-right of image |
 | Selection indicator included | Category base color solid circle + white checkmark |
 | Item card — included | Category base color border 2px, category tint shadow glow |
+| Item price (Phase 2.7) | `$XX.XX` below star rating (or below description if no rating); `text-caption` (12px/400); `neutral-500`; hidden when `pricePlaceholder` is `null` |
 | Quantity bar | neutral-100 strip; `−`/`+` in neutral-200; qty in neutral-900 bold; `−` disabled at 1, `+` disabled at 10 |
 | Image placeholder MVP | Category tint bg + category icon 32px centered + bottom gradient overlay |
 | Empty Container | White panel, neutral-200 border; selected: item grid dims opacity-35 |
+| Empty container price (Phase 2.7) | Container price displayed inline with checkbox label: `$40.00` (Regular) or `$60.00` (Large); sourced from `CONTAINER_PRICES[size]`; `text-caption` (12px/400); `neutral-500` |
 | Next Subkit CTA | brand-primary fill; final subkit label: "Review My Kit" |
 | SubkitStatsStrip | Inline strip below subkit heading, above item grid — see Phase 2.5 spec below |
 
@@ -573,6 +578,7 @@ Same layout as S2 with category group structure:
 | Subkit heading | Category icon 20px + name text-h2 + size badge text-caption |
 | Empty container badge | "◈ Empty Container" in category base color |
 | Item list | "• Name × qty" — neutral-700 name, neutral-400 qty |
+| Item price in summary (Phase 2.7) | Per-item price and line total displayed alongside each item row: `$XX.XX each` for qty 1, or `$XX.XX × N = $YY.YY` for qty > 1; `text-caption` (12px/400); `neutral-400`; items with `null` price show no price info |
 
 **Phase 2.5 — Weight and Volume Compact Readout on Summary Page:**
 
@@ -586,7 +592,8 @@ A compact stats row appears at the top of the Kit Summary section, spanning the 
 │  └──────────────────────────────────────────────────┘  │
 │  ┌──────────────────────────────────────────────────┐  │
 │  │ ▌ ⚡ POWER — Regular          ~2.4 lbs · 48% ▓  │  │
-│  │   • Solar Panel × 2  • Power Banks × 1          │  │
+│  │   • Solar Panel × 2     $79.99 × 2 = $159.98   │  │
+│  │   • Power Banks × 1                    $29.99   │  │
 │  ├──────────────────────────────────────────────────┤  │
 │  │ ▌ 🏥 MEDICAL — Large         ~0.0 lbs · 0%  ▓  │  │
 │  │   ◈ Empty Container                             │  │
@@ -726,6 +733,18 @@ interface ItemCardProps {
 | Excluded | White, shadow-1, neutral-200 border; hollow circle indicator top-right |
 | Included | Category base color 2px border, category tint shadow glow; solid circle + checkmark indicator |
 
+**Phase 2.7 — Inline Item Price:**
+
+Each ItemCard displays the item's per-unit price below the star rating (or below the description if the item has no rating). The price is read directly from `item.pricePlaceholder` — no new prop needed.
+
+| Element | Spec |
+|---------|------|
+| Price text | `$XX.XX` format (`pricePlaceholder.toFixed(2)` prefixed with `$`) |
+| Typography | `text-caption` (12px / 400) |
+| Color | `neutral-500` (`#6B7280`) |
+| Placement | Below `StarRating` (or below description if `rating` is `null`) |
+| Null handling | When `pricePlaceholder` is `null`, no price element is rendered — no placeholder text |
+
 ---
 
 ### QuantitySelector
@@ -747,6 +766,18 @@ interface ItemCardProps {
 - Selected: item grid dims to opacity-35, pointer-events none; inline confirmation in category base color
 - Reversed: item grid re-enables; all previously set states restored
 - Still counts toward 3-subkit minimum and 6-slot constraint
+
+**Phase 2.7 — Container Price Display:**
+
+The empty container price is displayed inline with the checkbox area, showing the cost of an empty container matching the current subkit's selected size. The price is sourced from `CONTAINER_PRICES` in `cartCalculations.ts`.
+
+| Element | Spec |
+|---------|------|
+| Price text | `$40.00` (Regular) or `$60.00` (Large) — `CONTAINER_PRICES[subkit.size].toFixed(2)` prefixed with `$` |
+| Typography | `text-caption` (12px / 400) |
+| Color | `neutral-500` (`#6B7280`) |
+| Placement | Below or alongside the existing checkbox label text |
+| Reactivity | Updates immediately if the subkit size is changed (Regular ↔ Large) on a prior screen — the parent passes the current size |
 
 ---
 
@@ -1296,4 +1327,4 @@ Winston — the UI/UX Specification for the Emergency Prep Kit Builder is comple
 
 ---
 
-*Emergency Prep Kit Builder — UI/UX Specification | Version 1.2 | 2026-03-09 | Sally, UX Expert*
+*Emergency Prep Kit Builder — UI/UX Specification | Version 1.3 | 2026-03-11 | Sally, UX Expert + Sarah, PO (Phase 2.7)*

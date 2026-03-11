@@ -35,6 +35,7 @@
       - [Story 9.4 — Summary Page Weight and Volume Readout](./6-epic-details.md#story-94-summary-page-weight-and-volume-readout)
     - [Epic 10: Visualizer Exterior Redesign](./6-epic-details.md#epic-10-visualizer-exterior-redesign)
       - [Story 10.1 — Housing Unit Visualizer: Outer Frame, Handle Tab, and Wheel Guards](./6-epic-details.md#story-101-housing-unit-visualizer-outer-frame-handle-tab-and-wheel-guards)
+  - [Epic 12: Inline Pricing Display](./epic-12-pricing-display.md)
   - [7. Next Steps](./7-next-steps.md)
     - [Architect Prompt](./7-next-steps.md#architect-prompt)
     - [PO Prompt](./7-next-steps.md#po-prompt)
