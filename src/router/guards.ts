@@ -41,3 +41,9 @@ export function forkGuard() {
   }
   return null;
 }
+
+export function reviewGuard() {
+  const { kitPath } = useMCQStore.getState();
+  if (!kitPath) return redirect('/choose');
+  return null;
+}
