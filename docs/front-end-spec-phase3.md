@@ -45,7 +45,7 @@ This document covers **Phase 3 Sprint 1 only** — four new screens inserted bef
 | 18 | "None of the Above" visual treatment | **Visually separated** — placed below a subtle `neutral-200` divider, full-width, no icon, outlined style. It's a different kind of answer, not a lesser one. |
 | 19 | Essentials Display Screen | **Eliminated** — bundle preview lives directly on the fork card. Selecting "Get The Essentials Kit" routes straight to Review & Order. One less screen, faster path to confidence. |
 | 20 | Fork card co-equality | **Enforced by spec** — identical dimensions, padding, border radius, elevation, CTA size. Essentials adds trust badge + bundle preview; Build My Own adds feature description. Neither visually dominates. |
-| 21 | Review & Order scope | **Shell only** — prototype surface. No real fulfillment, no payment processing. Serves both Essentials and Build My Own paths with the same layout. |
+| 21 | Review & Order scope | **Shell only** — prototype surface. No real fulfillment, no payment processing. Spec covers both Essentials and Custom Kit variants for layout completeness, but **Sprint 1 implementation is Essentials-only**. The Build My Own path does not reach `/review` in Sprint 1 — Custom Kit variant is Sprint 2 wiring. Winston: design the `kitPath` field and `KitSummaryCard` interface to accept both variants, but only the Essentials code path needs to function in Sprint 1. |
 | 22 | Step indicator scope | **MCQ only** — "Step 1 of 2" / "Step 2 of 2" on MCQ screens. Does not span the fork or Review & Order. The main `StepProgressIndicator` does not appear on any Phase 3 Sprint 1 screen. |
 | 23 | Copy tone | **Warm authority** for Essentials ("We've done the research..."), **empowering confidence** for Build My Own ("You know your household best..."). Confirmed by stakeholder. |
 | 24 | "Build My Own" Sprint 1 destination | Routes to existing `/builder` (SubkitSelectionScreen). No placeholder or coming-soon state — the existing flow is fully functional. |
@@ -525,9 +525,11 @@ All specs identical to MCQ-1 except:
 | Behavior (prototype) | On click: navigate to `/confirmation` (existing OrderConfirmationScreen). No real fulfillment. |
 | Disabled state | Disabled if delivery option requires input and fields are empty. For prototype: always enabled once a delivery option is selected |
 
-**Content for both paths:**
+**Content for both paths (spec-level — see Sprint 1 note below):**
 - **Essentials path:** Kit summary shows the 4 Essentials bundle subkits. Path label: "Essentials Kit". Bundle sourced from `ESSENTIALS_BUNDLE` constant.
 - **Build My Own path:** Kit summary shows user-selected subkits from kit store. Path label: "Custom Kit". Data sourced from existing `selectedSubkits` in kit store.
+
+**Sprint 1 implementation scope (PO-confirmed):** Only the Essentials path reaches `/review` in Sprint 1. The Build My Own path routes to `/builder` → existing flow → `/summary` and never hits this page. James should implement only the Essentials variant of `KitSummaryCard` in Sprint 1. The Custom Kit variant is Sprint 2 wiring — the spec documents it here so the component interface and store shape are designed to accept it without rework, but the code path does not need to function yet.
 
 **Sprint 1 prototype note:** The Review & Order page is a demonstration surface. Address validation, real fulfillment, and payment processing are out of scope. Input fields accept any text. The "Place Order" CTA navigates to the existing confirmation screen as a prototype endpoint.
 
