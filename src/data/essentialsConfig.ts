@@ -1,13 +1,13 @@
 import type { SubkitSize } from '../types';
 
 export interface EssentialsBundleItem {
-  categoryId: string;
+  subkit: string;
   size: SubkitSize;
 }
 
 export const ESSENTIALS_BUNDLE: EssentialsBundleItem[] = [
-  { categoryId: 'power', size: 'large' },
-  { categoryId: 'cooking', size: 'regular' },
-  { categoryId: 'medical', size: 'regular' },
-  { categoryId: 'communications', size: 'regular' },
+  { subkit: 'power', size: 'large' },
+  { subkit: 'cooking', size: 'regular' },
+  { subkit: 'medical', size: 'regular' },
+  { subkit: 'communications', size: 'regular' },
 ];

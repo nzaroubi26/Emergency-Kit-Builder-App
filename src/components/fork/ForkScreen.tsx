@@ -20,9 +20,9 @@ export const ForkScreen: FC = () => {
     const kitStore = useKitStore.getState();
     kitStore.resetKit();
     ESSENTIALS_BUNDLE.forEach((item) => {
-      kitStore.selectSubkit(item.categoryId);
+      kitStore.selectSubkit(item.subkit);
       if (item.size === 'large') {
-        kitStore.setSubkitSize(item.categoryId, 'large');
+        kitStore.setSubkitSize(item.subkit, 'large');
       }
     });
     useMCQStore.getState().setKitPath('essentials');

@@ -18,10 +18,10 @@ export const BundlePreview: FC<BundlePreviewProps> = ({ bundle }) => {
       style={{ backgroundColor: '#F9FAFB' }}
     >
       {bundle.map((item) => {
-        const category = CATEGORIES[item.categoryId];
+        const category = CATEGORIES[item.subkit];
         if (!category) return null;
         return (
-          <div key={item.categoryId} className="flex items-center gap-2 py-1">
+          <div key={item.subkit} className="flex items-center gap-2 py-1">
             <span
               className="inline-block h-4 w-4 rounded-full"
               style={{ backgroundColor: category.colorBase }}
