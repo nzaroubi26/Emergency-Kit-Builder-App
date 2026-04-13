@@ -44,7 +44,7 @@ test.describe('Phase 3 Sprint 1 — Essentials Happy Path', () => {
 
     // Place Order → confirmation
     await page.getByRole('button', { name: 'Place Order' }).click();
-    await expect(page.getByText(/order/i)).toBeVisible();
+    await expect(page.getByText('Your kit is on its way.')).toBeVisible();
   });
 });
 
