@@ -32,15 +32,16 @@ test.describe('Phase 3 Sprint 1 — Essentials Happy Path', () => {
     await expect(page.getByText('Recommended for most households')).toBeVisible();
     await page.getByRole('button', { name: 'Get The Essentials Kit' }).click();
 
-    // Review & Order screen
+    // Review & Order screen — scope to main to avoid CartSidebar duplicates
     await expect(page.getByRole('heading', { name: 'Review & Order' })).toBeVisible();
-    await expect(page.getByText('The Essentials Kit')).toBeVisible();
-    await expect(page.getByText('Power')).toBeVisible();
-    await expect(page.getByText('Cooking')).toBeVisible();
-    await expect(page.getByText('Medical')).toBeVisible();
-    await expect(page.getByText('Communications')).toBeVisible();
-    await expect(page.getByText('5 of 6 slots used')).toBeVisible();
-    await expect(page.getByText('Delivery Options')).toBeVisible();
+    const main = page.getByRole('main');
+    await expect(main.getByText('The Essentials Kit')).toBeVisible();
+    await expect(main.getByText('Power')).toBeVisible();
+    await expect(main.getByText('Cooking')).toBeVisible();
+    await expect(main.getByText('Medical')).toBeVisible();
+    await expect(main.getByText('Communications')).toBeVisible();
+    await expect(main.getByText('5 of 6 slots used')).toBeVisible();
+    await expect(main.getByText('Delivery Options')).toBeVisible();
 
     // Place Order → confirmation
     await page.getByRole('button', { name: 'Place Order' }).click();
@@ -69,6 +70,6 @@ test.describe('Phase 3 Sprint 1 — Build My Own Path', () => {
     await page.getByRole('button', { name: 'Start Building' }).click();
 
     // Visualizer / SubkitSelectionScreen
-    await expect(page.getByText(/Build Your Kit/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Build Your Kit' })).toBeVisible();
   });
 });
