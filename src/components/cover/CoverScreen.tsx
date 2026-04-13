@@ -21,7 +21,7 @@ export const CoverScreen: FC<CoverScreenProps> = () => {
           tailored to your family's needs.
         </p>
         <Link
-          to="/builder"
+          to="/build"
           className="mt-8 inline-flex min-h-[44px] items-center rounded-full px-8 py-4 text-sm font-semibold transition-colors"
           style={{
             backgroundColor: 'var(--color-neutral-white)',
