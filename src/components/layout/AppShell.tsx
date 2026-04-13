@@ -16,6 +16,11 @@ export const AppShell: FC = () => {
   const location = useLocation();
   const isConfirmation = location.pathname === '/confirmation';
 
+  const MOBILE_EXEMPT_ROUTES = ['/build', '/build/household', '/choose', '/review'];
+  const isMobileExempt = MOBILE_EXEMPT_ROUTES.some(
+    (route) => location.pathname === route || location.pathname.startsWith(route + '/')
+  );
+
   const handleCartClose = () => {
     setCartOpen(false);
     cartButtonRef.current?.focus();
@@ -39,7 +44,7 @@ export const AppShell: FC = () => {
         cartButtonRef={cartButtonRef}
       />
       <main className="mx-auto max-w-5xl px-4 py-6">
-        {isMobile ? <MobileInterstitial /> : <Outlet />}
+        {isMobile && !isMobileExempt ? <MobileInterstitial /> : <Outlet />}
       </main>
       {!isConfirmation && (
         <CartSidebar isOpen={cartOpen} onClose={handleCartClose} />

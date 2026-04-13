@@ -1,5 +1,6 @@
 import { redirect } from 'react-router-dom';
 import { useKitStore } from '../store/kitStore';
+import { useMCQStore } from '../store/mcqStore';
 
 export function subkitConfigGuard({ params }: { params: Record<string, string | undefined> }) {
   const { selectedSubkits } = useKitStore.getState();
@@ -25,4 +26,24 @@ export function summaryGuard() {
 export function confirmationGuard() {
   const { selectedSubkits } = useKitStore.getState();
   return selectedSubkits.length > 0 ? null : redirect('/builder');
+}
+
+export function mcqHouseholdGuard() {
+  const { emergencyTypes } = useMCQStore.getState();
+  if (emergencyTypes.length === 0) return redirect('/build');
+  return null;
+}
+
+export function forkGuard() {
+  const { emergencyTypes, householdComposition } = useMCQStore.getState();
+  if (emergencyTypes.length === 0 || householdComposition.length === 0) {
+    return redirect('/build');
+  }
+  return null;
+}
+
+export function reviewGuard() {
+  const { kitPath } = useMCQStore.getState();
+  if (!kitPath) return redirect('/choose');
+  return null;
 }
