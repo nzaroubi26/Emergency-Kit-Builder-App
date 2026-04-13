@@ -2,8 +2,8 @@
 
 **Prepared by:** John, Product Manager
 **Date:** 2026-04-13
-**Version:** 1.0
-**Status:** Draft
+**Version:** 1.1
+**Status:** Draft — Updated per Sally's review flags (2026-04-13)
 
 ---
 
@@ -68,13 +68,14 @@ Sprint 2 completes the Build My Own path end-to-end and connects both paths to a
 | `reviewGuard` accepting `kitPath === 'custom'` | Winston (Sprint 1) | Designed ✅ (truthy check) |
 | Surfacing rules (Q1 + Q2 elevation tables) | John + Winston (Sprint 1 arch Section 11) | Locked ✅ |
 | Subkit taxonomy | Team | Locked ✅ |
-| Pets item catalog content (names, weights, volumes) | John | Locked ✅ (see Story 13.1) |
+| Pets item catalog content (names, weights, volumes) | John | Locked ✅ (see Story 15.1) |
 
 ### Change Log
 
 | Change | Date | Version | Description | Author |
 |---|---|---|---|---|
 | Initial draft | 2026-04-13 | 1.0 | Phase 3 Sprint 2 PRD — Pets subkit, visualizer refresh, MCQ surfacing, Build My Own → /review, Order Confirmation | John, PM |
+| Sally review flags | 2026-04-13 | 1.1 | (1) Renumbered Epics 13/14 → 15/16 to avoid story file collision with Sprint 1, (2) "Start Over" routes to `/` (cover) for both paths, (3) BackLink on `/review` is path-aware (explicit AC), (4) Sprint 1 deferred story 14.4 superseded by Story 15.1 | John, PM |
 
 ---
 
@@ -250,20 +251,22 @@ No new dependencies. Sprint 2 uses the same stack as Sprint 1: Vite 6.x, React 1
 
 Two epics, ordered by dependency.
 
-- **Epic 13 — Pets Subkit, Visualizer Refresh & MCQ Surfacing:** Adds the Pets subkit to the catalog, refreshes the visualizer layout, implements MCQ elevation logic, and adds visual distinction for suggested subkits. Stories 13.1 (Pets data) and 13.2 (layout refresh) can run in parallel. Story 13.3 (elevation logic) depends on 13.1. Story 13.4 (visual distinction) depends on 13.3.
-- **Epic 14 — Build My Own Order Flow & Confirmation:** Wires the Build My Own path to Review & Order, implements the custom `KitSummaryCard`, and updates Order Confirmation for dual-path support with the "Fill Your Kit" CTA. Story 14.1 (KitSummaryCard) can start in parallel with Epic 13. Story 14.2 (wiring) depends on 14.1. Story 14.3 (confirmation) depends on 14.2.
+- **Epic 15 — Pets Subkit, Visualizer Refresh & MCQ Surfacing:** Adds the Pets subkit to the catalog, refreshes the visualizer layout, implements MCQ elevation logic, and adds visual distinction for suggested subkits. Stories 15.1 (Pets data) and 15.2 (layout refresh) can run in parallel. Story 15.3 (elevation logic) depends on 15.1. Story 15.4 (visual distinction) depends on 15.3.
+- **Epic 16 — Build My Own Order Flow & Confirmation:** Wires the Build My Own path to Review & Order, implements the custom `KitSummaryCard`, and updates Order Confirmation for dual-path support with the "Fill Your Kit" CTA. Story 16.1 (KitSummaryCard) can start in parallel with Epic 15. Story 16.2 (wiring) depends on 16.1. Story 16.3 (confirmation) depends on 16.2.
 
 ---
 
 ## 6. Epic Details
 
-### Epic 13: Pets Subkit, Visualizer Refresh & MCQ Surfacing
+### Epic 15: Pets Subkit, Visualizer Refresh & MCQ Surfacing
 
 **Epic Goal:** Add the Pets subkit to the catalog, modernize the visualizer layout from vertical to horizontal, and implement MCQ-driven subkit elevation with clear visual distinction — making the Build My Own path feel personalized and contextually aware.
 
 ---
 
-#### Story 13.1 — Pets Subkit: Catalog Addition
+#### Story 15.1 — Pets Subkit: Catalog Addition
+
+> **Supersedes:** Sprint 1 deferred Story 14.4 (`docs/stories/14.4.story.md`). That file should be marked as superseded by this story during sharding.
 
 As a developer,
 I want the Pets subkit added to the catalog with consistent data shape and minimum viable item content,
@@ -305,7 +308,7 @@ pets: {
 
 ---
 
-#### Story 13.2 — Visualizer Layout Refresh: Vertical to Horizontal
+#### Story 15.2 — Visualizer Layout Refresh: Vertical to Horizontal
 
 As a user,
 I want the kit builder screen to display the housing unit and subkit options side-by-side,
@@ -330,7 +333,7 @@ so that I can see my selections and available options simultaneously without scr
 
 ---
 
-#### Story 13.3 — MCQ → Subkit Surfacing Logic
+#### Story 15.3 — MCQ → Subkit Surfacing Logic
 
 As a user who completed the MCQ and chose Build My Own,
 I want the subkits most relevant to my emergency type and household surfaced at the top of the list,
@@ -377,7 +380,7 @@ export function computeElevatedSubkits(
 
 ---
 
-#### Story 13.4 — MCQ Visual Distinction: Suggested vs. Selected
+#### Story 15.4 — MCQ Visual Distinction: Suggested vs. Selected
 
 As a user,
 I want to clearly see which subkits the app is suggesting for my situation versus which ones I've actively chosen,
@@ -401,13 +404,13 @@ so that I understand the recommendation without feeling pressured.
 
 ---
 
-### Epic 14: Build My Own Order Flow & Confirmation
+### Epic 16: Build My Own Order Flow & Confirmation
 
 **Epic Goal:** Wire the Build My Own path through to Review & Order and Order Confirmation, implementing the custom `KitSummaryCard` variant and delivering a unified confirmation screen with a "Now Let's Fill Your Kit" CTA as the bridge to Part 2.
 
 ---
 
-#### Story 14.1 — KitSummaryCard: Custom Path Implementation
+#### Story 16.1 — KitSummaryCard: Custom Path Implementation
 
 As a developer,
 I want the `KitSummaryCard` component's custom path fully implemented,
@@ -430,7 +433,7 @@ so that users who built their own kit see an accurate summary on the Review & Or
 
 ---
 
-#### Story 14.2 — Build My Own → `/review` Wiring + E2E
+#### Story 16.2 — Build My Own → `/review` Wiring + E2E
 
 As a user who built my own kit,
 I want to proceed from the summary page to Review & Order and then place my order,
@@ -441,7 +444,7 @@ so that I complete the same order flow as users who chose the Essentials path.
 1. SummaryScreen's "Get My Kit" CTA is updated: calls `useMCQStore.getState().setKitPath('custom')`, then navigates to `/review`.
 2. `reviewGuard` passes for `kitPath === 'custom'` with no guard changes (Sprint 1 designed for this — truthy check).
 3. Review & Order page displays the custom `KitSummaryCard` with the user's kit. Delivery section and "Place Order" CTA function identically to the Essentials path.
-4. Back navigation from `/review` when `kitPath === 'custom'` returns to `/summary` (not `/choose`). This requires the back link `to` prop to be path-aware — Sally and Winston to confirm the cleanest approach.
+4. Back navigation from `/review` is path-aware. The `BackLink` `to` prop in `ReviewOrderScreen` reads `kitPath` from the MCQ store: `kitPath === 'essentials'` → `/choose`, `kitPath === 'custom'` → `/summary`. This is a code change to the existing hardcoded `<BackLink to="/choose" />` from Sprint 1.
 5. "Place Order" navigates to `/confirmation`.
 6. Smoke E2E test covers the full Build My Own happy path: cover → MCQ → fork → `/builder` → select subkits → configure items → `/summary` → `/review` → `/confirmation`.
 
@@ -454,7 +457,7 @@ so that I complete the same order flow as users who chose the Essentials path.
 
 ---
 
-#### Story 14.3 — Order Confirmation: Dual-Path Support + "Fill Your Kit" CTA
+#### Story 16.3 — Order Confirmation: Dual-Path Support + "Fill Your Kit" CTA
 
 As a user who placed an order (via either path),
 I want to see a confirmation of what I ordered and a clear next step to fill my kit,
@@ -467,7 +470,7 @@ so that I know my order is placed and I'm guided to the next phase of the experi
 3. Custom path (`kitPath === 'custom'`): confirmation displays the user's selected subkits with configured items, quantities, and pricing sourced from the kit store. This mirrors the existing confirmation behavior but is now explicitly path-branched.
 4. Both paths share the same page structure: heading ("Your kit is on its way."), kit summary section, kit total line, and CTAs.
 5. A new "Now Let's Fill Your Kit" primary CTA is added below the kit total. Positioned prominently. For Sprint 2, this routes to a stub/placeholder — Part 2 scope is not defined yet. Sally and Winston to align on stub treatment.
-6. The existing "Start Over" CTA is retained as a secondary action.
+6. The existing "Start Over" CTA is retained as a secondary action. Its route target is updated to `/` (cover page) for both paths. The current implementation routes to `/builder`, which is incorrect for Essentials-path users who never visited the builder. `resetKit()` and `resetMCQ()` are both called on "Start Over".
 7. Component tests cover: Essentials path renders bundle data, Custom path renders kit store data, "Fill Your Kit" CTA is present and routes to stub, "Start Over" still functions, both paths display kit totals.
 
 **Integration Verification:**
