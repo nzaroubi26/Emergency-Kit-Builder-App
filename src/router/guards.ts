@@ -33,3 +33,11 @@ export function mcqHouseholdGuard() {
   if (emergencyTypes.length === 0) return redirect('/build');
   return null;
 }
+
+export function forkGuard() {
+  const { emergencyTypes, householdComposition } = useMCQStore.getState();
+  if (emergencyTypes.length === 0 || householdComposition.length === 0) {
+    return redirect('/build');
+  }
+  return null;
+}

@@ -8,7 +8,8 @@ import { ItemConfigScreen } from '../components/item-config/ItemConfigScreen';
 import { CustomSubkitScreen } from '../components/item-config/CustomSubkitScreen';
 import { SummaryScreen } from '../components/summary/SummaryScreen';
 import { OrderConfirmationScreen } from '../components/confirmation/OrderConfirmationScreen';
-import { subkitConfigGuard, customConfigGuard, summaryGuard, confirmationGuard, mcqHouseholdGuard } from './guards';
+import { ForkScreen } from '../components/fork/ForkScreen';
+import { subkitConfigGuard, customConfigGuard, summaryGuard, confirmationGuard, mcqHouseholdGuard, forkGuard } from './guards';
 
 export const router = createBrowserRouter([
   {
@@ -26,6 +27,11 @@ export const router = createBrowserRouter([
         path: '/build/household',
         element: <MCQHouseholdScreen />,
         loader: mcqHouseholdGuard,
+      },
+      {
+        path: '/choose',
+        element: <ForkScreen />,
+        loader: forkGuard,
       },
       {
         path: '/builder',
