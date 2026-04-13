@@ -235,20 +235,20 @@ The only modification to an existing screen is the "Build My Kit" CTA on the cov
 
 Two epics, ordered by dependency.
 
-- **Epic 11 — MCQ Step & Data Model:** MCQ types, store, and two MCQ screen UIs. Stories 11.1 → 11.2 are sequentially dependent.
-- **Epic 12 — Fork Screen, Review & Order Shell, & Flow Wiring:** Fork screen, Review & Order shell, Essentials bundle config, and full flow wiring.
+- **Epic 13 — MCQ Step & Data Model:** MCQ types, store, and two MCQ screen UIs. Stories 11.1 → 11.2 are sequentially dependent.
+- **Epic 14 — Fork Screen, Review & Order Shell, & Flow Wiring:** Fork screen, Review & Order shell, Essentials bundle config, and full flow wiring.
 
 ---
 
 ## 6. Epic Details
 
-### Epic 11: MCQ Step & Data Model
+### Epic 13: MCQ Step & Data Model
 
 **Epic Goal:** Introduce a two-question multi-select MCQ screen as the new entry point to the kit-building flow, capturing emergency type and household composition. Lock the MCQ data model and state persistence so Sprint 2 and Sprint 3 can consume it without rework.
 
 ---
 
-#### Story 11.1 — MCQ Data Model: Types and State Slice
+#### Story 13.1 — MCQ Data Model: Types and State Slice
 
 As a developer,
 I want a typed MCQ state slice in the Zustand store persisted to localStorage,
@@ -291,7 +291,7 @@ Types are exported directly from the store file (not `kit.types.ts` — differen
 
 ---
 
-#### Story 11.2 — MCQ Screens: Two Sequential Multi-Select Screens
+#### Story 13.2 — MCQ Screens: Two Sequential Multi-Select Screens
 
 As a user,
 I want to answer two multi-select questions on separate screens about my emergency type and household before building my kit,
@@ -322,13 +322,13 @@ so that the app can personalize subkit recommendations for my specific situation
 
 ---
 
-### Epic 12: Fork Screen & Essentials Path
+### Epic 14: Fork Screen & Essentials Path
 
 **Epic Goal:** Present users with a genuine fork after MCQ — Essentials Kit or Build My Own — deliver the Review & Order shell as the Sprint 1 shippable endpoint for the Essentials path, and wire the full flow end-to-end.
 
 ---
 
-#### Story 12.1 — Fork Screen: Two Co-Equal Path Cards
+#### Story 14.1 — Fork Screen: Two Co-Equal Path Cards
 
 As a user,
 I want to see two clearly differentiated path options after completing the MCQ,
@@ -357,7 +357,7 @@ so that I can choose between a trusted recommended kit and building my own.
 
 ---
 
-#### Story 12.2 — Review & Order Shell Screen
+#### Story 14.2 — Review & Order Shell Screen
 
 As a user who chose the Essentials path,
 I want to see a review page with my kit summary and delivery options before placing my order,
@@ -383,7 +383,7 @@ so that I understand exactly what I'm getting and can choose how to receive it.
 
 ---
 
-#### Story 12.3 — Essentials Bundle Config, Route Guards, MobileInterstitial Bypass + Full Flow Wiring
+#### Story 14.3 — Essentials Bundle Config, Route Guards, MobileInterstitial Bypass + Full Flow Wiring
 
 As a developer,
 I want the Essentials bundle defined as a typed config constant, route guards enforcing sequential flow, MobileInterstitial bypassed for Phase 3 routes, and the full Sprint 1 flow wired end-to-end,
@@ -426,7 +426,7 @@ export const ESSENTIALS_BUNDLE: EssentialsBundleItem[] = [
 
 ---
 
-#### Story 12.4 — Pets Subkit: Catalog Addition *(DEFERRED — moved to Sprint 2)*
+#### Story 14.4 — Pets Subkit: Catalog Addition *(DEFERRED — moved to Sprint 2)*
 
 > **Note:** This story was in PRD v1.0 but is deferred from Sprint 1 per Winston's architecture exclusions (Section 10): "No `pets` category in `CATEGORIES` yet. The store shape supports it (the `householdComposition` field captures `'pets'`), and the surfacing rules will handle it when the Pets subkit is introduced."
 >
@@ -465,5 +465,5 @@ Both downstream documents have been delivered and their decisions reconciled int
 ### Next: Shard and Hand Off
 
 1. **Shard this PRD** — Sarah to shard `docs/prd-phase3.md` into `docs/prd-phase3/` with section files and epic/story files matching the existing project pattern.
-2. **Stories to James** — Once sharded, stories are validated and handed off for implementation. Story dependency: 11.1 → 11.2 → 12.1 → 12.2. Story 12.3 (wiring) depends on all prior stories. Story 12.4 (Pets) is deferred to Sprint 2.
+2. **Stories to James** — Once sharded, stories are validated and handed off for implementation. Story dependency: 11.1 → 11.2 → 12.1 → 12.2. Story 14.3 (wiring) depends on all prior stories. Story 14.4 (Pets) is deferred to Sprint 2.
 3. **Sprint 1 summary:** 4 new routes, 1 new Zustand store, 4 new screens, 7+ new components, 1 config constant, 3 route guards, 1 AppShell modification. No existing routes, kit store shape, or screens modified except the cover page CTA.
