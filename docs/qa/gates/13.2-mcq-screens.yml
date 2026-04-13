@@ -1,0 +1,41 @@
+schema: 1
+story: "13.2"
+story_title: "MCQ Screens — Two Sequential Multi-Select Screens"
+gate: PASS
+status_reason: "All 11 ACs met. 33/33 tests passing across 3 test files with axe-core assertions. Visual tokens match front-end spec exactly. NOTA mutex logic correct both directions. Route guard matches architecture spec. Accessibility thorough (fieldset/legend, role=checkbox, aria-checked, aria-disabled, h1 focus, ARIA live). tsc clean, no regressions."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-04-13T20:15:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 95
+expires: "2026-04-27T20:15:00Z"
+
+evidence:
+  tests_reviewed: 33
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "No external APIs, no auth, no PII. Route guard is defensive."
+  performance:
+    status: PASS
+    notes: "Lightweight components. Local state for toggling, store writes only on Next CTA."
+  reliability:
+    status: PASS
+    notes: "Route guard prevents invalid state. NOTA mutex logic handles all edge cases."
+  maintainability:
+    status: PASS
+    notes: "Clean component separation. MCQTile/MCQNotaTile reusable. Named exports, FC<Props> pattern throughout."
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Verify with Sally whether MCQNotaTile selected checkmark should use neutral-700 (#374151) instead of brand-accent (#22C55E)"
+      refs: ["src/components/mcq/MCQNotaTile.tsx:45"]
