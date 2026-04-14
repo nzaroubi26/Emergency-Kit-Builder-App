@@ -110,7 +110,7 @@ describe('CartSidebar', () => {
       },
     } as ReturnType<typeof useKitStore>);
     render(<CartSidebar isOpen={true} onClose={vi.fn()} />);
-    expect(screen.getByText('$299.98')).toBeInTheDocument();
+    expect(screen.getByText('$398.00')).toBeInTheDocument();
   });
 
   it('renders subkit subtotal reflecting container price plus item costs', () => {
@@ -131,7 +131,7 @@ describe('CartSidebar', () => {
     render(<CartSidebar isOpen={true} onClose={vi.fn()} />);
     const subtotalLabel = screen.getByText('Subtotal');
     const subtotalRow = subtotalLabel.closest('div')!;
-    expect(subtotalRow.textContent).toContain('$189.99');
+    expect(subtotalRow.textContent).toContain('$239.00');
   });
 
   it('renders grand total equal to sum of all subkit subtotals', () => {
@@ -157,7 +157,7 @@ describe('CartSidebar', () => {
       },
     } as ReturnType<typeof useKitStore>);
     render(<CartSidebar isOpen={true} onClose={vi.fn()} />);
-    const total = (40 + 149.99 + 60 + 6.99).toFixed(2);
+    const total = (40 + 199.00 + 60 + 8.99).toFixed(2);
     expect(screen.getByText(`$${total}`)).toBeInTheDocument();
   });
 

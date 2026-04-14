@@ -40,10 +40,10 @@ describe('Subkit Subtotal on ItemConfigScreen', () => {
     renderItemConfigScreen('power');
     expect(screen.getByText('Subkit Subtotal: $40.00')).toBeInTheDocument();
 
-    const powerBanksButton = screen.getByRole('button', { name: /Power Banks, excluded/i });
+    const powerBanksButton = screen.getByRole('button', { name: /Power Bank, excluded/i });
     fireEvent.click(powerBanksButton);
 
-    expect(screen.getByText('Subkit Subtotal: $69.99')).toBeInTheDocument();
+    expect(screen.getByText('Subkit Subtotal: $59.98')).toBeInTheDocument();
   });
 
   it('shows Large container price ($60.00) for a Large subkit with no items', () => {
