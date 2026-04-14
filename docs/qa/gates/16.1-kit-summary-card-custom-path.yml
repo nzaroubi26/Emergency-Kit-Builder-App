@@ -1,0 +1,74 @@
+schema: 1
+story: "16.1"
+story_title: "KitSummaryCard — Custom Path Implementation"
+gate: PASS
+status_reason: "All 7 ACs met. CustomKitSummary uses existing calculateSubkitCartTotal and calculateTotalSlots as spec'd. Zero-items edge case handled. Visual structure matches Sally's spec. 9/9 tests passing (5 new custom path + 4 pre-existing essentials) after QA-applied fix to slotCalculations.ts import chain. tsc clean."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-04-14T02:00:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "TEST-002"
+    severity: low
+    finding: "KitSummaryCard.test.tsx was blocked by import chain: slotCalculations.ts → ../data barrel → itemImages.ts. Resolved during QA review by changing slotCalculations.ts to import directly from ../data/kitItems."
+    suggested_action: "Resolved. Also fixed ElevationVisuals.test.tsx border color assertion (hex vs RGB format)."
+
+quality_score: 93
+expires: "2026-04-28T02:00:00Z"
+
+evidence:
+  tests_reviewed: 9
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7]
+    ac_gaps: []
+  file_evidence:
+    - ac: 1
+      file: "src/components/review/KitSummaryCard.tsx"
+      lines: "62-121"
+      detail: "CustomKitSummary component replaces Sprint 2 placeholder. Rendered at line 135."
+    - ac: 2
+      file: "src/components/review/KitSummaryCard.tsx"
+      lines: "63-64"
+      detail: "useKitStore selectors for selectedSubkits and itemSelections."
+    - ac: 3
+      file: "src/components/review/KitSummaryCard.tsx"
+      lines: "82-86"
+      detail: "Per-subkit: inline itemCount filter + calculateSubkitCartTotal(subkit, itemSelections, ITEMS)."
+    - ac: 4
+      file: "src/components/review/KitSummaryCard.tsx"
+      line: 67
+      detail: "calculateTotalSlots(selectedSubkits) — existing utility, no new functions."
+    - ac: 5
+      file: "src/components/review/KitSummaryCard.tsx"
+      lines: "114-118"
+      detail: "'Custom Kit · {slotCount} slots used' in text-xs (12px), neutral-400 (#9CA3AF)."
+    - ac: 6
+      file: "src/components/review/KitSummaryCard.tsx"
+      lines: "88-110"
+      detail: "Two-line rows: color dot (h-2 w-2) + name + size / item count + subtotal. divide-y with #E5E7EB. Empty state: 'No items configured' in #9CA3AF."
+    - ac: 7
+      file: "tests/components/KitSummaryCard.test.tsx"
+      lines: "41-102"
+      detail: "5 new tests + 4 pre-existing: renders subkits, correct subtotals, slot count, zero-items graceful, empty container. All 9 pass after QA import fix."
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Reads from client-side store only. No external data, no PII."
+  performance:
+    status: PASS
+    notes: "calculateSubkitCartTotal called per-subkit in render — acceptable for max 6 subkits."
+  reliability:
+    status: PASS
+    notes: "Sorted by selectionOrder. Empty state handled. Null category guard (line 80)."
+  maintainability:
+    status: PASS
+    notes: "Internal component pattern matches EssentialsKitSummary. Named exports. Uses existing utilities per architecture spec."
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Resolve @assets import issue globally — 9 suites still blocked by direct itemImages imports. Add vitest alias mock or stub images."
+      refs: ["src/data/itemImages.ts", "vitest.config.ts"]

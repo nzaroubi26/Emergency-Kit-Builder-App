@@ -1,0 +1,78 @@
+schema: 1
+story: "15.2"
+story_title: "Visualizer Layout Refresh — Vertical to Horizontal"
+gate: CONCERNS
+status_reason: "ACs 1-7 met with correct 40/60 layout, sticky column, responsive breakpoints, and zero HousingUnitVisualizer interface changes. AC8 (layout assertion test updates) not done — no test file changes for layout. Elevation logic from Stories 15.3/15.4 mixed into same file but backwards-compatible (no-op when MCQ store empty)."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-04-14T02:00:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "TEST-001"
+    severity: medium
+    finding: "AC8 requires 'Component tests updated for new layout assertions' — no layout test updates in commit. Story dev record says 'Pure layout change — zero logic modifications' but does not mention tests."
+    suggested_action: "Add or update layout assertion tests in SubkitSelectionScreen test file to verify 40/60 split, sticky class, responsive grid-cols switch."
+  - id: "SCOPE-001"
+    severity: low
+    finding: "SubkitSelectionScreen.tsx includes Story 15.3 elevation sorting (lines 35-43) and Story 15.4 visual distinction (lines 78, 84-85, 94, 165-169) which were not gated before implementation. Code is backwards-compatible but violates dependency gating."
+    suggested_action: "Acknowledged — elevation is no-op with empty MCQ store. Will gate 15.3/15.4 when formally reviewed."
+
+quality_score: 82
+expires: "2026-04-28T02:00:00Z"
+
+evidence:
+  tests_reviewed: 0
+  risks_identified: 2
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7]
+    ac_gaps: [8]
+  file_evidence:
+    - ac: 1
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      lines: "135-174"
+      detail: "flex-col gap-6 lg:flex-row lg:gap-8 — stacked mobile, 40/60 desktop. Left w-[40%], right w-[60%]."
+    - ac: 2
+      file: "src/components/visualizer/HousingUnitVisualizer.tsx"
+      lines: "5-8"
+      detail: "Props unchanged: slots, readOnly, onSlotClick. Zero new props confirmed."
+    - ac: 3
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      line: 170
+      detail: "grid grid-cols-2 gap-3 lg:grid-cols-1 — 2-col mobile/tablet, single-col desktop."
+    - ac: 4
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      lines: "137-161"
+      detail: "Left column contains HousingUnitVisualizer, slot usage text, SlotFullIndicator, min-message, Configure Items CTA."
+    - ac: 5
+      detail: "All handler functions (handleSelect, handleSizeChange, handleProceed) unchanged. Capacity enforcement intact."
+    - ac: 6
+      detail: "No existing color changes per Sally Decision #5. Pets color additive via Story 15.1."
+    - ac: 7
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      line: 137
+      detail: "lg:sticky lg:top-6 lg:self-start on left column."
+    - ac: 8
+      detail: "MISSING — no layout assertion test updates found in commit."
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Layout-only change. No new inputs, no new data flow."
+  performance:
+    status: PASS
+    notes: "CSS sticky is browser-native, no JS cost. Elevation computation is pure function with tiny input — negligible."
+  reliability:
+    status: PASS
+    notes: "All existing interactions preserved. Responsive breakpoints use standard Tailwind lg: prefix."
+  maintainability:
+    status: CONCERNS
+    notes: "SubkitSelectionScreen now contains 15.2 layout + 15.3 elevation + 15.4 visual code in one commit. Each story's changes are identifiable but mixed."
+
+recommendations:
+  immediate:
+    - action: "Add layout assertion tests for AC8: verify lg:flex-row, lg:w-[40%]/lg:w-[60%], lg:sticky, grid-cols-2/lg:grid-cols-1 classes."
+      refs: ["src/components/subkit-selection/SubkitSelectionScreen.tsx"]
+  future:
+    - action: "Resolve pre-existing @assets import chain in src/data/index.ts barrel to unblock 13+ test suites."
+      refs: ["src/data/index.ts", "src/data/itemImages.ts"]

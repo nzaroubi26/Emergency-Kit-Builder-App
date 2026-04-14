@@ -1,5 +1,5 @@
 import type { SubkitSelection, SubkitSize, SlotState, KitItem, ItemSelection } from '../types';
-import { CATEGORIES } from '../data';
+import { CATEGORIES } from '../data/kitItems';
 
 export const MAX_SLOTS = 6;
 

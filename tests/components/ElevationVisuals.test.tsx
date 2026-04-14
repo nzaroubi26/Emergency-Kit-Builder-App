@@ -122,7 +122,7 @@ describe('SubkitCard elevation', () => {
       />
     );
     const card = container.querySelector('.subkit-card') as HTMLElement;
-    expect(card.style.borderLeftColor).toBe('#22C55E');
+    expect(card.style.borderLeftColor).toBe('rgb(34, 197, 94)');
     expect(card.style.borderLeftWidth).toBe('3px');
   });
 });

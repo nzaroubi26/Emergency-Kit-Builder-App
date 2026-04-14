@@ -1,0 +1,58 @@
+schema: 1
+story: "15.1"
+story_title: "Pets Subkit — Catalog Addition"
+gate: PASS
+status_reason: "All 6 ACs met. Pure data addition — pets category, 3 items, STANDARD_CATEGORY_IDS update. All values match architecture spec exactly. Winston's catch (STANDARD_CATEGORY_IDS) implemented. tsc clean, no test regressions. Color contrast values correct per Sally spec (#BE185D on #FFF1F2 ~6.2:1)."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-04-14T02:00:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 97
+expires: "2026-04-28T02:00:00Z"
+
+evidence:
+  tests_reviewed: 0
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+  file_evidence:
+    - ac: 1
+      file: "src/data/kitItems.ts"
+      line: 12
+      detail: "pets category entry with colorBase #BE185D, colorTint #FFF1F2, icon PawPrint, correct description and sizeOptions"
+    - ac: 2
+      file: "src/data/kitItems.ts"
+      lines: "45-47"
+      detail: "3 items (pets-food, pets-water, pets-first-aid) all with non-null weightGrams, volumeIn3, pricePlaceholder matching spec values"
+    - ac: 3
+      file: "src/data/kitItems.ts"
+      line: 57
+      detail: "'pets' appended to STANDARD_CATEGORY_IDS array (9th entry)"
+    - ac: 4
+      detail: "Data-driven rendering via Object.values(CATEGORIES) — no component changes needed, verified SubkitCard.tsx has no pets-specific code"
+    - ac: 5
+      detail: "tsc --noEmit clean. All 185 runnable tests pass (13 pre-existing suite failures from @assets import unrelated)."
+    - ac: 6
+      detail: "colorBase/icon values correct — rendering is data-driven via resolveIcon and inline style"
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Pure data addition, no new attack surface."
+  performance:
+    status: PASS
+    notes: "3 items added to static array. Negligible impact."
+  reliability:
+    status: PASS
+    notes: "All fields populated per KitCategory/KitItem interfaces. No null values in required weight/volume/price fields."
+  maintainability:
+    status: PASS
+    notes: "Follows existing data shape exactly. Named exports. No new files."
+
+recommendations:
+  immediate: []
+  future: []
