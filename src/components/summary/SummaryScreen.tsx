@@ -1,6 +1,7 @@
 import { type FC, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKitStore } from '../../store/kitStore';
+import { useMCQStore } from '../../store/mcqStore';
 import { useSlotState, useTotalSlotsUsed } from '../../hooks/useKitStore';
 import { CATEGORIES, ITEMS, ITEMS_BY_CATEGORY } from '../../data';
 import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../../utils/slotCalculations';
@@ -121,7 +122,8 @@ export const SummaryScreen: FC<SummaryScreenProps> = () => {
           <PrimaryButton
             onClick={() => {
               Analytics.ctaClicked();
-              navigate('/confirmation');
+              useMCQStore.getState().setKitPath('custom');
+              navigate('/review');
             }}
             className="btn-get-my-kit"
           >
