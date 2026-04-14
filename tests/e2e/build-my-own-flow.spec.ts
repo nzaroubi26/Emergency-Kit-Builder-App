@@ -30,9 +30,9 @@ test.describe('Build My Own — Full Happy Path', () => {
 
     // SubkitSelectionScreen — select 3 subkits
     await expect(page.getByRole('heading', { name: 'Build Your Emergency Kit' })).toBeVisible();
-    await page.getByRole('button', { name: /Power subkit/i }).click();
-    await page.getByRole('button', { name: /Lighting subkit/i }).click();
-    await page.getByRole('button', { name: /Medical subkit/i }).click();
+    await page.getByRole('button', { name: /^Power/i }).click();
+    await page.getByRole('button', { name: /^Lighting/i }).click();
+    await page.getByRole('button', { name: /^Medical/i }).click();
 
     // Click "Configure Items"
     await page.getByRole('button', { name: 'Configure Items' }).click();
