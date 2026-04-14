@@ -332,7 +332,7 @@ interface ProductCardProps {
 │  ┌────────────────┐  │
 │  │                │  │
 │  │  Product Image │  │  160x160 desktop, 140x140 tablet
-│  │   (1:1 ratio)  │  │  object-fit: cover, bg-white
+│  │   (1:1 ratio)  │  │  object-fit: contain, bg-white
 │  │                │  │
 │  └────────────────┘  │
 │                      │
