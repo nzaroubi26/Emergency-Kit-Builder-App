@@ -16,14 +16,17 @@ const mockCategory: KitCategory = {
 };
 
 describe('ElevationBadge', () => {
-  it('renders badge when visible is true', () => {
+  it('renders badge visibly when visible is true', () => {
     render(<ElevationBadge visible={true} />);
-    expect(screen.getByText('Suggested for you')).toBeInTheDocument();
+    const badge = screen.getByText('Suggested for you').parentElement!;
+    expect(badge.style.opacity).toBe('1');
   });
 
-  it('does not render when visible is false', () => {
+  it('renders badge hidden (opacity 0) when visible is false', () => {
     render(<ElevationBadge visible={false} />);
-    expect(screen.queryByText('Suggested for you')).not.toBeInTheDocument();
+    const badge = screen.getByText('Suggested for you').parentElement!;
+    expect(badge.style.opacity).toBe('0');
+    expect(badge.getAttribute('aria-hidden')).toBe('true');
   });
 });
 
@@ -56,7 +59,8 @@ describe('SubkitCard elevation', () => {
         onSelect={onSelect}
       />
     );
-    expect(screen.getByText('Suggested for you')).toBeInTheDocument();
+    const badge = screen.getByText('Suggested for you').parentElement!;
+    expect(badge.style.opacity).toBe('1');
   });
 
   it('hides badge when elevated and selected', () => {
@@ -69,7 +73,8 @@ describe('SubkitCard elevation', () => {
         onSelect={onSelect}
       />
     );
-    expect(screen.queryByText('Suggested for you')).not.toBeInTheDocument();
+    const badge = screen.getByText('Suggested for you').parentElement!;
+    expect(badge.style.opacity).toBe('0');
   });
 
   it('hides badge when not elevated', () => {
@@ -82,7 +87,8 @@ describe('SubkitCard elevation', () => {
         onSelect={onSelect}
       />
     );
-    expect(screen.queryByText('Suggested for you')).not.toBeInTheDocument();
+    const badge = screen.getByText('Suggested for you').parentElement!;
+    expect(badge.style.opacity).toBe('0');
   });
 
   it('uses correct aria-label when elevated and unselected', () => {

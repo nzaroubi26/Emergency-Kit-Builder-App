@@ -6,15 +6,18 @@ interface ElevationBadgeProps {
 }
 
 export const ElevationBadge: FC<ElevationBadgeProps> = ({ visible }) => {
-  if (!visible) return null;
-
   return (
     <span
       className="inline-flex items-center gap-1 rounded-full px-2 py-0.5"
+      aria-hidden={!visible}
       style={{
         backgroundColor: '#E8F5EE',
         color: '#1F4D35',
-        transition: 'opacity 150ms var(--ease-standard, ease)',
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
+        transition: visible
+          ? 'opacity 150ms var(--ease-standard, ease)'
+          : 'opacity 130ms var(--ease-standard, ease)',
       }}
     >
       <Sparkles size={10} aria-hidden="true" />

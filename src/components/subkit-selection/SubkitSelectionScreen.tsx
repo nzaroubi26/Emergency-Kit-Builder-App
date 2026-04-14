@@ -77,27 +77,28 @@ export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
 
   const hasElevated = elevated.size > 0;
 
-  const cardGrid = sortedCategories.map((category, index) => {
+  const renderCard = (category: KitCategory) => {
     const isSelected = selectedIds.has(category.id);
     const isDisabled = isAtCapacity;
     const currentSize = sizeMap.get(category.id) ?? 'regular';
     const isElevated = elevated.has(category.id);
-    const isLastElevated = isElevated && (index + 1 >= sortedCategories.length || !elevated.has(sortedCategories[index + 1].id));
 
     return (
-      <div key={category.id} className={isLastElevated && hasElevated ? 'mb-4' : ''}>
-        <SubkitCard
-          category={category}
-          selected={isSelected}
-          disabled={isDisabled}
-          currentSize={currentSize}
-          elevated={isElevated}
-          onSelect={handleSelect}
-          onSizeChange={handleSizeChange}
-        />
-      </div>
+      <SubkitCard
+        key={category.id}
+        category={category}
+        selected={isSelected}
+        disabled={isDisabled}
+        currentSize={currentSize}
+        elevated={isElevated}
+        onSelect={handleSelect}
+        onSizeChange={handleSizeChange}
+      />
     );
-  });
+  };
+
+  const elevatedCards = sortedCategories.filter((c) => elevated.has(c.id)).map(renderCard);
+  const nonElevatedCards = sortedCategories.filter((c) => !elevated.has(c.id)).map(renderCard);
 
   const minMessageId = 'min-subkit-message';
   const ctaDisabled = !canProceed;
@@ -163,12 +164,15 @@ export const SubkitSelectionScreen: FC<SubkitSelectionScreenProps> = () => {
         {/* Right column: subkit cards */}
         <div className="w-full lg:w-[60%]">
           {hasElevated && (
-            <section aria-label="Suggested subkits for your situation">
+            <section aria-label="Suggested subkits for your situation" className="mb-4">
               <ElevationGroupHeader visible={hasElevated} />
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+                {elevatedCards}
+              </div>
             </section>
           )}
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-            {cardGrid}
+            {nonElevatedCards}
           </div>
         </div>
       </div>
