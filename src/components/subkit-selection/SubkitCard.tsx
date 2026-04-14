@@ -3,6 +3,7 @@ import { Check } from 'lucide-react';
 import type { KitCategory, SubkitSize } from '../../types';
 import { resolveIcon } from '../../utils/iconResolver';
 import { SizeToggle } from './SizeToggle';
+import { ElevationBadge } from './ElevationBadge';
 import { announceAssertive } from '../../utils/announce';
 
 interface SubkitCardProps {
@@ -10,6 +11,7 @@ interface SubkitCardProps {
   selected: boolean;
   disabled: boolean;
   currentSize?: SubkitSize;
+  elevated?: boolean;
   onSelect: (categoryId: string) => void;
   onSizeChange?: (categoryId: string, size: SubkitSize) => boolean;
 }
@@ -19,6 +21,7 @@ export const SubkitCard: FC<SubkitCardProps> = ({
   selected,
   disabled,
   currentSize = 'regular',
+  elevated,
   onSelect,
   onSizeChange,
 }) => {
@@ -59,9 +62,13 @@ export const SubkitCard: FC<SubkitCardProps> = ({
     }
   };
 
+  const showElevation = elevated && !selected;
+
   const selectedBorderStyle: React.CSSProperties = selected
     ? { borderColor: category.colorBase, borderWidth: '2px', backgroundColor: category.colorTint }
-    : {};
+    : showElevation
+      ? { borderLeftColor: '#22C55E', borderLeftWidth: '3px' }
+      : {};
 
   const disabledStyle: React.CSSProperties = disabled && !selected
     ? { opacity: 0.45, cursor: 'not-allowed', transition: 'opacity 200ms var(--ease-standard)' }
@@ -110,8 +117,10 @@ export const SubkitCard: FC<SubkitCardProps> = ({
     : null;
 
   const ariaLabel = selected
-    ? `${category.name} subkit, selected`
-    : `${category.name} subkit`;
+    ? `${category.name}, selected`
+    : showElevation
+      ? `${category.name} — Suggested for your situation`
+      : `${category.name} subkit`;
 
   return (
     <div className={containerClasses} style={containerStyles} data-testid={`subkit-card-${category.id}`}>
@@ -133,6 +142,7 @@ export const SubkitCard: FC<SubkitCardProps> = ({
             {badgeContent}
           </div>
         </div>
+        <ElevationBadge visible={!!showElevation} />
         <p className="text-xs text-[var(--color-neutral-500)]">{category.description}</p>
       </div>
       {showSizeToggle && (
