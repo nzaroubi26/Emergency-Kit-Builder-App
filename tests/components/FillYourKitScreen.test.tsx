@@ -1,5 +1,5 @@
-import { render, screen, act } from '@testing-library/react';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { render, screen, act, within } from '@testing-library/react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { FillYourKitScreen } from '../../src/components/fill/FillYourKitScreen';
 import { useKitStore } from '../../src/store/kitStore';
@@ -132,6 +132,73 @@ describe('FillYourKitScreen', () => {
       useKitStore.getState().selectSubkit('custom');
       await renderFill();
       expect(screen.queryByText('Custom')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Add All to Amazon Cart CTA', () => {
+    beforeEach(() => setupEssentials());
+
+    it('renders Add All to Cart button at top and bottom', async () => {
+      await renderFill();
+      const buttons = screen.getAllByRole('button', { name: /Add all displayed products to Amazon cart/i });
+      expect(buttons).toHaveLength(2);
+    });
+
+    it('renders disclaimer near CTA', async () => {
+      await renderFill();
+      const disclaimers = screen.getAllByText('Prices may vary on Amazon');
+      expect(disclaimers.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('calls window.open with cart URL on click', async () => {
+      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+      await renderFill();
+      const buttons = screen.getAllByRole('button', { name: /Add all displayed products to Amazon cart/i });
+      buttons[0].click();
+      expect(openSpy).toHaveBeenCalledOnce();
+      expect(openSpy.mock.calls[0][0]).toContain('amazon.com/gp/aws/cart/add.html');
+      expect(openSpy.mock.calls[0][1]).toBe('_blank');
+      openSpy.mockRestore();
+    });
+  });
+
+  describe('Product cards and affiliate links', () => {
+    beforeEach(() => setupEssentials());
+
+    it('renders product cards with View on Amazon links', async () => {
+      await renderFill();
+      const links = screen.getAllByRole('link', { name: /View .+ on Amazon/ });
+      expect(links.length).toBeGreaterThan(0);
+      const firstLink = links[0];
+      expect(firstLink).toHaveAttribute('target', '_blank');
+      expect(firstLink).toHaveAttribute('rel', 'noopener noreferrer');
+      expect(firstLink.getAttribute('href')).toContain('amazon.com/dp/');
+    });
+  });
+
+  describe('Kids poncho conditional filtering', () => {
+    it('hides Kids Rain Poncho when no kids in household', async () => {
+      useMCQStore.getState().resetMCQ();
+      useKitStore.getState().resetKit();
+      useMCQStore.getState().setKitPath('custom');
+      useMCQStore.getState().setEmergencyTypes(['hurricane']);
+      useMCQStore.getState().setHouseholdComposition([]);
+      useKitStore.getState().selectSubkit('clothing');
+      await renderFill();
+      expect(screen.queryByText('Rain Poncho (Kids)')).not.toBeInTheDocument();
+      expect(screen.getByText('Rain Poncho (Adult)')).toBeInTheDocument();
+    });
+
+    it('shows Kids Rain Poncho when kids in household', async () => {
+      useMCQStore.getState().resetMCQ();
+      useKitStore.getState().resetKit();
+      useMCQStore.getState().setKitPath('custom');
+      useMCQStore.getState().setEmergencyTypes(['hurricane']);
+      useMCQStore.getState().setHouseholdComposition(['kids']);
+      useKitStore.getState().selectSubkit('clothing');
+      await renderFill();
+      expect(screen.getByText('Rain Poncho (Kids)')).toBeInTheDocument();
+      expect(screen.getByText('Rain Poncho (Adult)')).toBeInTheDocument();
     });
   });
 

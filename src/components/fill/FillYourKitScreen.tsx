@@ -1,9 +1,11 @@
 import { type FC, useEffect, useRef } from 'react';
+import { ShoppingCart } from 'lucide-react';
 import { useMCQStore } from '../../store/mcqStore';
 import { useKitStore } from '../../store/kitStore';
 import { ESSENTIALS_BUNDLE } from '../../data/essentialsConfig';
 import { PRODUCTS_BY_CATEGORY } from '../../data/amazonProducts';
 import { getOrderedCategories } from '../../utils/subkitOrdering';
+import { buildCartUrl } from '../../utils/cartUrl';
 import { CategorySection } from './CategorySection';
 
 export const FillYourKitScreen: FC = () => {
@@ -40,6 +42,34 @@ export const FillYourKitScreen: FC = () => {
     })
     .filter((entry) => entry.products.length > 0);
 
+  // 5. Collect all visible product ASINs for cart URL
+  const allVisibleAsins = categoryData.flatMap((entry) => entry.products.map((p) => p.asin));
+  const cartUrl = buildCartUrl(allVisibleAsins);
+
+  const handleAddAllToCart = () => {
+    if (cartUrl) {
+      window.open(cartUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const addAllCta = cartUrl ? (
+    <div className="flex flex-col items-center">
+      <button
+        type="button"
+        onClick={handleAddAllToCart}
+        aria-label="Add all displayed products to Amazon cart"
+        className="w-full max-w-[400px] flex items-center justify-center gap-2 py-3 px-6 text-[15px] font-semibold text-white rounded-[var(--radius-md,8px)] cursor-pointer"
+        style={{ backgroundColor: 'var(--color-brand-primary, #1F4D35)' }}
+      >
+        <ShoppingCart size={18} aria-hidden="true" />
+        Add All to Amazon Cart
+      </button>
+      <p className="text-[12px] text-[var(--color-neutral-400)] text-center mt-2">
+        Prices may vary on Amazon
+      </p>
+    </div>
+  ) : null;
+
   return (
     <div className="max-w-[960px] mx-auto px-4 md:px-8">
       <h1
@@ -53,6 +83,8 @@ export const FillYourKitScreen: FC = () => {
         Shop for the items to fill your emergency subkits. Each product links directly to Amazon.
       </p>
 
+      <div className="mt-6">{addAllCta}</div>
+
       <div className="mt-8 flex flex-col gap-4">
         {categoryData.map((entry, index) => (
           <CategorySection
@@ -63,6 +95,8 @@ export const FillYourKitScreen: FC = () => {
           />
         ))}
       </div>
+
+      <div className="mt-8 mb-8">{addAllCta}</div>
     </div>
   );
 };

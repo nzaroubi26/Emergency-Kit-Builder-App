@@ -3,6 +3,8 @@ import { ChevronDown } from 'lucide-react';
 import { CATEGORIES } from '../../data/kitItems';
 import type { AmazonProduct } from '../../data/amazonProducts';
 import { resolveIcon } from '../../utils/iconResolver';
+import { buildAffiliateUrl } from '../../utils/affiliateLink';
+import { ProductCard } from './ProductCard';
 
 interface CategorySectionProps {
   categoryId: string;
@@ -53,20 +55,17 @@ export const CategorySection: FC<CategorySectionProps> = ({ categoryId, products
         aria-labelledby={headerId}
         className="transition-[max-height] overflow-hidden"
         style={{
-          maxHeight: isExpanded ? '2000px' : '0px',
+          maxHeight: isExpanded ? '5000px' : '0px',
           transitionDuration: isExpanded ? '200ms' : '180ms',
         }}
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
           {products.map((product) => (
-            <div
+            <ProductCard
               key={product.id}
-              className="rounded-lg border border-[var(--color-neutral-200)] bg-white p-3 text-sm"
-            >
-              <p className="font-medium text-[var(--color-neutral-900)]">{product.name}</p>
-              <p className="text-xs text-[var(--color-neutral-500)] truncate">{product.brand}</p>
-              <p className="font-semibold text-[var(--color-neutral-900)] mt-1">${product.price.toFixed(2)}</p>
-            </div>
+              product={product}
+              affiliateUrl={buildAffiliateUrl(product.asin)}
+            />
           ))}
         </div>
       </div>
