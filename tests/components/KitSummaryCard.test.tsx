@@ -63,8 +63,8 @@ describe('KitSummaryCard', () => {
         },
       });
       render(<KitSummaryCard path="custom" />);
-      // 2 items, container $40 + $149.99 + $79.99 = $269.98
-      expect(screen.getByText('2 items · $269.98')).toBeInTheDocument();
+      // 2 items, container $40 + $199.00 + $149.99 = $388.99
+      expect(screen.getByText('2 items · $388.99')).toBeInTheDocument();
     });
 
     it('computes correct slot count', () => {

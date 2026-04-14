@@ -62,7 +62,7 @@ describe('SummaryScreen — Story 5.1: Kit Summary Display', () => {
     expect(screen.getByText('Portable Power Station')).toBeInTheDocument();
     expect(screen.getByText('×2')).toBeInTheDocument();
     expect(screen.getByText('Solar Panel')).toBeInTheDocument();
-    expect(screen.getByText('Flashlights')).toBeInTheDocument();
+    expect(screen.getByText('Flashlight')).toBeInTheDocument();
   });
 
   it('shows empty container badge for empty subkits', async () => {
