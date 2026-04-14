@@ -7,7 +7,7 @@ import { ElevationGroupHeader } from './ElevationGroupHeader';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { useSlotState, useTotalSlotsUsed, useIsAtCapacity, useCanProceedToConfig } from '../../hooks/useKitStore';
 import { useKitStore } from '../../store/kitStore';
-import { CATEGORIES } from '../../data';
+import { CATEGORIES } from '../../data/kitItems';
 import { useMCQStore } from '../../store/mcqStore';
 import { announcePolite } from '../../utils/announce';
 import { Analytics } from '../../utils/analytics';
