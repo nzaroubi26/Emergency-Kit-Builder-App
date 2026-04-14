@@ -37,12 +37,12 @@ All decisions continue the numbering sequence from Sprint 2 (last decision was #
 | 23 | Expand/collapse implementation | **React state + ARIA (Option B)** per Winston's recommendation in Section 10 of the architecture brief. `useState` per `CategorySection`, initialized from `defaultExpanded` prop. Gives full control over transition animations and matches the app's existing approach to interactive UI (React-controlled state with explicit ARIA attributes). Native `<details>`/`<summary>` was considered but rejected due to animation limitations. |
 | 24 | Default expanded count | **First 3 categories expanded, rest collapsed.** These are the MCQ priority categories — the ones most relevant to the user's emergency type. If fewer than 3 categories are displayed, all are expanded. |
 | 25 | "Add All to Amazon Cart" CTA placement | **Top of page only** — positioned below the page subtitle, above the first category section. A single prominent CTA keeps the page clean and establishes the primary action before the user scrolls. No sticky footer, no bottom repeat. The individual "View on Amazon" CTAs per product card provide ongoing action throughout the scroll. |
-| 26 | Product card image treatment | **Square aspect ratio, 1:1, object-fit cover.** Consistent sizing across all 31 products regardless of original Amazon image dimensions. 160x160px on desktop, 140x140px on tablet, full-width on mobile (1-col). White background container to handle product images with varying background colors. |
+| 26 | Product card image treatment | **Square container, 1:1 aspect ratio, object-fit contain.** Consistent sizing across all 31 products regardless of original Amazon image dimensions. 160x160px on desktop, 140x140px on tablet, 160x160px centered on mobile (1-col). White background container to handle product images with varying background colors. `object-contain` preserves the full product silhouette without cropping — critical for product recognition. |
 | 27 | Price display format | **`$XX.XX` — always two decimal places.** Formatted at the component level using `toFixed(2)`. Consistent with existing `pricePlaceholder` rendering in ItemConfigScreen and SummaryScreen. |
 | 28 | Category section color bar | **4px top border using `colorBase`.** Minimal, distinctive, consistent with the category color system used across SubkitCard, ItemConfigScreen, and SummaryScreen. Applied to the section header container, not the expand/collapse toggle. |
 | 29 | Product grid gap | **`gap-4` (16px).** Matches the card spacing used in the existing SubkitSelectionScreen card grid. Sufficient breathing room without wasting vertical space on content-dense product sections. |
 | 30 | Empty category behavior | **Not rendered.** If a category has zero products after MCQ conditional filtering (e.g., Clothing with only the Kids poncho, and no kids in household — but adult poncho + shoe covers remain, so this is unlikely), the category section is omitted entirely. No empty state, no "No products" message. Same pattern as Pets category exclusion when no pets selected. |
-| 31 | Disclaimer copy positioning | **Inline below the "Add All to Amazon Cart" button.** `text-caption` size, `neutral-500`, centered. Visible without scrolling, directly associated with the CTA it qualifies. |
+| 31 | Disclaimer copy positioning | **Inline below the "Add All to Amazon Cart" button.** `text-caption` size, `neutral-400`, centered. Visible without scrolling, directly associated with the CTA it qualifies. |
 | 32 | Brand text treatment | **Separate line below product name.** `text-caption` size, `neutral-500`, truncated with ellipsis if longer than card width. Keeps the product name visually dominant while the brand provides recognition context. |
 | 33 | "View on Amazon" CTA style | **Outlined button, not filled.** `brand-accent` (`#22C55E`) border and text, white background, `radius-md`. Avoids visual competition with the primary "Add All to Amazon Cart" CTA. On hover: fills with `brand-accent`, text turns white. |
 | 34 | Page entry from Order Confirmation | **Standard forward navigation.** Same screen transition as existing flow (exit left, enter from right) per Animation #16/#17. No special entrance animation. The "Now Let's Fill Your Kit" CTA on Order Confirmation navigates via `navigate('/fill')` — replaces the `FillKitStubModal`. |
@@ -205,6 +205,35 @@ max-w-[960px] mx-auto px-4 md:px-8     ← matches OrderConfirmationScreen
 | CTA button | `PrimaryButton` with cart icon, full width up to `max-w-[400px]` |
 | Disclaimer | `text-[12px] text-[var(--color-neutral-400)] text-center` |
 | Category sections | `mt-8 flex flex-col gap-4` |
+
+**Data Flow — Rendering Pipeline:**
+
+The `FillYourKitScreen` component reads from two Zustand stores and computes the display list:
+
+```
+1. Determine active category IDs:
+   kitPath === 'essentials'
+     ? ESSENTIALS_BUNDLE.map(b => b.subkit)       // ['power', 'cooking', 'medical', 'communications']
+     : selectedSubkits.map(s => s.categoryId)      // user's selections
+
+2. Get ordered categories via getOrderedCategories(emergencyTypes[0], householdComposition)
+
+3. Filter to active categories only:
+   orderedCategories.filter(id => activeCategoryIds.includes(id))
+
+4. For each category, get visible products:
+   PRODUCTS_BY_CATEGORY[categoryId]
+     .filter(p => !p.mcqCondition || householdComposition.includes(p.mcqCondition.includes))
+
+5. Skip categories with 0 products after filtering (safety net)
+
+6. First 3 categories → defaultExpanded={true}, rest → defaultExpanded={false}
+
+7. Compute Add All to Cart URL (once, at screen level):
+   buildCartUrl(allVisibleProducts.map(p => p.asin))
+```
+
+**Category metadata** for section headers comes from `CATEGORIES` in `kitItems.ts` — the same source used by `SubkitCard` and `ItemConfigScreen`. Each category provides `colorBase`, `colorTint`, `icon`, and `name`. Visual consistency across screens is automatic.
 
 ---
 
