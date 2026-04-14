@@ -236,7 +236,7 @@ Revisit when **all** of these are true:
 
 ## Appendix: Add to Cart URL Reference
 
-For Sprint 3B implementation, here is the exact URL format:
+For implementation, here is the exact URL format:
 
 ```
 https://www.amazon.com/gp/aws/cart/add.html

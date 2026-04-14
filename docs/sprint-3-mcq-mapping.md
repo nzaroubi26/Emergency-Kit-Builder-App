@@ -31,8 +31,9 @@ When no emergency-type-specific ordering applies, subkits are displayed in this 
 | 6 | Hygiene | — |
 | 7 | Comfort | — |
 | 8 | Clothing | — |
-| 9 | Custom | — |
-| 10 | Pets | Conditional — only if "pets" selected in household composition. Always last when shown. |
+| 9 | Pets | Conditional — only if "pets" selected in household composition. Always last when shown. |
+
+> **Note:** Custom is excluded from the Fill Your Kit display order — it has no Amazon products.
 
 ---
 
@@ -63,8 +64,7 @@ If the user selects multiple emergency types, the **first selected type wins** �
 | 6 | Cooking | Default order |
 | 7 | Hygiene | Default order |
 | 8 | Comfort | Default order |
-| 9 | Custom | Default order |
-| 10 | Pets | Conditional, always last |
+| 9 | Pets | Conditional, always last |
 
 ### Ordering Example: Tornado
 
@@ -78,8 +78,7 @@ If the user selects multiple emergency types, the **first selected type wins** �
 | 6 | Hygiene | Default order |
 | 7 | Comfort | Default order |
 | 8 | Clothing | Default order |
-| 9 | Custom | Default order |
-| 10 | Pets | Conditional, always last |
+| 9 | Pets | Conditional, always last |
 
 ---
 

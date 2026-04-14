@@ -128,13 +128,21 @@ No dedicated products. Users pull items from other categories.
 
 These changes should be included in the Sprint 3A product data story:
 
-### Renames
+### Renames (9 total)
 | Current Name | New Name | Item ID |
 |--------------|----------|---------|
 | Paper Cups | Paper Plates & Utensils | hygiene-cups |
-| Feminine Hygiene Products | Feminine Hygiene Kit (confirm) | hygiene-feminine |
+| Feminine Hygiene Products | Feminine Hygiene Kit | hygiene-feminine |
 | Pet Water & Bowl Kit | Collapsible Bowl | pets-water |
 | Pet First Aid & Comfort Kit | Pet First Aid Kit | pets-first-aid |
+| Flashlights | Flashlight | light-flashlight |
+| Electric Lanterns | Electric Lantern | light-lantern |
+| Power Banks | Power Bank | power-banks |
+| Ice Packs | Hot/Cold Pack | med-ice-packs |
+| Ponchos | Rain Poncho (Adult) | cloth-ponchos |
+
+### Price Sync
+All `pricePlaceholder` values in `kitItems.ts` shall be updated to match catalog prices above. The Amazon catalog is now the source of truth.
 
 ### Removals
 | Item | Item ID | Reason |

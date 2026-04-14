@@ -2,8 +2,8 @@
 
 **Prepared by:** John, Product Manager
 **Date:** 2026-04-14
-**Version:** 1.0
-**Status:** Draft — Ready for Architect and PO Review
+**Version:** 1.2
+**Status:** Draft — Ready for Architect and UX Expert Handoff
 
 ---
 
@@ -52,6 +52,7 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 |--------|------|---------|-------------|--------|
 | Initial draft | 2026-04-14 | 1.0 | Sprint 3A PRD — Amazon affiliate layer | John, PM |
 | Spike integration | 2026-04-14 | 1.1 | Updated with spike results: Add to Cart URL (GO) absorbed into Epic 17/18, PA-API (NO-GO) confirmed, Sprint 3B section updated | John, PM |
+| PO review pass | 2026-04-14 | 1.2 | 14 flags from Sarah (PO): expanded FR18 renames to 9, added FR9 clarification, FR30 (selected subkits filter), FR31 (route guard), stub modal rewiring AC, Custom removed from display order, pricePlaceholder sync, image location deferred to Winston, Story 18.1 split into 18.1+18.2, icon override + missing image notes | John, PM |
 
 ---
 
@@ -75,7 +76,7 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 
 - **FR7:** A new "Fill Your Kit" screen shall be created, accessible from the "Now Let's Fill Your Kit" CTA on the Order Confirmation screen.
 - **FR8:** The screen shall display product recommendations organized by subkit category. Each category is presented as a collapsible section with the category name, icon, and color.
-- **FR9:** Each product recommendation shall display as a card showing: product image, product name, brand, price, and a "View on Amazon" CTA that opens the affiliate link in a new tab.
+- **FR9:** Each product recommendation shall display as a card showing: product image, generic product name (e.g., "Portable Power Station" — NOT the full Amazon listing title), brand as a separate muted text field (e.g., "Jackery Explorer"), price, and a "View on Amazon" CTA that opens the affiliate link in a new tab.
 - **FR10:** Subkit categories shall be displayed in an order determined by the user's MCQ emergency type selection, per the mapping rules defined in `docs/sprint-3-mcq-mapping.md`.
 
 **MCQ-Informed Ordering**
@@ -90,8 +91,16 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 | Tornado | Power | Cooking | Medical |
 | Tropical Storm | Power | Medical | Communications |
 
-- **FR13:** The default subkit order (for positions after the top 3) is: Power, Medical, Communications, Lighting, Cooking, Hygiene, Comfort, Clothing, Custom. Pets is always last when shown.
+- **FR13:** The default subkit order (for positions after the top 3) is: Power, Medical, Communications, Lighting, Cooking, Hygiene, Comfort, Clothing. Pets is always last when shown. Custom is excluded — it has no Amazon products.
 - **FR14:** If no emergency type is selected (edge case), the default order applies in full.
+
+**Selected Subkit Filtering**
+
+- **FR30:** The Fill Your Kit screen shall only display product sections for subkit categories present in `kitStore.selectedSubkits`. If a user selected Power, Medical, and Cooking, only those 3 categories' products are shown — not all 9. This applies to both Essentials and Custom paths.
+
+**Route Guard**
+
+- **FR31:** The `/fill` route shall have a route guard that redirects to `/` if `kitStore.selectedSubkits` is empty. *(Open question for Winston: confirm guard implementation pattern.)*
 
 **MCQ-Conditional Items and Categories**
 
@@ -109,9 +118,15 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 | Feminine Hygiene Products | Feminine Hygiene Kit | hygiene-feminine |
 | Pet Water & Bowl Kit | Collapsible Bowl | pets-water |
 | Pet First Aid & Comfort Kit | Pet First Aid Kit | pets-first-aid |
+| Flashlights | Flashlight | light-flashlight |
+| Electric Lanterns | Electric Lantern | light-lantern |
+| Power Banks | Power Bank | power-banks |
+| Ice Packs | Hot/Cold Pack | med-ice-packs |
+| Ponchos | Rain Poncho (Adult) | cloth-ponchos |
 
 - **FR19:** The "Pet Food Supply (3-Day)" item (`pets-food`) shall be removed from `kitItems.ts`.
 - **FR20:** A new item "Rain Poncho (Kids)" shall be added to the Clothing category in `kitItems.ts` (ASIN: B07QCVMCF8, price: $12.99).
+- **FR20a:** All `pricePlaceholder` values in `kitItems.ts` shall be updated to match the corresponding prices in `docs/sprint-3-product-catalog.md`. The Amazon catalog is the source of truth for pricing.
 
 **"Add All to Amazon Cart" CTA**
 
@@ -230,9 +245,10 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 
 | File | Change |
 |------|--------|
-| `src/data/kitItems.ts` | Renames (4), removal (1), addition (1) per FR18-FR20 |
-| `src/router/index.tsx` | Add `/fill` route |
-| Order Confirmation screen | Wire "Fill Your Kit" CTA to `/fill` (verify if already stubbed) |
+| `src/data/kitItems.ts` | Renames (9), removal (1), addition (1), pricePlaceholder sync per FR18-FR20a |
+| `src/router/index.tsx` | Add `/fill` route + route guard |
+| `src/components/confirmation/OrderConfirmationScreen.tsx` | Replace `FillKitStubModal` with `navigate('/fill')` |
+| `src/components/confirmation/FillKitStubModal.tsx` | Remove file |
 
 ### Risk Assessment
 
@@ -252,7 +268,7 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 Three epics, partially parallelizable.
 
 - **Epic 17 — Product Data & Affiliate Infrastructure:** Static product data file, affiliate link utility, Add to Cart URL utility, subkit ordering utility, and kitItems.ts data cleanup. Foundation for the Fill Your Kit screen. Stories 17.1 and 17.2 can run in parallel; 17.3 depends on both; 17.4 depends on 17.2.
-- **Epic 18 — Fill Your Kit Screen:** The main new screen with MCQ-ordered category sections, product cards, conditional gates, affiliate CTAs, and "Add All to Cart" button. Depends on Epic 17.
+- **Epic 18 — Fill Your Kit Screen:** The main new screen, split into two stories: 18.1 (shell, routing, stub modal rewiring, category sections, ordering, selected-subkit filtering) and 18.2 (product cards, affiliate CTAs, Add All to Cart button). 18.2 depends on 18.1. Epic depends on Epic 17.
 - **Epic 19 — Amazon API Feasibility Spike:** Research-only assessment of Cart API and PA-API 5.0. **Complete.** Results: Add to Cart URL = GO (absorbed into Epics 17-18), PA-API = NO-GO (static data continues).
 
 ---
@@ -273,11 +289,16 @@ so that item names match their real Amazon products and the data is accurate for
 
 **Acceptance Criteria:**
 
-1. The following items are renamed in `kitItems.ts` (name field only — IDs unchanged):
+1. The following 9 items are renamed in `kitItems.ts` (name field only — IDs unchanged):
    - `hygiene-cups`: "Paper Cups" → "Paper Plates & Utensils"
    - `hygiene-feminine`: "Feminine Hygiene Products" → "Feminine Hygiene Kit"
    - `pets-water`: "Pet Water & Bowl Kit" → "Collapsible Bowl"
    - `pets-first-aid`: "Pet First Aid & Comfort Kit" → "Pet First Aid Kit"
+   - `light-flashlight`: "Flashlights" → "Flashlight"
+   - `light-lantern`: "Electric Lanterns" → "Electric Lantern"
+   - `power-banks`: "Power Banks" → "Power Bank"
+   - `med-ice-packs`: "Ice Packs" → "Hot/Cold Pack"
+   - `cloth-ponchos`: "Ponchos" → "Rain Poncho (Adult)"
 2. Item `pets-food` ("Pet Food Supply (3-Day)") is removed from the `ITEMS` array.
 3. A new item is added to the Clothing category:
    - ID: `cloth-ponchos-kids`
@@ -285,8 +306,12 @@ so that item names match their real Amazon products and the data is accurate for
    - categoryId: `clothing`
    - All standard fields populated (weightGrams, volumeIn3, pricePlaceholder: 12.99)
    - `productId: null`, `imageSrc: null` (populated in Story 17.2)
-4. `tsc --noEmit` passes. All existing tests pass. Any test referencing "Paper Cups", "Pet Food Supply", or renamed items by display name is updated.
-5. No item IDs are changed. No type shape changes.
+   - Entry added to `ITEM_ICON_OVERRIDES` with icon `CloudRain` (same as adult ponchos)
+4. All `pricePlaceholder` values in `kitItems.ts` updated to match the corresponding prices in `docs/sprint-3-product-catalog.md`. The Amazon catalog is now the source of truth for pricing.
+5. `tsc --noEmit` passes. All existing tests pass. Any test referencing "Paper Cups", "Pet Food Supply", or renamed items by display name is updated.
+6. No item IDs are changed. No type shape changes.
+
+**Dev Note:** The new `cloth-ponchos-kids` item will not have an entry in `itemImages.ts`. Verify that components handle missing images gracefully (expected — no image assets exist for pets items either).
 
 ---
 
@@ -318,7 +343,7 @@ so that the Fill Your Kit screen has a complete data source and can generate wor
 2. All 31 products from `docs/sprint-3-product-catalog.md` are defined with correct ASINs and prices.
 3. Kids Rain Poncho has `mcqCondition: { field: 'householdComposition', includes: 'kids' }`.
 4. All Pets category items have `mcqCondition: { field: 'householdComposition', includes: 'pets' }`.
-5. Product images are downloaded and placed in `src/assets/products/` (or `public/products/`). One image per product, named by ASIN (e.g., `B082TMBYR6.jpg`).
+5. Product images are downloaded and placed in the location specified by Winston's architecture brief. One image per product, named by ASIN (e.g., `B082TMBYR6.jpg`). *(Open question for Winston: confirm image storage location — `src/assets/products/` vs `public/products/`.)*
 6. A new file `src/utils/affiliateLink.ts` exports:
    ```ts
    export const AFFILIATE_TAG = 'placeholder-20'; // updated when Associates account confirmed
@@ -353,7 +378,7 @@ so that the Fill Your Kit screen can render categories in priority order.
    | Tornado | Power | Cooking | Medical |
    | Tropical Storm | Power | Medical | Communications |
 
-3. After the top 3, remaining categories follow default order: Power, Medical, Communications, Lighting, Cooking, Hygiene, Comfort, Clothing, Custom. Categories already placed in top 3 are skipped.
+3. After the top 3, remaining categories follow default order: Power, Medical, Communications, Lighting, Cooking, Hygiene, Comfort, Clothing. Categories already placed in top 3 are skipped. Custom is excluded (no Amazon products).
 4. Pets is appended last, only if `householdComposition` includes `'pets'`.
 5. If `emergencyType` is undefined, the full default order is used.
 6. Unit tests cover: each of the 4 emergency types produces correct ordering, undefined type uses default, Pets inclusion/exclusion based on household composition, no duplicate categories in output.
@@ -394,29 +419,47 @@ so that the Fill Your Kit screen can offer a one-click "Add All to Amazon Cart" 
 
 ---
 
-#### Story 18.1 — Fill Your Kit Screen: Category Sections and Product Cards
+#### Story 18.1 — Fill Your Kit Screen: Shell and Category Sections
 
 As a user who completed my kit order,
-I want to see product recommendations for each subkit organized by relevance to my emergency type,
-so that I can browse and purchase the items I need on Amazon.
+I want to see my subkits organized by relevance to my emergency type on a dedicated screen,
+so that I can browse product recommendations for the subkits I selected.
 
 **Acceptance Criteria:**
 
 1. A new screen `FillYourKitScreen` is created at route `/fill`.
-2. The "Now Let's Fill Your Kit" CTA on Order Confirmation navigates to `/fill`.
-3. The screen reads `emergencyTypes` and `householdComposition` from the MCQ store.
-4. Subkit categories are displayed as vertical `CategorySection` components in the order returned by `getOrderedCategories(emergencyTypes[0], householdComposition)`.
-5. Each `CategorySection` displays: category color bar (using `colorBase` from `CATEGORIES`), category icon, category name, product count badge, and an expand/collapse toggle.
-6. The first 3 categories (MCQ priority) are expanded by default. Remaining categories are collapsed.
-7. Within each expanded section, `ProductCard` components are displayed in a responsive grid (3-col desktop >=1024px, 2-col tablet >=640px, 1-col mobile).
-8. Each `ProductCard` displays: product image, product name, brand (muted text), price (formatted as `$XX.XX`), and a "View on Amazon" CTA button.
-9. The CTA calls `buildAffiliateUrl(product.asin)` and opens the result in a new tab with `rel="noopener noreferrer"`.
-10. Products with `mcqCondition` are filtered: Kids Rain Poncho hidden if `householdComposition` does not include `'kids'`. Pets category hidden entirely if `householdComposition` does not include `'pets'`.
-11. An "Add All to Amazon Cart" CTA button is displayed prominently (top of page and/or sticky footer). Clicking it calls `buildCartUrl()` with the ASINs of all currently displayed products (respecting conditional filters) and opens the result in a new tab.
-12. A "Prices may vary on Amazon" disclaimer is displayed near the Add All to Cart CTA.
-13. Accessibility: category sections use `<details>`/`<summary>` or equivalent ARIA pattern for expand/collapse. Product links have descriptive `aria-label` (e.g., "View Jackery Explorer on Amazon"). Images have `alt` text with product name.
-14. Component tests cover: correct category ordering for each emergency type, expand/collapse behavior, product card rendering with all fields, affiliate link construction, Add All to Cart URL construction with correct ASINs, conditional filtering for kids/pets, empty state (category not rendered when all items filtered out).
-15. E2E test: complete flow from Order Confirmation → Fill Your Kit → verify at least one product card is visible with a working "View on Amazon" link and "Add All to Amazon Cart" button is present.
+2. Route guard on `/fill` redirects to `/` if `kitStore.selectedSubkits` is empty. *(Confirm guard pattern with Winston.)*
+3. Replace `FillKitStubModal` behavior in `OrderConfirmationScreen.tsx` with `navigate('/fill')`. Remove `FillKitStubModal.tsx`.
+4. The screen reads `emergencyTypes` and `householdComposition` from the MCQ store, and `selectedSubkits` from the kit store.
+5. Only subkit categories present in `kitStore.selectedSubkits` are displayed. If a user selected Power, Medical, and Cooking, only those 3 categories appear.
+6. Displayed categories are ordered by `getOrderedCategories(emergencyTypes[0], householdComposition)`, filtered to the user's selected subkits.
+7. Each category is rendered as a `CategorySection` component displaying: category color bar (using `colorBase` from `CATEGORIES`), category icon, category name, product count badge, and an expand/collapse toggle.
+8. The first 3 categories (or all if fewer than 3) are expanded by default. Remaining categories are collapsed.
+9. Conditional category filtering: Pets category hidden entirely if `householdComposition` does not include `'pets'` (even if in selectedSubkits). Custom category excluded (no Amazon products).
+10. Responsive layout: category sections stack vertically, product card grid within each section (3-col desktop >=1024px, 2-col tablet >=640px, 1-col mobile).
+11. Component tests cover: correct category ordering for each emergency type, expand/collapse behavior, selected-subkits-only filtering, conditional Pets/Custom exclusion, route guard redirect.
+
+---
+
+#### Story 18.2 — Fill Your Kit Screen: Product Cards and Affiliate CTAs
+
+As a user browsing the Fill Your Kit screen,
+I want to see product cards with images, names, prices, and links to Amazon for each subkit,
+so that I can purchase the recommended items via affiliate links.
+
+**Depends on:** Story 18.1
+
+**Acceptance Criteria:**
+
+1. Within each expanded `CategorySection`, `ProductCard` components are displayed in the responsive grid established in 18.1.
+2. Each `ProductCard` displays: product image, generic product name (e.g., "Portable Power Station"), brand as separate muted text (e.g., "Jackery Explorer"), price (formatted as `$XX.XX`), and a "View on Amazon" CTA button.
+3. The CTA calls `buildAffiliateUrl(product.asin)` and opens the result in a new tab with `rel="noopener noreferrer"`.
+4. Products with `mcqCondition` are filtered: Kids Rain Poncho hidden if `householdComposition` does not include `'kids'`.
+5. An "Add All to Amazon Cart" CTA button is displayed prominently (top of page and/or sticky footer). Clicking it calls `buildCartUrl()` with the ASINs of all currently displayed products (respecting all filters — selected subkits, conditional MCQ gates) and opens the result in a new tab.
+6. A "Prices may vary on Amazon" disclaimer is displayed near the Add All to Cart CTA.
+7. Accessibility: category sections use `<details>`/`<summary>` or equivalent ARIA pattern for expand/collapse. Product links have descriptive `aria-label` (e.g., "View Jackery Explorer on Amazon"). Images have `alt` text with product name. Keyboard navigable.
+8. Component tests cover: product card rendering with all fields, affiliate link construction, Add All to Cart URL construction with correct ASINs, conditional item filtering (kids poncho), empty state (category not rendered when all items filtered out).
+9. E2E test: complete flow from Order Confirmation → Fill Your Kit → verify at least one product card is visible with a working "View on Amazon" link and "Add All to Amazon Cart" button is present.
 
 ---
 
