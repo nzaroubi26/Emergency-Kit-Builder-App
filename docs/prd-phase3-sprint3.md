@@ -51,6 +51,7 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 | Change | Date | Version | Description | Author |
 |--------|------|---------|-------------|--------|
 | Initial draft | 2026-04-14 | 1.0 | Sprint 3A PRD — Amazon affiliate layer | John, PM |
+| Spike integration | 2026-04-14 | 1.1 | Updated with spike results: Add to Cart URL (GO) absorbed into Epic 17/18, PA-API (NO-GO) confirmed, Sprint 3B section updated | John, PM |
 
 ---
 
@@ -112,11 +113,20 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 - **FR19:** The "Pet Food Supply (3-Day)" item (`pets-food`) shall be removed from `kitItems.ts`.
 - **FR20:** A new item "Rain Poncho (Kids)" shall be added to the Clothing category in `kitItems.ts` (ASIN: B07QCVMCF8, price: $12.99).
 
-**API Feasibility Spike**
+**"Add All to Amazon Cart" CTA**
 
-- **FR21:** A research-only spike shall assess Amazon Cart API and PA-API 5.0 feasibility per the exit criteria defined in `docs/sprint-3-spike-criteria.md`.
-- **FR22:** The spike deliverable is a single document (`docs/sprint-3-api-spike-results.md`) with go/no-go on each API and architecture recommendations.
-- **FR23:** No implementation code is produced by the spike. Sprint 3B scope is contingent on the results.
+- **FR21:** The Fill Your Kit screen shall include an "Add All to Amazon Cart" CTA button that opens a pre-loaded Amazon cart in a new tab containing all displayed products.
+- **FR22:** The cart URL shall be constructed using Amazon's Add to Cart URL mechanism: `https://www.amazon.com/gp/aws/cart/add.html?AssociateTag={TAG}&ASIN.1={ASIN}&Quantity.1=1&...` with sequential ASIN/Quantity parameters for each product.
+- **FR23:** A utility function (`src/utils/cartUrl.ts`) shall construct the cart URL from an array of ASINs. The affiliate tag shall use the same constant as the individual affiliate links.
+- **FR24:** The cart URL shall only include products currently displayed on screen (respecting MCQ conditional filters — e.g., exclude Pets items if no pets, exclude Kids poncho if no kids).
+- **FR25:** The CTA shall open the URL in a new tab via `window.open()` with `noopener,noreferrer`.
+- **FR26:** A "prices may vary" disclaimer shall be displayed near the CTA, since Amazon cart prices are live and may differ from our static snapshots.
+
+**API Spike Results (Completed)**
+
+- **FR27:** The API feasibility spike is complete. Results documented in `docs/sprint-3-api-spike-results.md`.
+- **FR28:** Add to Cart URL: **GO** — implemented in Sprint 3A via FR21-FR26 above. No backend required.
+- **FR29:** PA-API 5.0 / Creators API: **NO-GO** — static data approach continues. No live pricing, dynamic images, or availability badges in the prototype. See spike results for full reasoning.
 
 ### Non-Functional Requirements
 
@@ -197,6 +207,7 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 
 - **Product data file:** New `src/data/amazonProducts.ts` — static typed array of product objects. Imports category IDs from `kitItems.ts` for type safety. Same module pattern as existing data files.
 - **Affiliate utility:** New `src/utils/affiliateLink.ts` — pure function. Accepts ASIN and tag, returns full URL. Tag constant defined in same file or a config file.
+- **Cart URL utility:** New `src/utils/cartUrl.ts` — pure function. Accepts array of ASINs and tag, returns Amazon Add to Cart URL. Uses the `gp/aws/cart/add.html` mechanism documented in spike results. Same affiliate tag constant.
 - **Subkit ordering utility:** New `src/utils/subkitOrdering.ts` — pure function. Accepts `emergencyTypes[0]` from MCQ store, returns ordered array of category IDs. Encapsulates the priority mapping tables and default order.
 - **Conditional item filtering:** Logic in the Fill Your Kit screen component. Reads `householdComposition` from MCQ store. Filters products before render: hide Kids poncho if no kids, hide Pets category if no pets.
 - **Route addition:** One new route `/fill` added to React Router config. Order Confirmation CTA wired to navigate here.
@@ -208,6 +219,7 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 |------|---------|
 | `src/data/amazonProducts.ts` | Static product catalog — 31 items with ASINs, prices, image paths |
 | `src/utils/affiliateLink.ts` | Affiliate URL construction utility |
+| `src/utils/cartUrl.ts` | Add to Cart URL construction utility |
 | `src/utils/subkitOrdering.ts` | MCQ-driven subkit ordering logic |
 | `src/components/fill/FillYourKitScreen.tsx` | Main screen at `/fill` |
 | `src/components/fill/CategorySection.tsx` | Collapsible category section with product grid |
@@ -239,9 +251,9 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 
 Three epics, partially parallelizable.
 
-- **Epic 17 — Product Data & Affiliate Infrastructure:** Static product data file, affiliate link utility, subkit ordering utility, and kitItems.ts data cleanup. Foundation for the Fill Your Kit screen. Stories 17.1 and 17.2 can run in parallel; 17.3 depends on both.
-- **Epic 18 — Fill Your Kit Screen:** The main new screen with MCQ-ordered category sections, product cards, conditional gates, and affiliate CTAs. Depends on Epic 17.
-- **Epic 19 — Amazon API Feasibility Spike:** Research-only assessment of Cart API and PA-API 5.0. Runs in parallel with Epics 17-18. No code deliverable.
+- **Epic 17 — Product Data & Affiliate Infrastructure:** Static product data file, affiliate link utility, Add to Cart URL utility, subkit ordering utility, and kitItems.ts data cleanup. Foundation for the Fill Your Kit screen. Stories 17.1 and 17.2 can run in parallel; 17.3 depends on both; 17.4 depends on 17.2.
+- **Epic 18 — Fill Your Kit Screen:** The main new screen with MCQ-ordered category sections, product cards, conditional gates, affiliate CTAs, and "Add All to Cart" button. Depends on Epic 17.
+- **Epic 19 — Amazon API Feasibility Spike:** Research-only assessment of Cart API and PA-API 5.0. **Complete.** Results: Add to Cart URL = GO (absorbed into Epics 17-18), PA-API = NO-GO (static data continues).
 
 ---
 
@@ -348,6 +360,34 @@ so that the Fill Your Kit screen can render categories in priority order.
 
 ---
 
+#### Story 17.4 — Add to Cart URL Utility
+
+As a developer,
+I want a utility that constructs an Amazon Add to Cart URL from an array of ASINs,
+so that the Fill Your Kit screen can offer a one-click "Add All to Amazon Cart" CTA.
+
+**Acceptance Criteria:**
+
+1. A new file `src/utils/cartUrl.ts` exports:
+   ```ts
+   export function buildCartUrl(asins: string[], tag?: string): string
+   ```
+2. The function constructs a URL in the format:
+   ```
+   https://www.amazon.com/gp/aws/cart/add.html
+     ?AssociateTag={TAG}&tag={TAG}
+     &ASIN.1={ASIN_1}&Quantity.1=1
+     &ASIN.2={ASIN_2}&Quantity.2=1
+     ...
+   ```
+   Both `AssociateTag` and `tag` parameters are included for compatibility (per Winston's spike findings).
+3. ASINs are numbered sequentially starting at 1. Quantity is always 1.
+4. The affiliate tag defaults to the same `AFFILIATE_TAG` constant from `affiliateLink.ts`.
+5. The function handles edge cases: empty array returns empty string, single ASIN works correctly.
+6. Unit tests cover: correct URL format with 1 ASIN, correct URL with multiple ASINs, sequential numbering, custom tag override, empty array returns empty string, URL length is reasonable for 31 ASINs (under 2,000 characters).
+
+---
+
 ### Epic 18: Fill Your Kit Screen
 
 **Epic Goal:** Deliver the "Fill Your Kit" screen — the primary Sprint 3A user-facing deliverable. Users see their subkits ordered by MCQ relevance, with product cards linking to Amazon via affiliate links. The business model is immediately visible.
@@ -372,34 +412,34 @@ so that I can browse and purchase the items I need on Amazon.
 8. Each `ProductCard` displays: product image, product name, brand (muted text), price (formatted as `$XX.XX`), and a "View on Amazon" CTA button.
 9. The CTA calls `buildAffiliateUrl(product.asin)` and opens the result in a new tab with `rel="noopener noreferrer"`.
 10. Products with `mcqCondition` are filtered: Kids Rain Poncho hidden if `householdComposition` does not include `'kids'`. Pets category hidden entirely if `householdComposition` does not include `'pets'`.
-11. Accessibility: category sections use `<details>`/`<summary>` or equivalent ARIA pattern for expand/collapse. Product links have descriptive `aria-label` (e.g., "View Jackery Explorer on Amazon"). Images have `alt` text with product name.
-12. Component tests cover: correct category ordering for each emergency type, expand/collapse behavior, product card rendering with all fields, affiliate link construction, conditional filtering for kids/pets, empty state (category not rendered when all items filtered out).
-13. E2E test: complete flow from Order Confirmation → Fill Your Kit → verify at least one product card is visible with a working "View on Amazon" link.
+11. An "Add All to Amazon Cart" CTA button is displayed prominently (top of page and/or sticky footer). Clicking it calls `buildCartUrl()` with the ASINs of all currently displayed products (respecting conditional filters) and opens the result in a new tab.
+12. A "Prices may vary on Amazon" disclaimer is displayed near the Add All to Cart CTA.
+13. Accessibility: category sections use `<details>`/`<summary>` or equivalent ARIA pattern for expand/collapse. Product links have descriptive `aria-label` (e.g., "View Jackery Explorer on Amazon"). Images have `alt` text with product name.
+14. Component tests cover: correct category ordering for each emergency type, expand/collapse behavior, product card rendering with all fields, affiliate link construction, Add All to Cart URL construction with correct ASINs, conditional filtering for kids/pets, empty state (category not rendered when all items filtered out).
+15. E2E test: complete flow from Order Confirmation → Fill Your Kit → verify at least one product card is visible with a working "View on Amazon" link and "Add All to Amazon Cart" button is present.
 
 ---
 
-### Epic 19: Amazon API Feasibility Spike
+### Epic 19: Amazon API Feasibility Spike — COMPLETE
 
 **Epic Goal:** Assess the feasibility of Amazon Cart API and PA-API 5.0 for potential Sprint 3B integration. Research only — no code deliverable.
 
+**Status:** Complete. Results in `docs/sprint-3-api-spike-results.md`.
+
 ---
 
-#### Story 19.1 — Amazon Cart API and PA-API 5.0 Feasibility Assessment
+#### Story 19.1 — Amazon Cart API and PA-API 5.0 Feasibility Assessment — COMPLETE
 
-As a product team,
-we want a documented feasibility assessment of Amazon's Cart API and PA-API 5.0,
-so that we can make an informed go/no-go decision on Sprint 3B scope.
+**Results Summary:**
 
-**Acceptance Criteria:**
+| API | Verdict | Action |
+|-----|---------|--------|
+| Add to Cart URL | **GO** | Absorbed into Sprint 3A as Story 17.4 + FR21-FR26. Client-side only. |
+| PA-API 5.0 / Creators API | **NO-GO** | Static data continues. PA-API 5.0 deprecated April 30, 2026. Creators API requires 10 sales/month — chicken-and-egg for a prototype. Requires backend. |
 
-1. Winston (Architect) conducts research per the exit criteria in `docs/sprint-3-spike-criteria.md`.
-2. A document is created at `docs/sprint-3-api-spike-results.md` containing:
-   - Cart API: answers to all 5 exit criteria questions + go/no-go recommendation
-   - PA-API 5.0: answers to all 6 exit criteria questions + go/no-go recommendation
-   - Architecture recommendations for Sprint 3B if either API is viable
-   - Fallback confirmation if either API is not viable
-3. No implementation code is produced.
-4. Document is committed and available for Sprint 3B planning.
+**Key finding:** The 90-day affiliate cookie on Add to Cart URLs (vs. 24 hours for standard links) makes the cart URL the superior primary affiliate mechanism. This is a win we didn't anticipate.
+
+Full details: `docs/sprint-3-api-spike-results.md`
 
 ---
 
@@ -418,19 +458,23 @@ These are all post-prototype concerns. Sprint 3A proves the business model is **
 
 ---
 
-## 8. Sprint 3B Forward Look (Contingent on Spike Results)
+## 8. Sprint 3B Forward Look (Updated Post-Spike)
 
-Sprint 3B is not scoped in this PRD. Its existence depends on Epic 19 results. Potential Sprint 3B stories if APIs are viable:
+The spike results significantly reduce Sprint 3B scope:
 
-| Story Area | Condition |
-|------------|-----------|
-| PA-API integration — live product data | PA-API go |
-| Cart API integration — "Add All to Cart" CTA | Cart API go |
-| Backend proxy for API keys | Either API requires server-side auth |
-| Per-product MCQ mapping (e.g., kid-sized items) | Deferred from 3A |
-| Category consolidation review | Lean categories identified during curation |
+- **Add to Cart URL: GO** — absorbed into Sprint 3A (Story 17.4 + Story 18.1). No Sprint 3B work needed.
+- **PA-API / Creators API: NO-GO** — no live pricing, no dynamic images, no availability badges. Static data approach continues indefinitely for the prototype.
 
-If both APIs are no-go, Sprint 3B may be skipped entirely — the static affiliate link approach is sufficient for the prototype.
+**Remaining Sprint 3B candidates (all client-side, no API dependency):**
+
+| Story Area | Description | Priority |
+|------------|-------------|----------|
+| Per-product MCQ mapping | Kid-sized items, elderly-appropriate products based on household composition | Medium — deferred until user data justifies the complexity |
+| Category consolidation | Merge lean categories (Communications, Medical, Comfort have 2 items each) | Low — cosmetic, not functional |
+
+**When to revisit Creators API (per Winston):** Only when all four conditions are met: (1) Associates account approved and generating 10+ sales/month, (2) Creators API stabilized post-PA-API deprecation (2-3 months), (3) demonstrated user need for live pricing, (4) backend justified by other requirements.
+
+**Sprint 3B may be skipped entirely** — the static data + affiliate links + Add to Cart URL approach is sufficient for the prototype. The next meaningful sprint may instead focus on polish, user testing, or stakeholder feedback incorporation.
 
 ---
 
@@ -442,6 +486,7 @@ If both APIs are no-go, Sprint 3B may be skipped entirely — the static affilia
 | Product Catalog | `docs/sprint-3-product-catalog.md` |
 | MCQ Mapping Rules | `docs/sprint-3-mcq-mapping.md` |
 | API Spike Criteria | `docs/sprint-3-spike-criteria.md` |
+| API Spike Results | `docs/sprint-3-api-spike-results.md` |
 | Phase 3 Sprint 1 PRD | `docs/prd-phase3.md` |
 | Architecture | `docs/architecture.md` |
 | Kit Items Data | `src/data/kitItems.ts` |
