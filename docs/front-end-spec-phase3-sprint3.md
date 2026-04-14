@@ -1,8 +1,9 @@
 # Emergency Prep Kit Builder — Phase 3 Sprint 3A UI/UX Specification (Addendum)
 
-**Document version:** 1.0 | **Date:** 2026-04-14 | **Author:** Sally, UX Expert
+**Document version:** 1.1 | **Date:** 2026-04-14 | **Author:** Sally, UX Expert
 **Status:** Complete — Sprint 3A scope (Fill Your Kit screen, product cards, affiliate CTAs, Add All to Cart)
 **Extends:** `docs/front-end-spec-phase3-sprint2.md` (Sprint 2 spec, v1.0)
+**v1.1 changes:** Sally review pass — added mobile/tablet wireframes (4.1b, 4.1c), added FillYourKitScreen component spec (5.0), fixed image size breakpoints to align with grid breakpoints (`sm:`/`lg:`), clarified CategorySection background treatment, added MCQ priority ordering reference table, updated Decision #25 to top+bottom CTA placement, removed unnecessary `householdComposition` prop from CategorySectionProps, updated design handoff checklist.
 
 ---
 
@@ -36,7 +37,7 @@ All decisions continue the numbering sequence from Sprint 2 (last decision was #
 |---|----------|------------|
 | 23 | Expand/collapse implementation | **React state + ARIA (Option B)** per Winston's recommendation in Section 10 of the architecture brief. `useState` per `CategorySection`, initialized from `defaultExpanded` prop. Gives full control over transition animations and matches the app's existing approach to interactive UI (React-controlled state with explicit ARIA attributes). Native `<details>`/`<summary>` was considered but rejected due to animation limitations. |
 | 24 | Default expanded count | **First 3 categories expanded, rest collapsed.** These are the MCQ priority categories — the ones most relevant to the user's emergency type. If fewer than 3 categories are displayed, all are expanded. |
-| 25 | "Add All to Amazon Cart" CTA placement | **Top of page only** — positioned below the page subtitle, above the first category section. A single prominent CTA keeps the page clean and establishes the primary action before the user scrolls. No sticky footer, no bottom repeat. The individual "View on Amazon" CTAs per product card provide ongoing action throughout the scroll. |
+| 25 | "Add All to Amazon Cart" CTA placement | **Top and bottom of page** — positioned below the page subtitle (above the first category section) and repeated below the last category section. The top placement establishes the primary action before the user scrolls; the bottom repeat catches users who browse all categories before deciding to cart everything. No sticky footer — the per-product "View on Amazon" CTAs provide ongoing action throughout the scroll without the visual weight of a persistent bar. |
 | 26 | Product card image treatment | **Square container, 1:1 aspect ratio, object-fit contain.** Consistent sizing across all 31 products regardless of original Amazon image dimensions. 160x160px on desktop, 140x140px on tablet, 160x160px centered on mobile (1-col). White background container to handle product images with varying background colors. `object-contain` preserves the full product silhouette without cropping — critical for product recognition. |
 | 27 | Price display format | **`$XX.XX` — always two decimal places.** Formatted at the component level using `toFixed(2)`. Consistent with existing `pricePlaceholder` rendering in ItemConfigScreen and SummaryScreen. |
 | 28 | Category section color bar | **4px top border using `colorBase`.** Minimal, distinctive, consistent with the category color system used across SubkitCard, ItemConfigScreen, and SummaryScreen. Applied to the section header container, not the expand/collapse toggle. |
@@ -155,14 +156,16 @@ Key states:
 
 ## 4. Wireframes — Fill Your Kit Screen Layout
 
-### 4.1 Page Structure
+### 4.1 Page Structure — Desktop (>=1024px)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  AppShell (AppHeader + main content area)                   │
 │  ┌───────────────────────────────────────────────────────┐  │
 │  │  h1: "Fill Your Kit"                                  │  │
-│  │  subtitle: "Shop for the items..."                    │  │
+│  │  subtitle: "Shop for the items to fill your           │  │
+│  │   emergency subkits. Each product links directly      │  │
+│  │   to Amazon."                                         │  │
 │  │                                                       │  │
 │  │  ┌─────────────────────────────────────────────────┐  │  │
 │  │  │  [🛒 Add All to Amazon Cart]  (PrimaryButton)   │  │  │
@@ -177,7 +180,8 @@ Key states:
 │  │  │  │  Name     │ │  Name     │ │  Name     │        │  │  │
 │  │  │  │  Brand    │ │  Brand    │ │  Brand    │        │  │  │
 │  │  │  │  $XX.XX   │ │  $XX.XX   │ │  $XX.XX   │        │  │  │
-│  │  │  │[View on ▸]│ │[View on ▸]│ │[View on ▸]│        │  │  │
+│  │  │  │[View on  ]│ │[View on  ]│ │[View on  ]│        │  │  │
+│  │  │  │[ Amazon  ]│ │[ Amazon  ]│ │[ Amazon  ]│        │  │  │
 │  │  │  └──────────┘ └──────────┘ └──────────┘        │  │  │
 │  │  │  ┌──────────┐ ┌──────────┐                      │  │  │
 │  │  │  │ProductCard│ │ProductCard│                      │  │  │
@@ -187,8 +191,94 @@ Key states:
 │  │  ┌─ CategorySection (collapsed) ───────────────────┐  │  │
 │  │  │  [▐ color bar] [icon] Comfort (2 items)  [▶]    │  │  │
 │  │  └─────────────────────────────────────────────────┘  │  │
+│  │                                                       │  │
+│  │  ┌─────────────────────────────────────────────────┐  │  │
+│  │  │  [🛒 Add All to Amazon Cart]  (repeated CTA)    │  │  │
+│  │  │  "Prices may vary on Amazon"                     │  │  │
+│  │  └─────────────────────────────────────────────────┘  │  │
 │  └───────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
+```
+
+### 4.1b Page Structure — Mobile (<640px)
+
+Single-column layout. Product cards stack full-width. Category sections remain full-bleed within page padding.
+
+```
+┌──────────────────────────────────┐
+│  h1: "Fill Your Kit"             │
+│  subtitle (full text)            │
+│                                  │
+│  [🛒 Add All to Amazon Cart]    │
+│  "Prices may vary on Amazon"    │
+│                                  │
+│  ┌──────────────────────────┐   │
+│  │ [▐] [⚡] Power (5)  [▼] │   │
+│  │  ┌────────────────────┐  │   │
+│  │  │    [product img]   │  │   │
+│  │  │  Portable Power    │  │   │
+│  │  │  Station           │  │   │
+│  │  │  Jackery Explorer  │  │   │
+│  │  │  $199.00           │  │   │
+│  │  │  [View on Amazon]  │  │   │
+│  │  └────────────────────┘  │   │
+│  │  ┌────────────────────┐  │   │
+│  │  │    [product img]   │  │   │
+│  │  │  Solar Panel       │  │   │
+│  │  │  GRECELL            │  │   │
+│  │  │  $149.99           │  │   │
+│  │  │  [View on Amazon]  │  │   │
+│  │  └────────────────────┘  │   │
+│  │  ... (3 more cards)       │   │
+│  └──────────────────────────┘   │
+│                                  │
+│  ┌──────────────────────────┐   │
+│  │ [▐] [🏥] Medical (2) [▶]│   │
+│  └──────────────────────────┘   │
+│                                  │
+│  [🛒 Add All to Amazon Cart]    │
+│  "Prices may vary on Amazon"    │
+└──────────────────────────────────┘
+```
+
+### 4.1c Page Structure — Tablet (>=640px, <1024px)
+
+Same vertical layout as mobile but product cards flow into a 2-column grid within each category section.
+
+```
+┌────────────────────────────────────────────┐
+│  h1: "Fill Your Kit"                        │
+│  subtitle (full text)                       │
+│                                             │
+│  [🛒 Add All to Amazon Cart]               │
+│  "Prices may vary on Amazon"               │
+│                                             │
+│  ┌────────────────────────────────────┐    │
+│  │ [▐] [⚡] Power (5 items)      [▼] │    │
+│  │  ┌──────────────┐ ┌──────────────┐│    │
+│  │  │  [image]     │ │  [image]     ││    │
+│  │  │  Name        │ │  Name        ││    │
+│  │  │  Brand       │ │  Brand       ││    │
+│  │  │  $XX.XX      │ │  $XX.XX      ││    │
+│  │  │[View on Amz] │ │[View on Amz] ││    │
+│  │  └──────────────┘ └──────────────┘│    │
+│  │  ┌──────────────┐ ┌──────────────┐│    │
+│  │  │  [image]     │ │  [image]     ││    │
+│  │  │  ...         │ │  ...         ││    │
+│  │  └──────────────┘ └──────────────┘│    │
+│  │  ┌──────────────┐                  │    │
+│  │  │  [image]     │                  │    │
+│  │  │  ...         │                  │    │
+│  │  └──────────────┘                  │    │
+│  └────────────────────────────────────┘    │
+│                                             │
+│  ┌────────────────────────────────────┐    │
+│  │ [▐] [🏥] Medical (2 items)    [▶] │    │
+│  └────────────────────────────────────┘    │
+│                                             │
+│  [🛒 Add All to Amazon Cart]               │
+│  "Prices may vary on Amazon"               │
+└────────────────────────────────────────────┘
 ```
 
 ### 4.2 Page Header
@@ -205,6 +295,7 @@ max-w-[960px] mx-auto px-4 md:px-8     ← matches OrderConfirmationScreen
 | CTA button | `PrimaryButton` with cart icon, full width up to `max-w-[400px]` |
 | Disclaimer | `text-[12px] text-[var(--color-neutral-400)] text-center` |
 | Category sections | `mt-8 flex flex-col gap-4` |
+| Bottom CTA container | Same as top CTA — `mt-8 flex flex-col items-center gap-2` |
 
 **Data Flow — Rendering Pipeline:**
 
@@ -221,7 +312,7 @@ The `FillYourKitScreen` component reads from two Zustand stores and computes the
 3. Filter to active categories only:
    orderedCategories.filter(id => activeCategoryIds.includes(id))
 
-4. For each category, get visible products:
+4. For each category, get visible products (filtering at screen level, before passing to CategorySection):
    PRODUCTS_BY_CATEGORY[categoryId]
      .filter(p => !p.mcqCondition || householdComposition.includes(p.mcqCondition.includes))
 
@@ -233,23 +324,92 @@ The `FillYourKitScreen` component reads from two Zustand stores and computes the
    buildCartUrl(allVisibleProducts.map(p => p.asin))
 ```
 
+**MCQ Priority Ordering Reference** (from `docs/sprint-3-mcq-mapping.md` — reproduced here for developer convenience):
+
+| Emergency Type | #1 | #2 | #3 |
+|----------------|----|----|-----|
+| Hurricane | Power | Medical | Communications |
+| Flood | Power | Clothing | Medical |
+| Tornado | Power | Cooking | Medical |
+| Tropical Storm | Power | Medical | Communications |
+
+Default order (positions after top 3): Power, Medical, Communications, Lighting, Cooking, Hygiene, Comfort, Clothing. Pets always last when shown. Custom excluded. If no emergency type selected, the full default order applies.
+
 **Category metadata** for section headers comes from `CATEGORIES` in `kitItems.ts` — the same source used by `SubkitCard` and `ItemConfigScreen`. Each category provides `colorBase`, `colorTint`, `icon`, and `name`. Visual consistency across screens is automatic.
 
 ---
 
 ## 5. Component Library — Sprint 3A Components
 
+### New Component Summary
+
+| Component | Screens | Key States |
+|-----------|---------|------------|
+| FillYourKitScreen | `/fill` | Essentials path (4 categories), Custom path (N categories), Empty redirect |
+| CategorySection | `/fill` | Expanded, Collapsed |
+| ProductCard | `/fill` | Default, Hover, Image fallback |
+
+### Modified Component Summary
+
+| Component | Change |
+|-----------|--------|
+| OrderConfirmationScreen | "Now Let's Fill Your Kit" CTA rewired: `FillKitStubModal` → `navigate('/fill')` |
+
+### Deleted Component Summary
+
+| Component | Reason |
+|-----------|--------|
+| FillKitStubModal | Replaced by real `/fill` route |
+
+---
+
+### 5.0 FillYourKitScreen
+
+**Purpose:** Main screen shell for the Fill Your Kit experience. Reads store state, computes display list, renders category sections with pre-filtered products.
+
+**Route:** `/fill` — guarded (see Section 2.2).
+
+```typescript
+// No props — this is a route-level screen component
+// All data sourced from stores and static imports
+
+// Store reads:
+const kitPath = useMCQStore((s) => s.kitPath);
+const emergencyTypes = useMCQStore((s) => s.emergencyTypes);
+const householdComposition = useMCQStore((s) => s.householdComposition);
+const selectedSubkits = useKitStore((s) => s.selectedSubkits);
+
+// Data imports:
+// ESSENTIALS_BUNDLE from essentialsConfig.ts
+// CATEGORIES from kitItems.ts
+// PRODUCTS_BY_CATEGORY from amazonProducts.ts
+// getOrderedCategories from subkitOrdering.ts
+// buildAffiliateUrl from affiliateLink.ts
+// buildCartUrl from cartUrl.ts
+```
+
+**Responsibilities:**
+1. Determine active category IDs (Essentials vs Custom path branching)
+2. Compute ordered + filtered category list via `getOrderedCategories()`
+3. Filter products per category (MCQ conditional gates applied here, not in child components)
+4. Compute the "Add All to Cart" URL once from all visible product ASINs
+5. Pass pre-filtered product arrays to each `CategorySection`
+6. Focus `h1` on mount via `ref` + `tabIndex={-1}` (same pattern as `OrderConfirmationScreen`)
+
+**Page container:** `max-w-[960px] mx-auto px-4 md:px-8` — matches `OrderConfirmationScreen`.
+
+---
+
 ### 5.1 CategorySection
 
 **Purpose:** Collapsible container for a subkit category's product grid.
 
-**Props interface** (from Winston's architecture brief):
+**Props interface:**
 ```typescript
 interface CategorySectionProps {
-  categoryId: string;           // CATEGORIES key
-  products: AmazonProduct[];    // pre-filtered by parent
+  categoryId: string;           // CATEGORIES key — used to look up colorBase, colorTint, icon, name from CATEGORIES
+  products: AmazonProduct[];    // pre-filtered by FillYourKitScreen (MCQ conditions already applied)
   defaultExpanded: boolean;     // true for first 3 categories
-  householdComposition: HouseholdOption[];  // for per-product mcqCondition filtering
 }
 ```
 
@@ -313,6 +473,10 @@ interface CategorySectionProps {
 
 **Collapsed state:** Content panel has `max-height: 0; opacity: 0; overflow: hidden`. Chevron is not rotated (points down).
 
+**Background treatment:**
+- **Section header** (the `<button>`): `colorTint` background (e.g., `#FFF7ED` for Power). This is the category's visual signature — warm, tinted, immediately identifiable.
+- **Product grid area** (the content panel): No background set — inherits the page background (`neutral-50` / `#F8F9FA`). This is intentional: the white `ProductCard` containers with their `neutral-200` border need a slightly contrasting background to have clear definition. Putting the cards on `colorTint` would create a busier, more visually heavy page. The `colorBase` top border + `colorTint` header is sufficient category identification — the products below are the focus, not the section chrome.
+
 ### 5.2 ProductCard
 
 **Purpose:** Displays a single Amazon product with image, details, and affiliate link CTA.
@@ -352,7 +516,7 @@ interface ProductCardProps {
 |---------|-------|
 | Card container | `bg-white rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] p-4 flex flex-col items-center text-center` |
 | Hover state | `hover:shadow-md hover:-translate-y-0.5 transition-all duration-150` |
-| Image container | `w-[160px] h-[160px] lg:w-[160px] md:w-[140px] bg-white rounded-md flex items-center justify-center overflow-hidden` |
+| Image container | `w-[160px] h-[160px] sm:w-[140px] sm:h-[140px] lg:w-[160px] lg:h-[160px] bg-white rounded-md flex items-center justify-center overflow-hidden` — breakpoints match the grid column changes: 1-col default, 2-col at `sm:` (640px), 3-col at `lg:` (1024px) |
 | Image | `object-contain max-w-full max-h-full` with `loading="lazy"` and `alt={product.name}` |
 | Product name | `mt-3 text-[14px] font-medium text-[var(--color-neutral-900)] line-clamp-2 min-h-[40px]` |
 | Brand | `mt-1 text-[12px] text-[var(--color-neutral-500)] truncate w-full` |
@@ -373,13 +537,16 @@ grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4
 
 ### 5.3 "Add All to Amazon Cart" CTA
 
+Rendered twice: once above the first category section (top), once below the last category section (bottom). Both instances are identical — same component, same URL, same styling.
+
 | Element | Style |
 |---------|-------|
-| Container | `flex flex-col items-center gap-2` |
-| Button | `PrimaryButton` component with `ShoppingCart` icon (lucide-react), label "Add All to Amazon Cart" |
+| Container | `flex flex-col items-center gap-2` — `mt-6` for top placement, `mt-8` for bottom placement |
+| Button | `PrimaryButton` component with `ShoppingCart` icon (lucide-react, size 18, inline before label), label "Add All to Amazon Cart" |
 | Button width | `w-full max-w-[400px]` |
 | Button action | `onClick` → `window.open(buildCartUrl(displayedAsins), '_blank', 'noopener,noreferrer')` |
 | Disclaimer | `text-[12px] text-[var(--color-neutral-400)] text-center` — "Prices may vary on Amazon" |
+| Hidden state | If zero products are displayed after all filtering (extremely unlikely), both CTA instances are hidden |
 
 ---
 
@@ -388,12 +555,14 @@ grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4
 | Breakpoint | Width | Product Grid | Image Size | Layout Notes |
 |------------|-------|-------------|------------|--------------|
 | Desktop | >=1024px (`lg:`) | 3 columns | 160x160 | Full page width up to `max-w-[960px]` |
-| Tablet | >=640px (`sm:`) | 2 columns | 140x140 | Same page padding |
-| Mobile | <640px | 1 column | Full width card, image centered at 160px | Category sections full-bleed within padding |
+| Tablet | >=640px (`sm:`) | 2 columns | 140x140 | Same page padding; cards are narrower, image shrinks to compensate |
+| Mobile | <640px | 1 column | 160x160, centered | Card spans full width within padding; image size returns to 160px since horizontal space is ample in single-column |
 
-All breakpoints use Tailwind's default values — consistent with Sprint 1/2.
+All breakpoints use Tailwind's default values (`sm:` = 640px, `lg:` = 1024px) — consistent with Sprint 1/2. The image size, grid columns, and container padding all shift at the **same** breakpoints to avoid misaligned transitions.
 
-Category section headers remain single-row at all breakpoints (name truncates if needed on mobile).
+Category section headers remain single-row at all breakpoints (category name truncates with ellipsis if needed on very narrow viewports, though existing category names are all short enough to fit).
+
+Product grid CSS: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4` — applied inside `CategorySection`'s expanded content panel.
 
 ---
 
@@ -455,7 +624,7 @@ On page load, focus moves to the `h1` (programmatic focus via `ref`). Tab order:
 ```
 h1 (page heading, tabIndex=-1, receives focus on mount)
   ↓ Tab
-"Add All to Amazon Cart" button
+"Add All to Amazon Cart" button (top)
   ↓ Tab
 CategorySection #1 header button (e.g., Power)
   ↓ Tab (if expanded)
@@ -472,6 +641,8 @@ CategorySection #2 header button (e.g., Medical)
 CategorySection #3 header button
   ↓ Tab
 ... (remaining categories)
+  ↓ Tab
+"Add All to Amazon Cart" button (bottom)
 ```
 
 - `Enter` / `Space` on category header: toggles expand/collapse
@@ -515,7 +686,7 @@ All copy finalized for Sprint 3A. Tone continues the **warm authority** establis
 | Add All CTA label | "Add All to Amazon Cart" | Clear action verb; "Amazon Cart" establishes destination |
 | Add All CTA icon | `ShoppingCart` (lucide-react) | Inline before label text, size 18 |
 | Add All disclaimer | "Prices may vary on Amazon" | Manages expectations for static price snapshots |
-| View product CTA | "View on Amazon" | Per-card CTA; no arrow to differentiate from primary CTA |
+| View product CTA | "View on Amazon" | Per-card CTA; deliberately no `→` arrow — differentiates from the primary "Add All" CTA and signals "outbound link" rather than "in-app navigation" |
 | Item count badge | "{N} items" | e.g., "5 items", "2 items", "1 item" (singular for 1) |
 | Category header aria-label | "Expand {category name}" / "Collapse {category name}" | Screen reader context for chevron toggle |
 | Product link aria-label | "View {product.name} by {product.brand} on Amazon" | Full context for screen readers on each affiliate link |
@@ -554,20 +725,22 @@ All animations use existing motion tokens and easing curves. `prefers-reduced-mo
 - [x] All 12 decisions documented and numbered (#23–#34)
 - [x] Information architecture updated with new `/fill` route
 - [x] User flows defined (4 new flows: #13–#16)
-- [x] Fill Your Kit screen wireframed (desktop + collapsed states)
-- [x] Rendering pipeline documented (data flow from stores to display)
-- [x] CategorySection fully specified (header, expand/collapse, ARIA, HTML structure)
-- [x] ProductCard fully specified (image, typography, CTA, hover, fallback)
-- [x] "Add All to Amazon Cart" CTA specified (placement, style, disclaimer)
-- [x] Responsive breakpoints defined (3-col / 2-col / 1-col at lg / sm / default)
+- [x] Fill Your Kit screen wireframed — **desktop, tablet, and mobile layouts** (Sections 4.1, 4.1b, 4.1c)
+- [x] `FillYourKitScreen` component specified with store reads, data imports, and responsibilities (Section 5.0)
+- [x] Rendering pipeline documented with **MCQ priority ordering reference table** inline (Section 4.2)
+- [x] CategorySection fully specified (header, expand/collapse, ARIA, HTML structure, **background treatment clarified**)
+- [x] ProductCard fully specified (image, typography, CTA, hover, fallback, **breakpoint-aligned image sizes**)
+- [x] "Add All to Amazon Cart" CTA specified — **top and bottom placement** (Decision #25, Section 5.3)
+- [x] Responsive breakpoints defined (3-col / 2-col / 1-col at `lg:` / `sm:` / default) — **image sizes aligned to grid breakpoints**
 - [x] Empty/edge states covered (8 scenarios)
 - [x] Accessibility spec complete (ARIA patterns, keyboard flow, contrast verification, screen reader)
 - [x] Copy finalized for all elements
 - [x] Animation specs defined (7 new animations: #34–#40)
 - [x] Category color palette referenced from Sprint 2 spec (10 categories, all values in `kitItems.ts`)
 - [x] Winston architecture brief alignment confirmed (Section 12 coordination points addressed)
+- [x] `CategorySectionProps` cleaned — `householdComposition` removed (filtering at screen level per rendering pipeline)
 - [ ] James implementation — **pending**
 
 ---
 
-*Emergency Prep Kit Builder — Phase 3 Sprint 3A UI/UX Specification (Addendum) | Version 1.0 | 2026-04-14 | Sally, UX Expert*
+*Emergency Prep Kit Builder — Phase 3 Sprint 3A UI/UX Specification (Addendum) | Version 1.1 | 2026-04-14 | Sally, UX Expert*
