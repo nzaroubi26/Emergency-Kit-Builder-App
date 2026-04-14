@@ -2,8 +2,8 @@
 
 **Prepared by:** John, Product Manager
 **Date:** 2026-04-14
-**Version:** 1.2
-**Status:** Draft — Ready for Architect and UX Expert Handoff
+**Version:** 1.3
+**Status:** Draft — Ready for Sharding and Story Writing
 
 ---
 
@@ -53,6 +53,7 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 | Initial draft | 2026-04-14 | 1.0 | Sprint 3A PRD — Amazon affiliate layer | John, PM |
 | Spike integration | 2026-04-14 | 1.1 | Updated with spike results: Add to Cart URL (GO) absorbed into Epic 17/18, PA-API (NO-GO) confirmed, Sprint 3B section updated | John, PM |
 | PO review pass | 2026-04-14 | 1.2 | 14 flags from Sarah (PO): expanded FR18 renames to 9, added FR9 clarification, FR30 (selected subkits filter), FR31 (route guard), stub modal rewiring AC, Custom removed from display order, pricePlaceholder sync, image location deferred to Winston, Story 18.1 split into 18.1+18.2, icon override + missing image notes | John, PM |
+| Cross-doc review | 2026-04-14 | 1.3 | Sally (UX) cross-doc review: fixed FR31 dual-path route guard (Essentials path was broken), fixed FR30 dual-path category source, resolved image storage to `public/products/` (per Winston Section 6), added PawPrint icon resolver to Story 17.1 AC, added MOBILE_EXEMPT_ROUTES to Story 18.1 AC, added CTA top+bottom placement/image fallback/hover states to Story 18.2 AC, added `guards.ts`/`AppShell.tsx`/`iconResolver.ts` to modified files, clarified image download as dev task in Story 17.2 | Sally, UX Expert |
 
 ---
 
@@ -96,11 +97,11 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 
 **Selected Subkit Filtering**
 
-- **FR30:** The Fill Your Kit screen shall only display product sections for subkit categories present in `kitStore.selectedSubkits`. If a user selected Power, Medical, and Cooking, only those 3 categories' products are shown — not all 9. This applies to both Essentials and Custom paths.
+- **FR30:** The Fill Your Kit screen shall only display product sections for the user's active subkit categories. For the **Custom path**, these are the categories in `kitStore.selectedSubkits`. For the **Essentials path**, these are the categories in the static `ESSENTIALS_BUNDLE` (Power, Cooking, Medical, Communications). If a Custom user selected Power, Medical, and Cooking, only those 3 categories' products are shown — not all 9.
 
 **Route Guard**
 
-- **FR31:** The `/fill` route shall have a route guard that redirects to `/` if `kitStore.selectedSubkits` is empty. *(Open question for Winston: confirm guard implementation pattern.)*
+- **FR31:** The `/fill` route shall have a dual-path route guard. The guard passes if `kitPath === 'essentials'` (Essentials users have an empty `selectedSubkits` by design — they use the static `ESSENTIALS_BUNDLE`) OR if `kitStore.selectedSubkits` is non-empty (Custom path). If neither condition is met, redirect to `/`. See Winston's architecture brief Section 7 for the full guard behavior matrix.
 
 **MCQ-Conditional Items and Categories**
 
@@ -239,7 +240,7 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 | `src/components/fill/FillYourKitScreen.tsx` | Main screen at `/fill` |
 | `src/components/fill/CategorySection.tsx` | Collapsible category section with product grid |
 | `src/components/fill/ProductCard.tsx` | Individual product card with affiliate CTA |
-| `src/assets/products/` | Directory for downloaded product images (31 images) |
+| `public/products/` | Directory for downloaded product images (31 images, ASIN-named — per Winston's Architecture Brief Section 6) |
 
 ### Modified Files
 
@@ -247,6 +248,9 @@ A parallel API spike assesses whether Amazon's Cart API and PA-API 5.0 are viabl
 |------|--------|
 | `src/data/kitItems.ts` | Renames (9), removal (1), addition (1), pricePlaceholder sync per FR18-FR20a |
 | `src/router/index.tsx` | Add `/fill` route + route guard |
+| `src/router/guards.ts` | Add `fillGuard` function (dual-path: checks `kitPath` and `selectedSubkits`) |
+| `src/components/layout/AppShell.tsx` | Add `/fill` to `MOBILE_EXEMPT_ROUTES` |
+| `src/utils/iconResolver.ts` | Add `PawPrint` to imports and `ICON_MAP` |
 | `src/components/confirmation/OrderConfirmationScreen.tsx` | Replace `FillKitStubModal` with `navigate('/fill')` |
 | `src/components/confirmation/FillKitStubModal.tsx` | Remove file |
 
@@ -308,8 +312,9 @@ so that item names match their real Amazon products and the data is accurate for
    - `productId: null`, `imageSrc: null` (populated in Story 17.2)
    - Entry added to `ITEM_ICON_OVERRIDES` with icon `CloudRain` (same as adult ponchos)
 4. All `pricePlaceholder` values in `kitItems.ts` updated to match the corresponding prices in `docs/sprint-3-product-catalog.md`. The Amazon catalog is now the source of truth for pricing.
-5. `tsc --noEmit` passes. All existing tests pass. Any test referencing "Paper Cups", "Pet Food Supply", or renamed items by display name is updated.
-6. No item IDs are changed. No type shape changes.
+5. Add `PawPrint` to imports and `ICON_MAP` in `src/utils/iconResolver.ts`. Without this, `CategorySection` for the Pets category will fail to resolve its icon at render time. (Per Winston's Architecture Brief Section 11.)
+6. `tsc --noEmit` passes. All existing tests pass. Any test referencing "Paper Cups", "Pet Food Supply", or renamed items by display name is updated.
+7. No item IDs are changed. No type shape changes.
 
 **Dev Note:** The new `cloth-ponchos-kids` item will not have an entry in `itemImages.ts`. Verify that components handle missing images gracefully (expected — no image assets exist for pets items either).
 
@@ -343,7 +348,7 @@ so that the Fill Your Kit screen has a complete data source and can generate wor
 2. All 31 products from `docs/sprint-3-product-catalog.md` are defined with correct ASINs and prices.
 3. Kids Rain Poncho has `mcqCondition: { field: 'householdComposition', includes: 'kids' }`.
 4. All Pets category items have `mcqCondition: { field: 'householdComposition', includes: 'pets' }`.
-5. Product images are downloaded and placed in the location specified by Winston's architecture brief. One image per product, named by ASIN (e.g., `B082TMBYR6.jpg`). *(Open question for Winston: confirm image storage location — `src/assets/products/` vs `public/products/`.)*
+5. Product images are downloaded and placed in `public/products/`, named by ASIN (e.g., `B082TMBYR6.jpg`). Referenced in `amazonProducts.ts` as `/products/B082TMBYR6.jpg` (root-relative path). Per Winston's Architecture Brief Section 6: these are data-adjacent content assets, not component assets — `public/` is the correct location. **Image download is a dev task in this story** — download each product's primary image from its Amazon listing page and save as `{ASIN}.jpg`.
 6. A new file `src/utils/affiliateLink.ts` exports:
    ```ts
    export const AFFILIATE_TAG = 'placeholder-20'; // updated when Associates account confirmed
@@ -428,7 +433,7 @@ so that I can browse product recommendations for the subkits I selected.
 **Acceptance Criteria:**
 
 1. A new screen `FillYourKitScreen` is created at route `/fill`.
-2. Route guard on `/fill` redirects to `/` if `kitStore.selectedSubkits` is empty. *(Confirm guard pattern with Winston.)*
+2. Route guard on `/fill` implements dual-path logic: passes if `kitPath === 'essentials'` OR `selectedSubkits.length > 0`. Otherwise redirects to `/`. (Essentials users have empty `selectedSubkits` by design — the guard must check `kitPath` first. See Architecture Brief Section 7.)
 3. Replace `FillKitStubModal` behavior in `OrderConfirmationScreen.tsx` with `navigate('/fill')`. Remove `FillKitStubModal.tsx`.
 4. The screen reads `emergencyTypes` and `householdComposition` from the MCQ store, and `selectedSubkits` from the kit store.
 5. Only subkit categories present in `kitStore.selectedSubkits` are displayed. If a user selected Power, Medical, and Cooking, only those 3 categories appear.
@@ -436,8 +441,9 @@ so that I can browse product recommendations for the subkits I selected.
 7. Each category is rendered as a `CategorySection` component displaying: category color bar (using `colorBase` from `CATEGORIES`), category icon, category name, product count badge, and an expand/collapse toggle.
 8. The first 3 categories (or all if fewer than 3) are expanded by default. Remaining categories are collapsed.
 9. Conditional category filtering: Pets category hidden entirely if `householdComposition` does not include `'pets'` (even if in selectedSubkits). Custom category excluded (no Amazon products).
-10. Responsive layout: category sections stack vertically, product card grid within each section (3-col desktop >=1024px, 2-col tablet >=640px, 1-col mobile).
-11. Component tests cover: correct category ordering for each emergency type, expand/collapse behavior, selected-subkits-only filtering, conditional Pets/Custom exclusion, route guard redirect.
+10. `/fill` added to `MOBILE_EXEMPT_ROUTES` in `AppShell.tsx`. The Fill Your Kit screen is responsive and must render on mobile — same exemption pattern as Sprint 1 Phase 3 routes (`/build`, `/build/household`, `/choose`, `/review`).
+11. Responsive layout: category sections stack vertically, product card grid within each section (3-col desktop >=1024px, 2-col tablet >=640px, 1-col mobile).
+12. Component tests cover: correct category ordering for each emergency type, expand/collapse behavior, selected-subkits-only filtering, conditional Pets/Custom exclusion, route guard redirect.
 
 ---
 
@@ -455,11 +461,13 @@ so that I can purchase the recommended items via affiliate links.
 2. Each `ProductCard` displays: product image, generic product name (e.g., "Portable Power Station"), brand as separate muted text (e.g., "Jackery Explorer"), price (formatted as `$XX.XX`), and a "View on Amazon" CTA button.
 3. The CTA calls `buildAffiliateUrl(product.asin)` and opens the result in a new tab with `rel="noopener noreferrer"`.
 4. Products with `mcqCondition` are filtered: Kids Rain Poncho hidden if `householdComposition` does not include `'kids'`.
-5. An "Add All to Amazon Cart" CTA button is displayed prominently (top of page and/or sticky footer). Clicking it calls `buildCartUrl()` with the ASINs of all currently displayed products (respecting all filters — selected subkits, conditional MCQ gates) and opens the result in a new tab.
-6. A "Prices may vary on Amazon" disclaimer is displayed near the Add All to Cart CTA.
-7. Accessibility: category sections use `<details>`/`<summary>` or equivalent ARIA pattern for expand/collapse. Product links have descriptive `aria-label` (e.g., "View Jackery Explorer on Amazon"). Images have `alt` text with product name. Keyboard navigable.
-8. Component tests cover: product card rendering with all fields, affiliate link construction, Add All to Cart URL construction with correct ASINs, conditional item filtering (kids poncho), empty state (category not rendered when all items filtered out).
-9. E2E test: complete flow from Order Confirmation → Fill Your Kit → verify at least one product card is visible with a working "View on Amazon" link and "Add All to Amazon Cart" button is present.
+5. An "Add All to Amazon Cart" CTA button is displayed at the **top of page** (below subtitle, above first category section) **and repeated at the bottom** (below the last category section). Per Sally's front-end spec Decision #25: the top CTA establishes the action before scrolling; the bottom repeat catches users who browse all categories first. Clicking either calls `buildCartUrl()` with the ASINs of all currently displayed products (respecting all filters — selected subkits, conditional MCQ gates) and opens the result in a new tab. If zero products are displayed after filtering (edge case), both CTAs are hidden.
+6. A "Prices may vary on Amazon" disclaimer is displayed near each Add All to Cart CTA instance.
+7. Product images use `loading="lazy"`. If an image fails to load, display a fallback: `neutral-100` background container with centered `Package` icon (lucide-react, size 48, `neutral-300`). Per Sally's front-end spec Section 5.2 and Section 7.
+8. Product cards have hover state: subtle lift (`translateY(-2px)`) + shadow elevation. "View on Amazon" CTA uses outlined style (`brand-accent` border and text on white) with fill on hover (`brand-accent` background, white text). Per Sally's front-end spec Decision #33 and Animations #37–#39.
+9. Accessibility: category sections use React state + ARIA pattern for expand/collapse (`aria-expanded`, `aria-controls`, `role="region"`). Product links have descriptive `aria-label` (e.g., "View Portable Power Station by Jackery Explorer on Amazon"). Images have `alt` text with product name. Keyboard navigable. Per Sally's front-end spec Section 8.
+10. Component tests cover: product card rendering with all fields, affiliate link construction, Add All to Cart URL construction with correct ASINs, conditional item filtering (kids poncho), empty state (category not rendered when all items filtered out), image fallback rendering.
+11. E2E test: complete flow from Order Confirmation → Fill Your Kit → verify at least one product card is visible with a working "View on Amazon" link and "Add All to Amazon Cart" button is present at top and bottom of page.
 
 ---
 
