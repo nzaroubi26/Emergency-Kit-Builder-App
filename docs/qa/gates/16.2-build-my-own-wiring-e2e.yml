@@ -1,0 +1,64 @@
+schema: 1
+story: "16.2"
+story_title: "Build My Own → /review Wiring + E2E"
+gate: PASS
+status_reason: "All 6 ACs met. SummaryScreen CTA sets kitPath('custom') and navigates to /review. reviewGuard unchanged (zero modifications to guards.ts) — truthy check passes for 'custom'. BackLink path-aware: custom → /summary 'Back to Kit Summary', essentials → /choose 'Back'. E2E smoke test covers full Build My Own happy path. Sprint 1 E2E updated for 15.2 heading change. 276/276 tests pass. tsc clean."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-04-14T02:35:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 96
+expires: "2026-04-28T02:35:00Z"
+
+evidence:
+  tests_reviewed: 276
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+  file_evidence:
+    - ac: 1
+      file: "src/components/summary/SummaryScreen.tsx"
+      lines: "123-127"
+      detail: "Analytics.ctaClicked() (Rule 12), then useMCQStore.getState().setKitPath('custom'), then navigate('/review'). Was navigate('/confirmation')."
+    - ac: 2
+      file: "src/router/guards.ts"
+      lines: "45-49"
+      detail: "reviewGuard: if (!kitPath) return redirect. 'custom' is truthy — passes. Zero modifications to file (not in commit diff)."
+    - ac: 3
+      file: "src/components/review/ReviewOrderScreen.tsx"
+      line: 39
+      detail: "KitSummaryCard path={kitPath === 'essentials' ? 'essentials' : 'custom'}. DeliverySection at line 40. Place Order CTA at line 44."
+    - ac: 4
+      file: "src/components/review/ReviewOrderScreen.tsx"
+      lines: "24-27"
+      detail: "BackLink to={kitPath === 'custom' ? '/summary' : '/choose'} label={kitPath === 'custom' ? 'Back to Kit Summary' : 'Back'}."
+    - ac: 5
+      file: "src/components/review/ReviewOrderScreen.tsx"
+      lines: "18-20"
+      detail: "handlePlaceOrder: navigate('/confirmation')."
+    - ac: 6
+      file: "tests/e2e/build-my-own-flow.spec.ts"
+      lines: "1-63"
+      detail: "Full happy path: cover → MCQ-1 (Flood) → MCQ-2 (None) → fork → /builder (3 subkits) → configure → /summary → /review → /confirmation. Verifies 'Back to Kit Summary', 'Your Custom Kit', 'Your kit is on its way.' Sprint 1 E2E heading updated for 15.2."
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "No new external input. kitPath is set from trusted client-side store."
+  performance:
+    status: PASS
+    notes: "Two inline ternary derivations. No new state, no new renders."
+  reliability:
+    status: PASS
+    notes: "reviewGuard validated — truthy check covers both 'essentials' and 'custom'. Null kitPath redirects to /choose."
+  maintainability:
+    status: PASS
+    notes: "Inline derivation per architecture spec. No unnecessary abstraction. Named exports."
+
+recommendations:
+  immediate: []
+  future: []

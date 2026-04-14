@@ -81,7 +81,7 @@ describe('Subkit-Visualizer Integration', () => {
     fireEvent.click(screen.getByRole('button', { name: /Lighting subkit/i }));
     fireEvent.click(screen.getByRole('button', { name: /Hygiene subkit/i }));
 
-    fireEvent.click(screen.getByRole('button', { name: /Lighting subkit, selected/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Lighting, selected/i }));
 
     expect(screen.getByTestId('slot-0')).toHaveAttribute('aria-label', 'Slot 1: Power');
     expect(screen.getByTestId('slot-1')).toHaveAttribute('aria-label', 'Slot 2: Hygiene');
@@ -127,7 +127,7 @@ describe('Subkit-Visualizer Integration', () => {
 
     fireEvent.click(powerButton);
 
-    const selectedPower = screen.getByRole('button', { name: /Power subkit, selected/i });
+    const selectedPower = screen.getByRole('button', { name: /Power, selected/i });
     expect(selectedPower).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByTestId('slot-0')).toHaveAttribute('aria-label', 'Slot 1: Power');
   });
@@ -183,7 +183,7 @@ describe('Subkit-Visualizer Integration', () => {
 
     return new Promise<void>((resolve) => {
       requestAnimationFrame(() => {
-        fireEvent.click(screen.getByRole('button', { name: /Power subkit, selected/i }));
+        fireEvent.click(screen.getByRole('button', { name: /Power, selected/i }));
         requestAnimationFrame(() => {
           expect(polite.textContent).toBe('Power removed');
           resolve();

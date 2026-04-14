@@ -70,6 +70,6 @@ test.describe('Phase 3 Sprint 1 — Build My Own Path', () => {
     await page.getByRole('button', { name: 'Start Building' }).click();
 
     // Visualizer / SubkitSelectionScreen
-    await expect(page.getByRole('heading', { name: 'Build Your Kit' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Build Your Emergency Kit' })).toBeVisible();
   });
 });

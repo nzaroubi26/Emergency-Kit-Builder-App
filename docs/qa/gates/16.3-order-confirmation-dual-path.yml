@@ -1,0 +1,68 @@
+schema: 1
+story: "16.3"
+story_title: "Order Confirmation — Dual-Path + Fill Your Kit CTA"
+gate: PASS
+status_reason: "All 7 ACs met. Essentials total computed from ESSENTIALS_BUNDLE + CONTAINER_PRICES = $180 (not calculateCartGrandTotal). Custom total from calculateCartGrandTotal. Start Over calls resetKit() + resetMCQ() + navigate('/'). FillKitStubModal has full a11y: role=dialog, aria-modal, focus trap, Escape close, trigger focus restore. Path-specific subheadings. 14/14 tests pass (suite previously blocked, unblocked by barrel import fix). 290/290 total tests, 0 failures. tsc clean."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-04-14T02:45:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 94
+expires: "2026-04-28T02:45:00Z"
+
+evidence:
+  tests_reviewed: 14
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7]
+    ac_gaps: []
+  file_evidence:
+    - ac: 1
+      file: "src/components/confirmation/OrderConfirmationScreen.tsx"
+      lines: "22, 30"
+      detail: "useMCQStore((s) => s.kitPath). isEssentials = kitPath === 'essentials'."
+    - ac: 2
+      file: "src/components/confirmation/OrderConfirmationScreen.tsx"
+      lines: "33-36, 41"
+      detail: "essentialsTotal = ESSENTIALS_BUNDLE.reduce(...CONTAINER_PRICES[item.size]...). 60+40+40+40 = $180. NOT calculateCartGrandTotal. Test confirms $180.00."
+    - ac: 3
+      file: "src/components/confirmation/OrderConfirmationScreen.tsx"
+      lines: "39, 130-134"
+      detail: "customTotal = calculateCartGrandTotal(selectedSubkits, itemSelections, ITEMS). Explicit isEssentials branch for rendering."
+    - ac: 4
+      file: "src/components/confirmation/OrderConfirmationScreen.tsx"
+      lines: "120, 123-126"
+      detail: "Heading: 'Your kit is on its way.' (universal). Subheading: 'Here\\'s your Essentials Kit summary.' / 'Here\\'s your custom kit summary.' (path-specific)."
+    - ac: 5
+      file: "src/components/confirmation/FillKitStubModal.tsx"
+      lines: "1-93"
+      detail: "Package 48px #1F4D35, 'Coming Soon', body copy, 'Got It' CTA. role=dialog, aria-modal=true, aria-labelledby, focus trap (Tab wrapping), Escape close, trigger focus restore via triggerRef."
+    - ac: 6
+      file: "src/components/confirmation/OrderConfirmationScreen.tsx"
+      lines: "66-70"
+      detail: "handleStartOver: resetKit() then resetMCQ() then navigate('/'). Correct order per architecture."
+    - ac: 7
+      file: "tests/components/OrderConfirmationScreen.test.tsx"
+      lines: "1-166"
+      detail: "14 tests: shared elements (4), essentials path with $180 total (3), custom path (2), modal open/close/escape (3), start over reset+navigate (2). All pass."
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "No external APIs, no PII. Store reads only. Modal has no form inputs."
+  performance:
+    status: PASS
+    notes: "ESSENTIALS_BUNDLE.reduce is 4 items. calculateCartGrandTotal runs once on mount. Acceptable."
+  reliability:
+    status: PASS
+    notes: "Essentials total derived from CONTAINER_PRICES — changes propagate automatically. Reset ordering safe per architecture analysis (independent stores, no cross-subscriptions)."
+  maintainability:
+    status: PASS
+    notes: "FillKitStubModal is self-contained. Focus trap follows existing ConfirmationModal pattern. Named exports. Barrel import fixed proactively."
+
+recommendations:
+  immediate: []
+  future: []

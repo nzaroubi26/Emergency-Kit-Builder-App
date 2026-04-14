@@ -9,6 +9,7 @@ export const CATEGORIES: Record<string, KitCategory> = {
   medical:        { id: 'medical',        name: 'Medical',        colorBase: '#991B1B', colorTint: '#FEF2F2', icon: 'HeartPulse',       description: 'Handle injuries and health needs during an emergency',        sizeOptions: ['regular', 'large'] },
   comfort:        { id: 'comfort',        name: 'Comfort',        colorBase: '#6D28D9', colorTint: '#F5F3FF', icon: 'Smile',            description: 'Reduce stress and maintain wellbeing during extended events', sizeOptions: ['regular', 'large'] },
   clothing:       { id: 'clothing',       name: 'Clothing',       colorBase: '#334155', colorTint: '#F8FAFC', icon: 'Shirt',            description: 'Protect against weather conditions and debris',              sizeOptions: ['regular', 'large'] },
+  pets:           { id: 'pets',           name: 'Pets',           colorBase: '#BE185D', colorTint: '#FFF1F2', icon: 'PawPrint',         description: 'Essential supplies to keep your pets safe, fed, and comfortable during an emergency.', sizeOptions: ['regular', 'large'] },
   custom:         { id: 'custom',         name: 'Custom',         colorBase: '#3730A3', colorTint: '#EEF2FF', icon: 'Settings2',        description: 'Choose any items from across all categories',                sizeOptions: ['regular', 'large'] },
 };
 
@@ -41,6 +42,9 @@ export const ITEMS: KitItem[] = [
   { id: 'comfort-earplugs', categoryId: 'comfort',  name: 'Ear Plugs',              description: 'High-NRR foam ear plugs',                    rating: 4.6, reviewCount: 378, weightGrams: 85,   volumeIn3: 18,  productId: null, pricePlaceholder: 12.99, imageSrc: null },
   { id: 'cloth-ponchos',    categoryId: 'clothing', name: 'Ponchos',                description: 'Waterproof hooded emergency ponchos',        rating: 4.2, reviewCount: 134, weightGrams: 227,  volumeIn3: 28,  productId: null, pricePlaceholder: 14.99, imageSrc: null },
   { id: 'cloth-shoe-covers',categoryId: 'clothing', name: 'Shoe Covers',            description: 'Heavy-duty waterproof boot covers',          rating: 3.8, reviewCount: 89,  weightGrams: 170,  volumeIn3: 36,  productId: null, pricePlaceholder: 11.99, imageSrc: null },
+  { id: 'pets-food',        categoryId: 'pets',     name: 'Pet Food Supply (3-Day)',     description: '2.5lb dry kibble + 4 cans wet food',                   rating: null, reviewCount: null, weightGrams: 1134, volumeIn3: 168, productId: null, pricePlaceholder: 24.99, imageSrc: null },
+  { id: 'pets-water',       categoryId: 'pets',     name: 'Pet Water & Bowl Kit',        description: 'Collapsible bowl + 1-gallon carrier',                  rating: null, reviewCount: null, weightGrams: 680,  volumeIn3: 96,  productId: null, pricePlaceholder: 18.99, imageSrc: null },
+  { id: 'pets-first-aid',   categoryId: 'pets',     name: 'Pet First Aid & Comfort Kit', description: 'Travel first aid + calming spray + comfort toy in bag', rating: null, reviewCount: null, weightGrams: 454,  volumeIn3: 84,  productId: null, pricePlaceholder: 29.99, imageSrc: null },
 ];
 
 export const ITEMS_BY_CATEGORY: Record<string, KitItem[]> = ITEMS.reduce(
@@ -50,7 +54,7 @@ export const ITEMS_BY_CATEGORY: Record<string, KitItem[]> = ITEMS.reduce(
 
 export const STANDARD_CATEGORY_IDS = [
   'power', 'lighting', 'communications', 'hygiene',
-  'cooking', 'medical', 'comfort', 'clothing',
+  'cooking', 'medical', 'comfort', 'clothing', 'pets',
 ] as const;
 
 export const ITEM_ICON_OVERRIDES: Record<string, string> = {

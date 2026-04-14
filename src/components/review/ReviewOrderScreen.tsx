@@ -21,7 +21,10 @@ export const ReviewOrderScreen: FC = () => {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
-      <BackLink to="/choose" label="Back" />
+      <BackLink
+        to={kitPath === 'custom' ? '/summary' : '/choose'}
+        label={kitPath === 'custom' ? 'Back to Kit Summary' : 'Back'}
+      />
 
       <h1
         ref={headingRef}

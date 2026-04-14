@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 test.describe('Full configuration flow', () => {
   test('select 3 subkits, configure items, reach summary', async ({ page }) => {
     await page.goto('/builder');
-    await expect(page.getByRole('heading', { name: 'Build Your Kit' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Build Your Emergency Kit' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Power subkit' }).click();
     await page.getByRole('button', { name: 'Lighting subkit' }).click();
@@ -86,7 +86,7 @@ test.describe('Start Over reset', () => {
 
     await page.getByRole('alertdialog').getByRole('button', { name: 'Start Over' }).click();
 
-    await expect(page.getByRole('heading', { name: 'Build Your Kit' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Build Your Emergency Kit' })).toBeVisible();
     await expect(page.getByText('0 of 6 slots used')).toBeVisible();
   });
 });

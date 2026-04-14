@@ -1,0 +1,78 @@
+schema: 1
+story: "15.2"
+story_title: "Visualizer Layout Refresh — Vertical to Horizontal"
+gate: PASS
+status_reason: "All 8 ACs met. Correct 40/60 horizontal layout, sticky left column, responsive breakpoints, zero HousingUnitVisualizer interface changes. 7/7 layout assertion tests passing (AC8 resolved). Barrel import fixed. tsc clean, 273/276 tests pass (3 failures are Story 15.4 aria-label scope, not 15.2)."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-04-14T02:15:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "SCOPE-001"
+    severity: low
+    finding: "SubkitSelectionScreen.tsx includes Story 15.3 elevation sorting and Story 15.4 visual distinction code — backwards-compatible (no-op with empty MCQ store). Will gate formally in 15.3/15.4 reviews."
+    suggested_action: "Acknowledged. No action needed for 15.2."
+  - id: "TEST-004"
+    severity: low
+    finding: "3 tests in SubkitVisualizerIntegration.test.tsx now fail — suite was previously blocked by @assets chain, now runs after barrel import fix. Failures caused by Story 15.4's aria-label change ('Power, selected' vs old 'Power subkit, selected'). Not a 15.2 regression."
+    suggested_action: "Track under Story 15.4 review — update SubkitVisualizerIntegration test expectations to match new aria-label pattern."
+
+quality_score: 93
+expires: "2026-04-28T02:15:00Z"
+
+evidence:
+  tests_reviewed: 7
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+  file_evidence:
+    - ac: 1
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      lines: "135-174"
+      detail: "flex-col gap-6 lg:flex-row lg:gap-8 — stacked mobile, 40/60 desktop. Left w-[40%], right w-[60%]."
+    - ac: 2
+      file: "src/components/visualizer/HousingUnitVisualizer.tsx"
+      lines: "5-8"
+      detail: "Props unchanged: slots, readOnly, onSlotClick. Zero new props confirmed."
+    - ac: 3
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      line: 170
+      detail: "grid grid-cols-2 gap-3 lg:grid-cols-1 — 2-col mobile/tablet, single-col desktop."
+    - ac: 4
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      lines: "137-161"
+      detail: "Left column contains HousingUnitVisualizer, slot usage text, SlotFullIndicator, min-message, Configure Items CTA."
+    - ac: 5
+      detail: "All handler functions (handleSelect, handleSizeChange, handleProceed) unchanged. Capacity enforcement intact."
+    - ac: 6
+      detail: "No existing color changes per Sally Decision #5. Pets color additive via Story 15.1."
+    - ac: 7
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      line: 137
+      detail: "lg:sticky lg:top-6 lg:self-start on left column."
+    - ac: 8
+      file: "tests/components/SubkitSelectionScreenLayout.test.tsx"
+      lines: "1-82"
+      detail: "7 layout tests: outer container max-w/mx-auto/px-6, flex lg:flex-row lg:gap-8, left col lg:w-[40%] lg:sticky lg:top-6 lg:self-start, right col lg:w-[60%], card grid grid-cols-2 lg:grid-cols-1, heading text, CTA in left column. All pass."
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Layout-only change. No new inputs, no new data flow."
+  performance:
+    status: PASS
+    notes: "CSS sticky is browser-native, no JS cost."
+  reliability:
+    status: PASS
+    notes: "All existing interactions preserved. Responsive breakpoints use standard Tailwind lg: prefix."
+  maintainability:
+    status: PASS
+    notes: "Barrel import fixed to direct path. Layout tests comprehensive."
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Resolve remaining 8 @assets test suite failures globally via vitest module mock or stub images."
+      refs: ["src/data/itemImages.ts", "vitest.config.ts"]

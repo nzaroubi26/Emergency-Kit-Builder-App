@@ -1,0 +1,68 @@
+schema: 1
+story: "15.3"
+story_title: "MCQ → Subkit Surfacing Logic"
+gate: PASS
+status_reason: "All 7 ACs met. ElevationResult struct (not flat Set) per Winston's revision. All Q1/Q2 rules match architecture spec. Deduplication correct — Q1+Q2 overlap stays in q2Elevated for sort priority. SubkitSelectionScreen partitions Q2 → Q1-only → non-elevated with catalog order preserved within tiers. Empty MCQ = default order, no group header. 12/12 unit tests pass. tsc clean."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-04-14T02:20:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+quality_score: 97
+expires: "2026-04-28T02:20:00Z"
+
+evidence:
+  tests_reviewed: 12
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7]
+    ac_gaps: []
+  file_evidence:
+    - ac: 1
+      file: "src/utils/elevationRules.ts"
+      lines: "1-6, 23-26"
+      detail: "ElevationResult interface with elevated + q2Elevated Sets. Function signature matches spec. Type imports only from mcqStore."
+    - ac: 2
+      file: "src/utils/elevationRules.ts"
+      lines: "8-21"
+      detail: "Q2_RULES: kids→hygiene/medical/comfort, older-adults→medical/comfort, disability→medical/comfort, pets→pets, none→[]. Q1_RULES: flood/hurricane→power/comms/cooking, tropical-storm→power/comms, tornado→medical/lighting/clothing."
+    - ac: 3
+      file: "src/utils/elevationRules.ts"
+      lines: "27-49"
+      detail: "Q2 loop adds to both elevated and q2Elevated. Q1 loop adds to elevated only. Set deduplicates naturally. Test 11 verifies tornado+kids → medical in q2Elevated."
+    - ac: 4
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      lines: "35-43"
+      detail: "Reads MCQ store, calls computeElevatedSubkits, partitions into q2/q1Only/nonElevated, spreads as [...q2, ...q1Only, ...nonElevated]. Matches architecture Section 2c."
+    - ac: 5
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      lines: "78, 165"
+      detail: "hasElevated = elevated.size > 0. Empty MCQ → empty sets → all categories in nonElevated → catalog order. Group header not rendered."
+    - ac: 6
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      line: 49
+      detail: "selectedIds derived from useKitStore().selectedSubkits only. No selectSubkit() calls from elevation. Informational only."
+    - ac: 7
+      file: "tests/unit/elevationRules.test.ts"
+      lines: "1-84"
+      detail: "12 tests: empty inputs, none option, all 4 Q1 types, 2 Q2 types, multi-Q1 dedup, multi-Q2 additive, Q1+Q2 overlap with q2Elevated priority, subset invariant. All pass."
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Pure function. No DOM, no network, no external input. Type-safe via EmergencyType/HouseholdOption unions."
+  performance:
+    status: PASS
+    notes: "Two loops over max 4-5 element arrays. Runs once per render. Negligible cost."
+  reliability:
+    status: PASS
+    notes: "Defensive: unknown Q1/Q2 values produce no elevation (undefined lookup returns undefined, skipped by if-guard). Empty inputs produce empty sets."
+  maintainability:
+    status: PASS
+    notes: "Pure function with zero dependencies beyond type imports. Rules declared as const Records — easy to update. Named exports."
+
+recommendations:
+  immediate: []
+  future: []

@@ -1,0 +1,75 @@
+schema: 1
+story: "15.4"
+story_title: "MCQ Visual Distinction — Suggested vs. Selected"
+gate: PASS
+status_reason: "All 8 ACs met. ElevationBadge uses CSS opacity transitions (130ms out, 150ms in) — always in DOM for proper animation. Section wrapper encompasses header + elevated cards. Badge disappears visually on selection (opacity 0, aria-hidden, pointer-events none). All aria-labels correct per spec. 10/10 elevation tests + 14/14 integration tests pass. 276/276 total tests pass, 0 failures. tsc clean."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-04-14T02:30:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "A11Y-001"
+    severity: low
+    finding: "prefers-reduced-motion: reduce not handled. Front-end spec requires animation collapse to 0.01ms. ElevationBadge hardcodes 130/150ms durations with no media query check. Animation is very short (barely perceptible), so impact is minimal."
+    suggested_action: "Add prefers-reduced-motion check — either CSS media query on the badge or a useMediaQuery hook to set duration to 0.01ms."
+
+quality_score: 92
+expires: "2026-04-28T02:30:00Z"
+
+evidence:
+  tests_reviewed: 24
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+  file_evidence:
+    - ac: 1
+      file: "src/components/subkit-selection/SubkitCard.tsx"
+      line: 14
+      detail: "elevated?: boolean in SubkitCardProps. Defaults to undefined (falsy) at line 25."
+    - ac: 2
+      file: "src/components/subkit-selection/ElevationBadge.tsx"
+      lines: "8-27"
+      detail: "Always in DOM, opacity toggle. Sparkles 10px, 'Suggested for you', #1F4D35 on #E8F5EE, rounded-full, px-2 py-0.5. SubkitCard.tsx:69-70 — 3px solid #22C55E left border."
+    - ac: 3
+      file: "src/components/subkit-selection/SubkitCard.tsx"
+      line: 65
+      detail: "showElevation = elevated && !selected. When selected: badge opacity 0, aria-hidden=true, pointer-events none. Border reverts to 2px colorBase + colorTint bg."
+    - ac: 4
+      detail: "showElevation = false when !elevated. Badge opacity 0, no green border applied."
+    - ac: 5
+      file: "src/components/subkit-selection/ElevationBadge.tsx"
+      line: 24
+      detail: "Text label 'Suggested for you' — understandable without color alone per WCAG 2.1 AA."
+    - ac: 6
+      file: "src/components/subkit-selection/SubkitCard.tsx"
+      lines: "119-123"
+      detail: "elevated+unselected: '{Name} — Suggested for your situation'. elevated+selected: '{Name}, selected'. non-elevated: '{Name} subkit'."
+    - ac: 7
+      file: "src/components/subkit-selection/SubkitSelectionScreen.tsx"
+      lines: "166-172"
+      detail: "<section aria-label='Suggested subkits for your situation' className='mb-4'> wraps header + elevated cards grid. ElevationGroupHeader with mb-3. hasElevated guard prevents rendering when no elevation."
+    - ac: 8
+      file: "tests/components/ElevationVisuals.test.tsx"
+      detail: "10 tests: badge opacity visible/hidden for all states, aria-labels, green border, group header. Plus 3 SubkitVisualizerIntegration tests updated for new aria-label pattern. All 24 tests pass."
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Visual-only changes. No new data flow, no external input."
+  performance:
+    status: PASS
+    notes: "Badge always in DOM (no mount/unmount churn). CSS opacity transitions are GPU-composited — zero layout cost."
+  reliability:
+    status: PASS
+    notes: "aria-hidden synced with visibility. pointer-events none prevents ghost clicks on hidden badge."
+  maintainability:
+    status: PASS
+    notes: "ElevationBadge and ElevationGroupHeader are small, focused components. Named exports. Clean prop interface."
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Add prefers-reduced-motion handling to ElevationBadge — collapse 130/150ms durations to 0.01ms when user prefers reduced motion."
+      refs: ["src/components/subkit-selection/ElevationBadge.tsx:18-20"]
