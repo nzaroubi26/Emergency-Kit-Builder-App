@@ -24,10 +24,10 @@ When no emergency-type-specific ordering applies, subkits are displayed in this 
 | Rank | Category | Notes |
 |------|----------|-------|
 | 1 | Power | Always #1 — user research confirms this |
-| 2 | Lighting | — |
+| 2 | Medical | — |
 | 3 | Communications | — |
-| 4 | Cooking | — |
-| 5 | Medical | — |
+| 4 | Lighting | — |
+| 5 | Cooking | — |
 | 6 | Hygiene | — |
 | 7 | Comfort | — |
 | 8 | Clothing | — |
@@ -58,8 +58,8 @@ If the user selects multiple emergency types, the **first selected type wins** �
 | 1 | Power | Flood top 3 |
 | 2 | Clothing | Flood top 3 |
 | 3 | Medical | Flood top 3 |
-| 4 | Lighting | Default order |
-| 5 | Communications | Default order |
+| 4 | Communications | Default order |
+| 5 | Lighting | Default order |
 | 6 | Cooking | Default order |
 | 7 | Hygiene | Default order |
 | 8 | Comfort | Default order |
@@ -73,8 +73,8 @@ If the user selects multiple emergency types, the **first selected type wins** �
 | 1 | Power | Tornado top 3 |
 | 2 | Cooking | Tornado top 3 |
 | 3 | Medical | Tornado top 3 |
-| 4 | Lighting | Default order |
-| 5 | Communications | Default order |
+| 4 | Communications | Default order |
+| 5 | Lighting | Default order |
 | 6 | Hygiene | Default order |
 | 7 | Comfort | Default order |
 | 8 | Clothing | Default order |
