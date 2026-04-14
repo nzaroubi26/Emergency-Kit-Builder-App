@@ -47,3 +47,13 @@ export function reviewGuard() {
   if (!kitPath) return redirect('/choose');
   return null;
 }
+
+export function fillGuard() {
+  const { kitPath } = useMCQStore.getState();
+  const { selectedSubkits } = useKitStore.getState();
+
+  if (kitPath === 'essentials') return null;
+  if (selectedSubkits.length > 0) return null;
+
+  return redirect('/');
+}

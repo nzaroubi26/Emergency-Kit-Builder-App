@@ -14,6 +14,7 @@ async function renderConfirmation(useGuard = true) {
       ...(useGuard ? { loader: confirmationGuard } : {}),
     },
     { path: '/', element: <div>Cover Page</div> },
+    { path: '/fill', element: <div>Fill Your Kit Page</div> },
   ];
   const router = createMemoryRouter(routes, { initialEntries: ['/confirmation'] });
   let result: ReturnType<typeof render>;
@@ -103,39 +104,17 @@ describe('OrderConfirmationScreen', () => {
     });
   });
 
-  describe('Fill Your Kit modal', () => {
+  describe('Fill Your Kit navigation', () => {
     beforeEach(() => setupCustomKit());
 
-    it('opens modal on CTA click', async () => {
+    it('navigates to /fill on CTA click', async () => {
       await renderConfirmation();
       await act(async () => {
         fireEvent.click(screen.getByRole('button', { name: /fill your kit/i }));
       });
-      expect(screen.getByText('Coming Soon')).toBeInTheDocument();
-    });
-
-    it('closes modal via "Got It" button', async () => {
-      await renderConfirmation();
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: /fill your kit/i }));
+      await waitFor(() => {
+        expect(screen.getByText('Fill Your Kit Page')).toBeInTheDocument();
       });
-      expect(screen.getByText('Coming Soon')).toBeInTheDocument();
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Got It' }));
-      });
-      expect(screen.queryByText('Coming Soon')).not.toBeInTheDocument();
-    });
-
-    it('closes modal via Escape key', async () => {
-      await renderConfirmation();
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: /fill your kit/i }));
-      });
-      expect(screen.getByText('Coming Soon')).toBeInTheDocument();
-      await act(async () => {
-        fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
-      });
-      expect(screen.queryByText('Coming Soon')).not.toBeInTheDocument();
     });
   });
 

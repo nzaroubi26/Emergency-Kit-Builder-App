@@ -10,7 +10,8 @@ import { SummaryScreen } from '../components/summary/SummaryScreen';
 import { OrderConfirmationScreen } from '../components/confirmation/OrderConfirmationScreen';
 import { ForkScreen } from '../components/fork/ForkScreen';
 import { ReviewOrderScreen } from '../components/review/ReviewOrderScreen';
-import { subkitConfigGuard, customConfigGuard, summaryGuard, confirmationGuard, mcqHouseholdGuard, forkGuard, reviewGuard } from './guards';
+import { FillYourKitScreen } from '../components/fill/FillYourKitScreen';
+import { subkitConfigGuard, customConfigGuard, summaryGuard, confirmationGuard, mcqHouseholdGuard, forkGuard, reviewGuard, fillGuard } from './guards';
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +63,11 @@ export const router = createBrowserRouter([
         path: '/confirmation',
         element: <OrderConfirmationScreen />,
         loader: confirmationGuard,
+      },
+      {
+        path: '/fill',
+        element: <FillYourKitScreen />,
+        loader: fillGuard,
       },
       {
         path: '*',
