@@ -26,10 +26,10 @@ test.describe('Fill Your Kit — Essentials Path', () => {
 
     // Fork screen — choose Essentials
     await expect(page.getByRole('heading', { name: 'Choose Your Path' })).toBeVisible();
-    await page.getByRole('button', { name: 'Get Essentials Kit' }).click();
+    await page.getByRole('button', { name: 'Get The Essentials Kit' }).click();
 
     // Review & Order
-    await page.getByRole('button', { name: /Get My Kit/i }).click();
+    await page.getByRole('button', { name: /Place Order/i }).click();
 
     // Order Confirmation
     await expect(page.getByText('Your kit is on its way.')).toBeVisible();
