@@ -16,7 +16,7 @@ export const AppShell: FC = () => {
   const location = useLocation();
   const isConfirmation = location.pathname === '/confirmation';
 
-  const MOBILE_EXEMPT_ROUTES = ['/build', '/build/household', '/choose', '/review'];
+  const MOBILE_EXEMPT_ROUTES = ['/build', '/build/household', '/choose', '/review', '/fill'];
   const isMobileExempt = MOBILE_EXEMPT_ROUTES.some(
     (route) => location.pathname === route || location.pathname.startsWith(route + '/')
   );

@@ -1,4 +1,4 @@
-import { type FC, useEffect, useRef, useState } from 'react';
+import { type FC, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKitStore } from '../../store/kitStore';
 import { useMCQStore } from '../../store/mcqStore';
@@ -7,7 +7,7 @@ import { ESSENTIALS_BUNDLE } from '../../data/essentialsConfig';
 import { SubkitSummarySection } from '../summary/SubkitSummarySection';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { SecondaryButton } from '../ui/SecondaryButton';
-import { FillKitStubModal } from './FillKitStubModal';
+
 import { CONTAINER_PRICES, calculateCartGrandTotal, calculateSubkitCartTotal } from '../../utils/cartCalculations';
 import { calculateSubkitWeightLbs, calculateSubkitVolumePct } from '../../utils/slotCalculations';
 
@@ -17,8 +17,6 @@ const LARGE_CAPACITY_IN3 = 3456;
 export const OrderConfirmationScreen: FC = () => {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const navigate = useNavigate();
-  const [showFillKitModal, setShowFillKitModal] = useState(false);
-
   const kitPath = useMCQStore((s) => s.kitPath);
   const resetMCQ = useMCQStore((s) => s.resetMCQ);
   const { selectedSubkits, itemSelections, emptyContainers, resetKit } = useKitStore();
@@ -70,11 +68,7 @@ export const OrderConfirmationScreen: FC = () => {
   };
 
   const handleOpenFillKit = () => {
-    setShowFillKitModal(true);
-  };
-
-  const handleCloseFillKit = () => {
-    setShowFillKitModal(false);
+    navigate('/fill');
   };
 
   // Essentials path: display bundle subkits
@@ -155,7 +149,6 @@ export const OrderConfirmationScreen: FC = () => {
         </SecondaryButton>
       </div>
 
-      <FillKitStubModal open={showFillKitModal} onClose={handleCloseFillKit} />
     </div>
   );
 };
