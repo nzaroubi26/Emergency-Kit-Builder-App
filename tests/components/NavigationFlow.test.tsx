@@ -123,7 +123,7 @@ describe('Navigation and Flow', () => {
     const confirmBtn = screen.getByRole('button', { name: 'Go Back' });
     await act(async () => { fireEvent.click(confirmBtn); });
     await waitFor(() => {
-      expect(screen.getByText(/Build Your Kit/i)).toBeInTheDocument();
+      expect(screen.getByText(/Build Your Emergency Kit/i)).toBeInTheDocument();
     });
   });
 

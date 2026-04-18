@@ -16,6 +16,7 @@ async function renderSummary() {
       { path: '/builder', element: <SubkitSelectionScreen /> },
       { path: '/summary', element: <SummaryScreen />, loader: summaryGuard },
       { path: '/confirmation', element: <div>Confirmation</div> },
+      { path: '/review', element: <div>Review Order</div> },
     ],
     { initialEntries: ['/summary'] }
   );
@@ -101,11 +102,11 @@ describe('SummaryScreen — Story 5.3: CTA and Purchase Intent', () => {
     expect(screen.getByRole('button', { name: 'Get My Kit' })).toBeInTheDocument();
   });
 
-  it('Get My Kit navigates to /confirmation', async () => {
+  it('Get My Kit navigates to /review', async () => {
     await renderSummary();
     fireEvent.click(screen.getByRole('button', { name: 'Get My Kit' }));
     await waitFor(() => {
-      expect(screen.getByText('Confirmation')).toBeInTheDocument();
+      expect(screen.getByText('Review Order')).toBeInTheDocument();
     });
   });
 
@@ -124,7 +125,7 @@ describe('SummaryScreen — Story 5.3: CTA and Purchase Intent', () => {
     const editBtn = screen.getByRole('button', { name: 'Edit My Kit' });
     await act(async () => { fireEvent.click(editBtn); });
     await waitFor(() => {
-      expect(screen.getByText(/Build Your Kit/i)).toBeInTheDocument();
+      expect(screen.getByText(/Build Your Emergency Kit/i)).toBeInTheDocument();
     });
   });
 });
@@ -165,7 +166,7 @@ describe('SummaryScreen — Story 5.4: Print & Start Over', () => {
     const confirmBtn = buttons[buttons.length - 1];
     await act(async () => { fireEvent.click(confirmBtn); });
     await waitFor(() => {
-      expect(screen.getByText(/Build Your Kit/i)).toBeInTheDocument();
+      expect(screen.getByText(/Build Your Emergency Kit/i)).toBeInTheDocument();
     });
     expect(useKitStore.getState().selectedSubkits).toHaveLength(0);
   });
