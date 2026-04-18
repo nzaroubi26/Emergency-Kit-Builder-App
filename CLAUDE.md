@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## What this app is
+
+A homeowner-facing SPA for configuring a personalized emergency preparedness kit that maps 1:1 to a physical modular storage unit. The user flow: land on a cover page → pick **subkits** (sized containers: small/medium/large) → fill each subkit with **items** drawn from **categories** (water, food, first aid, light, tools, etc.) → review a summary with running weight/volume/price totals → check out via a mock e-commerce endpoint → land on an order-confirmation screen.
+
+Core concepts (see `src/types/`):
+- **`KitCategory`** — grouping of items (e.g. "Water & Hydration"); carries a color + icon used across the UI.
+- **`KitItem`** — a purchasable SKU with price, weight, volume, star rating, slot footprint, and optional image/icon override. Catalog is static (`src/data/kitItems.ts`, ~28 items).
+- **`SubkitSelection`** — one container the user has chosen (id + size). A kit is a list of these plus an optional "custom" subkit.
+- **`SubkitSize`** — `'small' | 'medium' | 'large'`; controls total slot capacity, weight cap, and volume cap.
+- **`ItemSelection`** — `{ itemId, quantity }` scoped to a subkit. Items consume slots based on `item.slotsRequired * quantity`.
+
+Visualizer: `HousingUnitVisualizer` renders the physical unit with per-subkit slot grids. Slots are **clickable** (deep-link into that subkit's config screen) and show fill state computed from the current item selections. Key UX affordances: "Fill my kit for me" (auto-populates a subkit from a curated default), size toggle (shows whether current contents still fit when shrinking), and a sliding cart sidebar accessible from the header.
+
+Phases shipped (per `replit.md`): Phase 1 (core builder + summary + print), Phase 2 (persistence, analytics, cover page, ratings, clickable slots, checkout), Phase 2.5 (weight/volume tracking, visualizer exterior redesign), Phase 3 (cart sidebar + order confirmation + inline pricing everywhere).
+
 ## Commands
 
 ```bash
