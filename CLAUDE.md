@@ -64,7 +64,7 @@ Playwright's `webServer` config auto-starts `npm run dev` on port 5000; don't la
 - Components are typed `FC<Props>` with a co-located `{ComponentName}Props` interface.
 - No logic in JSX — extract to `const` above the `return`.
 - Every component test must include at least one `axe` accessibility assertion (via `vitest-axe`). No snapshot tests.
-- Path aliases: `@/*` → `src/*`, `@assets/*` → `src/assets/*` (note: `vitest.config.ts` aliases `@assets` to `attached_assets/` for test fixtures — don't "fix" this mismatch).
+- Path aliases: `@/*` → `src/*`, `@assets/*` → `src/assets/*` (configured identically in `vite.config.ts` and `vitest.config.ts`).
 - `lucide-react` icons: named imports only.
 
 ## Environment variables
@@ -72,3 +72,72 @@ Playwright's `webServer` config auto-starts `npm run dev` on port 5000; don't la
 - `VITE_PURCHASE_URL` — checkout endpoint (default `#`)
 - `VITE_ANALYTICS_ID` — GA4 measurement ID (optional; analytics no-ops when unset)
 - `PLAYWRIGHT_CHROMIUM_PATH` — executable path for E2E in sandboxed environments
+
+---
+
+## Quality Gates
+
+| Entity | Max | Enforced by |
+|---|---|---|
+| Source file (`src/**/*.{ts,tsx}`) | 300 lines | `scripts/lib/check-file-sizes.cjs` (pre-commit) |
+| Function | 50 lines | advisory (`.claude/rules/code-quality.md`) |
+| `src/utils/slotCalculations.ts` branch coverage | 100% | review gate (not in CI yet) |
+| Secret patterns in source | 0 | `scripts/lib/check-secrets.cjs` (pre-commit) |
+
+**Preexisting violation:** `src/components/item-config/CustomSubkitScreen.tsx` is 317 lines and is excluded in `scripts/lib/check-file-sizes.cjs`. Refactor it and remove the exclude entry.
+
+Complexity red flags (stop and refactor immediately): >5 nested if/else, >3 try/catch in one function, >10 imports, duplicated logic. See `.claude/rules/code-quality.md` (auto-loaded on `src/**`).
+
+## Git Hooks
+
+Hooks are source-controlled in `scripts/hooks/` and installed into `.git/hooks/` by `./scripts/install-hooks.sh` (run once after clone).
+
+**pre-commit** (fast):
+1. `node scripts/lib/check-secrets.cjs` — blocks API keys, private keys
+2. `node scripts/lib/check-file-sizes.cjs` — blocks files >300 lines
+3. `node scripts/lib/validate-docs.cjs` — warns if `src/`/`scripts/` changed without CLAUDE.md
+
+**pre-push** (thorough, SHA-cached):
+1. `npm run typecheck` + `npm run test:run` — skipped when `HEAD` matches `.test-passed`
+2. `npm audit --audit-level=moderate` — warn-only
+
+The `.test-passed` file caches the SHA of the last successful run and is gitignored.
+
+## Path-scoped Rules
+
+Rules in `.claude/rules/` auto-load based on file patterns (via `globs:` frontmatter):
+
+| File | Applies when editing |
+|---|---|
+| `tdd.md` | `src/**`, `lib/**` — test-first for features, reproduction-first for bugs |
+| `typescript.md` | `src/**/*.{ts,tsx,js}` — naming, imports, no default exports |
+| `react.md` | `src/**/*.{tsx,jsx}` — the five rules for avoiding `useEffect` |
+| `testing.md` | `tests/**`, `**/*.test.*`, `**/*.spec.*` — test patterns + review checklist |
+| `code-quality.md` | `src/**`, `lib/**`, `scripts/**` — file size, complexity red flags |
+
+## Code Review Checklist
+
+Before marking any change complete:
+
+- [ ] Tests written/updated (TDD for features, reproduction test for bugs)
+- [ ] `npm run typecheck` clean
+- [ ] `npm run lint` clean
+- [ ] `npm run test:run` green
+- [ ] No file over 300 lines (`find src \( -name "*.ts" -o -name "*.tsx" \) -exec wc -l {} + | awk '$1 > 300'`)
+- [ ] No `export default` in `src/`
+- [ ] No `useEffect` for derivable state (see `.claude/rules/react.md`)
+- [ ] CLAUDE.md updated if `src/` or `scripts/` structure changed
+
+## Critical Gotchas
+
+Add non-obvious discoveries here as you find them (see `.claude/plugins/harness-engineering/skills/setup/references/claude-md-guide.md` for what belongs here).
+
+- **Build copies `dist/index.html` → `dist/200.html`** as an SPA fallback for static hosts. If you rename the output dir, update the `build` script in `package.json`.
+- **Playwright `webServer`** auto-starts `npm run dev` on port 5000 — don't start the dev server manually before running E2E or you'll get `EADDRINUSE`.
+- **Category colors are dynamic** — always apply via inline `style={{ background: color }}`, never via Tailwind template literals (`bg-${color}-500`), which Tailwind can't statically extract.
+- **Zustand store persists to `localStorage` key `emergency-kit-v1`** — bumping the schema without a migration will silently drop user state. Bump the key suffix on breaking changes.
+- **`attached_assets/` is gitignored and Replit-specific.** All committed PNGs live in `src/assets/`. Both `vite.config.ts` and `vitest.config.ts` alias `@assets` there. An earlier `vitest.config.ts` pointed to `attached_assets/`, which broke tests on fresh clones — don't reintroduce that.
+
+## Harness Engineering
+
+This repo follows the [harness-engineering](https://github.com/jrenaldi79/harness-engineering) pattern: mechanical enforcement (hooks) backs up path-scoped rules, which back up CLAUDE.md prose. Skills are vendored at `.claude/plugins/harness-engineering/skills/`. Current readiness level: see `readiness-report.md`.

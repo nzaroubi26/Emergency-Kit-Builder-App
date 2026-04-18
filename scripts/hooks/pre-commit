@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+# Pre-commit hook: fast checks (<2s)
+# 1. Secret detection
+# 2. File size enforcement (300-line cap on src/**/*.{ts,tsx})
+# 3. CLAUDE.md drift warning
+
+node scripts/lib/check-secrets.cjs
+node scripts/lib/check-file-sizes.cjs
+node scripts/lib/validate-docs.cjs

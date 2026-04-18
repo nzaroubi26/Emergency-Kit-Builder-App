@@ -134,3 +134,7 @@ dist
 
 # Replit internal directories (agent uploads, screenshots)
 attached_assets/
+
+# Harness Engineering
+.test-passed
+.claude/settings.local.json
