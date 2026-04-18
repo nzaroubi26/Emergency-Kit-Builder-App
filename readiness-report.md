@@ -82,7 +82,7 @@ Agentic Workflow      ███░░░ 1/2
 - **BMAD is doing a lot of heavy lifting** — the `docs/stories/` + sharded architecture + per-phase PRDs approach is more structured than most projects. When scoring agentic workflow, this repo is effectively at Level 5 for planning discipline. The gap is mechanical enforcement, not process.
 - **`replit.md` duplicates CLAUDE.md content.** This is fine for humans but costs tokens on every Claude invocation. Consider consolidating after the harness migration is stable.
 - **Conventions are strong but advisory.** Named-exports-only, no-logic-in-JSX, axe-per-component-test, inline-styles-for-dynamic-colors — all documented, none lint-enforced. A Level 4+ posture would back them with ESLint rules.
-- **The `@assets` alias in `vitest.config.ts` was pointing to `attached_assets/`** (gitignored), which broke the test suite on fresh clones — 7 test files failed at import. Fixed as part of this commit; both configs now resolve `@assets` to `src/assets/`. This unmasks **4 pre-existing navigation test failures** in `NavigationFlow.test.tsx` and `SummaryScreen.test.tsx` (tests expect cross-screen text that a single-screen render can't produce). These are not caused by this commit but should be fixed as a follow-up.
+- **The `@assets` alias in `vitest.config.ts` was pointing to `attached_assets/`** (gitignored), which broke the test suite on fresh clones — 7 test files failed at import. Fixed as part of this commit; both configs now resolve `@assets` to `src/assets/`. This unmasked 4 pre-existing stale assertions in `NavigationFlow.test.tsx` and `SummaryScreen.test.tsx` — regex matched "Build Your Kit" but the heading is "Build Your Emergency Kit", and one test expected `/confirmation` navigation when Phase 3 routed `Get My Kit` to `/review`. Fixed in a follow-up commit; all 458 tests now pass.
 - **Coverage config enumerates paths but sets no threshold** — easy upgrade: add `thresholds: { branches: 100 }` scoped to `src/utils/slotCalculations.ts`.
 
 ## Level Gate
@@ -112,13 +112,12 @@ Agentic Workflow      █████░ 2/2   (+session-start validation via va
 
 ### To Reach Level 5 (after this commit)
 
-1. **Fix the 4 navigation test failures** in `NavigationFlow.test.tsx` and `SummaryScreen.test.tsx`. These tests assert text from screens that aren't rendered by the test's router — likely need `MemoryRouter` wired to the full route tree, or mocked navigation assertions instead of text assertions.
-2. **Refactor `CustomSubkitScreen.tsx`** (317 → <300 lines) and remove it from `scripts/lib/check-file-sizes.cjs` `CONFIG.exclude`.
-3. **Add `import/no-default-export`** to `.eslintrc.cjs` (`eslint-plugin-import` needs installing):
+1. **Refactor `CustomSubkitScreen.tsx`** (317 → <300 lines) and remove it from `scripts/lib/check-file-sizes.cjs` `CONFIG.exclude`.
+2. **Add `import/no-default-export`** to `.eslintrc.cjs` (`eslint-plugin-import` needs installing):
    ```js
    rules: { 'import/no-default-export': 'error' }
    ```
-4. **Add coverage threshold** for `src/utils/slotCalculations.ts` in `vitest.config.ts`:
+3. **Add coverage threshold** for `src/utils/slotCalculations.ts` in `vitest.config.ts`:
    ```ts
    coverage: { thresholds: { 'src/utils/slotCalculations.ts': { branches: 100 } } }
    ```
