@@ -1,8 +1,8 @@
 # ReadyVault Demo — Design Spec
 
 **Date:** 2026-05-19
-**Status:** Pilot landed; in-flight (4 of 6 screens briefed)
-**Deliverable:** Claude Design prompts that produce desktop mockups of 6 key screens for a demo. No application code changes.
+**Status:** All 5 screens briefed; ready for design execution
+**Deliverable:** Claude Design prompts that produce desktop mockups of 5 key screens for a demo. No application code changes.
 
 ## Goal
 
@@ -48,12 +48,13 @@ Sequential user-flow order. Briefing order modified to defer the Cover redesign 
 
 | # | Screen | Brief status | Hero treatment | Photography |
 |---|---|---|---|---|
-| 1 | Cover / landing (redesigned) | TBD — last | Hero | Yes (renderings + lifestyle) |
+| 1 | Cover / landing | **Briefed** | Hero | Yes (lifestyle hero) |
 | 2 | MCQ #1 — emergency type | **Briefed** | No (working screen) | No (icons only) |
 | 3 | MCQ #2 — household | **Briefed** | No (working screen) | No (icons only) |
 | 4 | Choose Your Path (3-card fork) | **Briefed** | Hero | Yes (3 ReadyVault renderings) |
-| 5 | Essentials tier landing | **Briefed** | Hero | Yes (subkit photos) |
-| 6 | ReadyVault visualizer | TBD (maybe) | Hero | Yes (Vault rendering) |
+| 5 | Essentials tier landing | **Briefed** | Hero | Yes (subkit + item photos) |
+
+The ReadyVault Visualizer was dropped from scope on 2026-05-19 — the Choose Your Path renderings and the expandable Essentials cards already carry the hub-anatomy and contents narratives the Visualizer was meant to express. A dedicated screen would have duplicated work without adding new product information.
 
 ## Strategy
 
@@ -200,19 +201,33 @@ If both come back strong, brief the remaining four. If either fails, tune the pr
 
 **Hero treatment.** Yes — sand background, generous whitespace, 42px H1.
 
-## TBD screen briefs
+### Screen #1 — Cover (landing page)
 
-### Screen #6 — ReadyVault visualizer
+**Purpose.** The front door. Establish brand, anchor the JTBD ("protect the people you love"), build credibility via FEMA Ready alignment, and drive one CTA into the flow.
 
-The Vault metaphor expressed as a hero rendering of the physical hub with its 6 slots — some filled, some empty, depending on tier or current cart state. Most novel screen visually; brief after pilot returns so we know how Claude Design handles the renderings.
+**Layout (desktop).**
+- Hero screen on `--sand`. Container max-width ~1280px.
+- Top utility row: ReadyVault logo (left) + minimal nav (right) — "How it works" text link + "Buy" ghost button.
+- Hero: split layout ~50/50. Left column = copy block (eyebrow `EMERGENCY PREPAREDNESS, HANDLED.`, H1 "Built for the people you love.", sub "Modular emergency kits, packed and ready when you are.", primary CTA "Build my kit →", inline trust strip). Right column = lifestyle photograph (~580×620, slightly portrait).
+- How it works strip below hero: eyebrow + H2 "Three steps to ready." + three step blocks in a row with numbered forest circles and short descriptions. Chevron-right separators between steps.
+- Footer: minimal wordmark + three text links.
 
-### Screen #1 — Cover (redesigned)
+**Trust strip (in hero).** FEMA Ready aligned · 72-hour coverage · Free shipping. Each prefixed with small forest check.
 
-Last screen briefed. Needs hero imagery (TBD), Build My Kit CTA, brand-level positioning. Deferred so we know what the rest of the system looks like before designing the front door.
+**Step content.**
+1. Tell us about your home — "Two-minute quiz. We learn what you need to be ready for."
+2. Pick your kit — "Base, Essentials, or Pro. Or build it yourself."
+3. Be ready — "Your kit ships ready. Stash it. Forget about it."
+
+**Variants in demo.** Single state — the page at rest. No hover artifacts.
+
+**Photography.** New lifestyle mode introduced — Vault in a real domestic corner, natural light, lived-in but tidy, no people. The preamble's photography section was updated to encode this as a distinct mode alongside studio.
+
+**Hero treatment.** Yes — 56px H1, sand background, generous whitespace.
 
 ## Process from here
 
-1. Run pilot prompts (MCQ #1 and Choose Your Path) through Claude Design.
-2. Review outputs. If both land, brief MCQ #2, Essentials tier landing, Visualizer, and the redesigned Cover.
-3. If outputs miss, tune the preamble or per-screen brief structure before continuing.
-4. Once all 6 screens have shipped mockups, package them for the demo.
+1. ✅ Pilot prompts (MCQ #1 and Choose Your Path) ran through Claude Design. Pilot landed strong.
+2. ✅ Remaining screens briefed (MCQ #2, Essentials tier landing, Cover). Visualizer dropped from scope.
+3. Run the remaining three prompts through Claude Design.
+4. Once all 5 screens have shipped mockups, package them for the demo.

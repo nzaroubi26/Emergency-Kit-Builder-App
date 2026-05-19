@@ -104,12 +104,32 @@ Lucide or Tabler icons, stroke style (not filled). ~14–28px depending on conte
 
 ## Photography direction
 
-When photography is requested for a screen:
+Two distinct photography modes. Use the right one for the right context.
+
+### Studio mode (default)
+
+Used for subkit cards, item thumbnails, tier renderings — anywhere a product is the subject.
+
 - Subjects on **sand `#F5F1EA`** or **sand-2 `#EFEADD`** backdrops — never pure white, never dark.
 - Soft directional lighting, no harsh shadows.
 - Products centered with breathing room. Real-feel, not over-styled stock.
 - Hub/Vault renderings: photoreal but slightly stylized, soft drop shadow on the sand-2 surface.
-- No people in the demo set. Product-only.
+
+### Lifestyle mode (Cover hero only)
+
+Used exclusively for the Cover screen's hero photograph. Introduces environmental context the studio mode can't carry.
+
+- Vault shown in a real domestic environment — a corner of a mudroom, hallway, foyer, or tidy garage. Indoor.
+- Natural daylight, soft and warm, single directional source. No studio lighting.
+- Lived-in but tidy. Context objects at lower visual weight (bicycle, fire extinguisher, boots, plant, basket) — never overcrowded.
+- Subtle, unposed composition. The kind of photograph that could appear in a slow-living magazine.
+
+### Universal rules (both modes)
+
+- **No people in the demo set.** The product is the subject.
+- **No fear imagery.** No debris, broken windows, smoke, candles-in-the-dark, or visible damage.
+- **No tactical / military framing.** No black-on-orange, no camo, no operator aesthetic.
+- **No stock-photo polish.** No glossy DTC over-styling, no gradient backgrounds, no neon accents.
 
 ## What this design system explicitly is NOT
 
