@@ -1,7 +1,7 @@
 # ReadyVault Demo — Design Spec
 
 **Date:** 2026-05-19
-**Status:** Pilot in progress (2 of 6 screens briefed)
+**Status:** Pilot landed; in-flight (3 of 6 screens briefed)
 **Deliverable:** Claude Design prompts that produce desktop mockups of 6 key screens for a demo. No application code changes.
 
 ## Goal
@@ -40,7 +40,7 @@ Sequential user-flow order. Briefing order modified to defer the Cover redesign 
 |---|---|---|---|---|
 | 1 | Cover / landing (redesigned) | TBD — last | Hero | Yes (renderings + lifestyle) |
 | 2 | MCQ #1 — emergency type | **Briefed** | No (working screen) | No (icons only) |
-| 3 | MCQ #2 — household | TBD | No (working screen) | No (icons only) |
+| 3 | MCQ #2 — household | **Briefed** | No (working screen) | No (icons only) |
 | 4 | Choose Your Path (3-card fork) | **Briefed** | Hero | Yes (3 ReadyVault renderings) |
 | 5 | Essentials tier landing | TBD | Possibly | Yes (subkit photos) |
 | 6 | ReadyVault visualizer | TBD (maybe) | Hero | Yes (Vault rendering) |
@@ -136,11 +136,31 @@ If both come back strong, brief the remaining four. If either fails, tune the pr
 **Asset needs.**
 - Three ReadyVault renderings — Base (empty hub), Essentials (hub with 3 prepacked + 2 empty slots visible), Pro (fully stocked).
 
-## TBD screen briefs
-
 ### Screen #3 — MCQ Household
 
-Will closely mirror MCQ #1 structure. Tile content: Kids, Older Adults, Person with a Disability, Pets, plus a separate "None of the Above" full-width tile beneath the grid. Step indicator reads "2 / 2".
+**Purpose.** Capture who the user is prepping for. Multi-select. Step 2 of 2.
+
+**Layout (desktop).**
+- Near-clone of MCQ #1 grammar. Centered single column, max-width ~640px, cream background.
+- Step indicator: pill 1 completed (success-tinted check circle, "Emergency type" label), pill 2 active (forest, "Household" label).
+- Eyebrow `STEP 2 OF 2`, H1 "Who are you prepping for?", sub "Select all that apply."
+- 2-column tile grid with four conceptual tiles: Kids, Older Adults, Person with a Disability, Pets.
+- Separate full-width "None of the above" tile beneath the grid, half-height, no icon — visually de-emphasized.
+- Full-width primary Continue button, disabled until ≥1 selected.
+
+**Tile anatomy.** Same as MCQ #1 (paper bg, line border, icon top-left, label bottom-left, selected = forest border + forest-soft quarter-circle + checkmark top-right).
+
+**Selection logic.** "None of the above" is mutually exclusive with the four conceptual tiles.
+
+**Variants in demo.**
+- Default (nothing selected, button disabled).
+- Kids selected only, button active.
+
+**Photography.** None. Lucide icons (Baby, User, Accessibility, PawPrint).
+
+**Hero treatment.** None. Working screen.
+
+## TBD screen briefs
 
 ### Screen #5 — Essentials tier landing
 
