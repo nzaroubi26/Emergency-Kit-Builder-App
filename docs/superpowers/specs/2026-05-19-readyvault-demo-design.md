@@ -1,7 +1,7 @@
 # ReadyVault Demo — Design Spec
 
 **Date:** 2026-05-19
-**Status:** Pilot landed; in-flight (3 of 6 screens briefed)
+**Status:** Pilot landed; in-flight (4 of 6 screens briefed)
 **Deliverable:** Claude Design prompts that produce desktop mockups of 6 key screens for a demo. No application code changes.
 
 ## Goal
@@ -28,7 +28,7 @@ Three tiers. All occupy 6 subkit slots in the ReadyVault hub. Power & Lighting i
 
 ### Parked product-model questions
 
-1. **Essentials slot math when user picks 3 singles.** If a user picks 3 standard subkits (no P&L), total = 3 prepacked + 2 empty = 5 slots, leaving 1 unaccounted for. Options: force P&L into the recommendation, scale the empty count, or restrict the picker. Resolve when briefing the Essentials tier landing.
+1. **Essentials slot math when user picks 3 singles.** ~~If a user picks 3 standard subkits (no P&L), total = 3 prepacked + 2 empty = 5 slots, leaving 1 unaccounted for.~~ **Resolved 2026-05-19:** force P&L silently. User can swap Medical or Cooking but not P&L. The restriction is not surfaced in demo copy.
 2. **"Build My Own" terminology.** In the new model, Base is effectively the "build my own" experience. Resolve copy when briefing Choose Your Path and the Cover.
 3. **"Comfort" category dropped from Pro.** Original Pro listed 7 categories; we removed Comfort to hit 6 slots. Confirm this is the final cut before production copy.
 
@@ -42,7 +42,7 @@ Sequential user-flow order. Briefing order modified to defer the Cover redesign 
 | 2 | MCQ #1 — emergency type | **Briefed** | No (working screen) | No (icons only) |
 | 3 | MCQ #2 — household | **Briefed** | No (working screen) | No (icons only) |
 | 4 | Choose Your Path (3-card fork) | **Briefed** | Hero | Yes (3 ReadyVault renderings) |
-| 5 | Essentials tier landing | TBD | Possibly | Yes (subkit photos) |
+| 5 | Essentials tier landing | **Briefed** | Hero | Yes (subkit photos) |
 | 6 | ReadyVault visualizer | TBD (maybe) | Hero | Yes (Vault rendering) |
 
 ## Strategy
@@ -160,11 +160,33 @@ If both come back strong, brief the remaining four. If either fails, tune the pr
 
 **Hero treatment.** None. Working screen.
 
-## TBD screen briefs
-
 ### Screen #5 — Essentials tier landing
 
-User has chosen Essentials. Show the hub anatomy, the 3 prepacked subkits as recommended (with override picker affordance), and the 2 empty slots. Hero photography on subkit cards.
+**Purpose.** User has just chosen Essentials. Confirm the kit composition, let them swap any of the 3 prepacked subkits (P&L locked silently), and make the 2 empty slots feel intentional.
+
+**Layout (desktop).**
+- Hero screen on `--sand`. Container max-width ~1200px.
+- Top utility row (back link only — past the MCQ flow).
+- Hero header: eyebrow `ESSENTIALS · $500`, H1 "Your Essentials kit.", sub "Hub plus 3 pre-packed subkits. 2 empty slots ready for you to pack."
+- `PRE-PACKED` section: 3 photo cards in a row (Power & Lighting, Medical, Cooking).
+- `EMPTY SLOTS` section: 2 dashed-border cards beneath, left-aligned to the prepacked grid.
+- Footer: right-aligned `KIT TOTAL $500` + "Continue to checkout" forest CTA.
+
+**Card anatomy.**
+- Pre-packed cards: ~240px photo area on sand-2, then subkit name (20px) + contents preview (13.5px) + "Swap subkit →" forest text link.
+- Empty cards: dashed `--line-2` border, no photo, centered Package icon + "Empty slot" + "Pack at home" sub.
+
+**Visualization choice.** No inline hub-state diagram — the cards carry the composition narrative. The dedicated Visualizer screen owns the hub anatomy.
+
+**Variants in demo.**
+- Default (all cards resting).
+- Hover on Medical card (border bump, shadow lift, swap link underlined).
+
+**Photography.** Three top-down product shots on sand-2 backdrops, calm-domestic-prep aesthetic, no people.
+
+**Hero treatment.** Yes — sand background, generous whitespace, 42px H1.
+
+## TBD screen briefs
 
 ### Screen #6 — ReadyVault visualizer
 
