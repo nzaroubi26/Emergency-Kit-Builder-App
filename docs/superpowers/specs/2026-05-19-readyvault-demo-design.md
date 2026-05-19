@@ -23,14 +23,24 @@ Three tiers. All occupy 6 subkit slots in the ReadyVault hub. Power & Lighting i
 | Tier | Price | Description | Slot composition |
 |---|---|---|---|
 | **Base** | $245 | ReadyVault Storage Hub + 6 empty subkits. Buy and pack your own supplies. | 6 empty × 1 slot = 6 slots |
-| **Essentials** | $500 | ReadyVault hub + 3 pre-packed subkits of your choice (recommended: Power & Lighting, Medical, Cooking) + 2 empty subkits to fill yourself. | If P&L is one of the 3: P&L (2) + 2× single (1+1) + 2 empty (1+1) = 6 slots |
+| **Essentials** | $500 | ReadyVault hub + 3 pre-packed subkits (Power & Lighting always included; Medical and Cooking by default, swappable). 2 remaining slots can be filled with add-ons. | P&L (2) + 2 subkits (1+1) + up to 2 add-ons (1+1) = up to 6 slots |
 | **Pro** | $700 | Fully stocked ReadyVault. Power & Lighting, Medical, Cooking, Hygiene, Communications. | P&L (2) + Medical + Cooking + Hygiene + Communications (1+1+1+1) = 6 slots |
+
+### Essentials add-on subkits (locked 2026-05-19)
+
+Available as add-ons or swap-ins on the Essentials tier landing. Swapping in (replacing Medical or Cooking) keeps the kit total at $500. Adding (filling an empty slot) increases the total by the price below.
+
+| Add-on | Price | Notes |
+|---|---|---|
+| Hygiene | +$30 | Personal care for 72 hours away from home. |
+| Communications | +$75 | Hand-crank radio, two-way radio, notebook, whistle. |
+| Comfort | +$75 | Emergency blanket, sleeping pad, warm socks, pillow, hand warmers. |
 
 ### Parked product-model questions
 
-1. **Essentials slot math when user picks 3 singles.** ~~If a user picks 3 standard subkits (no P&L), total = 3 prepacked + 2 empty = 5 slots, leaving 1 unaccounted for.~~ **Resolved 2026-05-19:** force P&L silently. User can swap Medical or Cooking but not P&L. The restriction is not surfaced in demo copy.
+1. **Essentials slot math when user picks 3 singles.** ~~If a user picks 3 standard subkits (no P&L), total = 3 prepacked + 2 empty = 5 slots, leaving 1 unaccounted for.~~ **Resolved 2026-05-19:** force P&L silently. User can swap Medical or Cooking but not P&L. Restriction not surfaced in demo copy.
 2. **"Build My Own" terminology.** In the new model, Base is effectively the "build my own" experience. Resolve copy when briefing Choose Your Path and the Cover.
-3. **"Comfort" category dropped from Pro.** Original Pro listed 7 categories; we removed Comfort to hit 6 slots. Confirm this is the final cut before production copy.
+3. **"Comfort" category dropped from Pro.** Original Pro listed 7 categories; we removed Comfort to hit 6 slots. Comfort remains available as an Essentials add-on. Confirm this is the final cut before production copy.
 
 ## Demo screens
 
@@ -162,27 +172,31 @@ If both come back strong, brief the remaining four. If either fails, tune the pr
 
 ### Screen #5 — Essentials tier landing
 
-**Purpose.** User has just chosen Essentials. Confirm the kit composition, let them swap any of the 3 prepacked subkits (P&L locked silently), and make the 2 empty slots feel intentional.
+**Purpose.** User has just chosen Essentials. Confirm the kit, let them inspect each pre-packed subkit at the item level (expandable cards), and surface other subkits they can add to the hub. This is the last look at the kit before checkout.
 
 **Layout (desktop).**
 - Hero screen on `--sand`. Container max-width ~1200px.
-- Top utility row (back link only — past the MCQ flow).
-- Hero header: eyebrow `ESSENTIALS · $500`, H1 "Your Essentials kit.", sub "Hub plus 3 pre-packed subkits. 2 empty slots ready for you to pack."
-- `PRE-PACKED` section: 3 photo cards in a row (Power & Lighting, Medical, Cooking).
-- `EMPTY SLOTS` section: 2 dashed-border cards beneath, left-aligned to the prepacked grid.
+- Top utility row (back link + wordmark — no step indicator).
+- Hero header: eyebrow `ESSENTIALS · $500`, H1 "Your Essentials kit.", sub "Hub plus 3 pre-packed subkits. Add more anytime."
+- `YOUR KIT` section: 3 photo cards in a row (Power & Lighting, Medical, Cooking). Each card has a "See items" expand toggle and a "Swap subkit" link.
+- `ADD MORE TO YOUR HUB` section: 3 photo cards (Hygiene +$30, Communications +$75, Comfort +$75). Each card has an outlined "Add to kit" button.
 - Footer: right-aligned `KIT TOTAL $500` + "Continue to checkout" forest CTA.
 
 **Card anatomy.**
-- Pre-packed cards: ~240px photo area on sand-2, then subkit name (20px) + contents preview (13.5px) + "Swap subkit →" forest text link.
-- Empty cards: dashed `--line-2` border, no photo, centered Package icon + "Empty slot" + "Pack at home" sub.
+- Your Kit cards: ~240px photo on sand-2 + subkit name + 2-line contents preview + footer row with "See items" toggle (left) and "Swap subkit →" link (right). Expanded state opens an "Includes" item list with ~48px thumbnail photos per item.
+- Add More cards: ~200px photo + name + 1-line description + `+$XX` forest price + outlined forest "Add to kit" button.
 
-**Visualization choice.** No inline hub-state diagram — the cards carry the composition narrative. The dedicated Visualizer screen owns the hub anatomy.
+**Product model.**
+- P&L is silently locked (no swap actually wired, but link visible for symmetry).
+- Medical and Cooking are swappable for Hygiene/Comms/Comfort — kit total stays $500.
+- Adding any Add More subkit increases the total by its `+$XX` price.
+- No capacity hint is surfaced anywhere ("2 slots remaining" etc.).
 
 **Variants in demo.**
-- Default (all cards resting).
-- Hover on Medical card (border bump, shadow lift, swap link underlined).
+- (A) Default resting — all cards collapsed, kit total $500.
+- (B) Medical expanded — Medical card opens to show its 6 items with thumbnails. Row becomes staggered (P&L and Cooking stay collapsed at their original height).
 
-**Photography.** Three top-down product shots on sand-2 backdrops, calm-domestic-prep aesthetic, no people.
+**Photography.** Six top-down product shots on sand-2 — three subkit-level (P&L, Medical, Cooking, Hygiene, Comms, Comfort) plus six item-level thumbnails in the Medical expanded state.
 
 **Hero treatment.** Yes — sand background, generous whitespace, 42px H1.
 
